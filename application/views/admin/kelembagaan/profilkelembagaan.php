@@ -31,13 +31,19 @@
                     <div class="card-body">
                     <form role="form" action="<?php echo base_url() ?>master/updatingprofil_save" novalidate method="POST" enctype="multipart/form-data">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="form-label font-weight-bolder">NSM</label>
+                                    <input type="text" class="form-control" name="nsm"  value="<?php echo $data_profil->nsm ?>" placeholder="NSM">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="form-label font-weight-bolder">NPSN</label>
                                     <input type="text" class="form-control" name="npsn"  value="<?php echo $data_profil->npsn ?>" placeholder="NPSN">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="form-label font-weight-bolder">PEMERINTAH</label>
                                     <select class="form-control" id="pemerintah" name="pemerintah">
@@ -49,7 +55,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="form-label font-weight-bolder">PROVINSI/KABUPATEN</label>
                                     <input type="text" class="form-control" style="text-transform: uppercase" name="pemerintahkop" value="<?php echo $data_profil->pemerintahkop ?>" placeholder="Nama Kabupaten/Provinsi">

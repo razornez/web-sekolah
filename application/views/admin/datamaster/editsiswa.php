@@ -137,7 +137,13 @@
 									<div class="form row">
 										<label class="col-sm-3 font-weight-bolder">Nomor KK</label>
 										<div class="col-md-9">:
-                                        <?php echo $data_siswa->nik ?>
+                                        <?php echo $data_siswa->nokk ?>
+										</div>
+									</div>
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Nama Kepala Keluarga</label>
+										<div class="col-md-9">:
+                                        <?php echo $data_siswa->nama_kepala_keluarga ?>
 										</div>
 									</div>
                                     <div class="form row">
@@ -194,10 +200,46 @@
 										<?php echo $data_siswa->status_anakyatim ?>
 										</div>
 									</div>  
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Yg Membiayai Sekolah</label>
+										<div class="col-sm-9">:
+										<?php echo $data_siswa->membiayai_sekolah ?>
+										</div>
+									</div>
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Kebutuhan Khusus</label>
+										<div class="col-sm-9">:
+										<?php echo $data_siswa->kebutuhan_khusus ?>
+										</div>
+									</div>  
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Kebutuhan Disabilitas</label>
+										<div class="col-sm-9">:
+										<?php echo $data_siswa->kebutuhan_disabilitas ?>
+										</div>
+									</div>  
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Pra Sekolah</label>
+										<div class="col-sm-9">:
+										<?php echo $data_siswa->pra_sekolah ?>
+										</div>
+									</div>  
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Imunisasi</label>
+										<div class="col-sm-9">:
+										<?php echo $data_siswa->imunisasi ?>
+										</div>
+									</div>  
                                     <div class="form row">
 										<label class="col-sm-3 font-weight-bolder">Jarak Rumah Ke Sekolah</label>
 										<div class="col-sm-9">:
 										<?php echo $data_siswa->jarakkesekolah ?>
+										</div>
+									</div>  
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Waktu Tempuh</label>
+										<div class="col-sm-9">:
+										<?php echo $data_siswa->waktu_tempuh ?>
 										</div>
 									</div>  
                                     <div class="form row">
@@ -425,6 +467,12 @@
 										<div class="col-sm-9">
 											<input type="text" name="nokk" class="form-control" value="<?php echo $data_siswa->nokk ?>">
 										</div>
+									</div> 
+									<div class="form row">
+										<label class="col-sm-3">Nama Kepala Keluarga</label>
+										<div class="col-sm-9">
+											<input type="text" name="nama_kepala_keluarga" class="form-control" value="<?php echo $data_siswa->nama_kepala_keluarga ?>">
+										</div>
 									</div>  
 									<div class="form row">
 										<label class="col-sm-3">Nama Lengkap</label>
@@ -516,26 +564,28 @@
 									<div class="form-group row">
 										<label class="col-sm-3">Jarak Dari Rumah Ke Sekolah</label>
 										<div class="col-sm-9">
-											<div class="custom-control custom-radio custom-control-inline">
-												<input type="radio" id="1km" name="jarakkesekolah" class="custom-control-input" value="< 1 km"<?php echo ($data_siswa->jarakkesekolah == '< 1 km' ? ' checked' : ''); ?> >
-												<label class="custom-control-label" for="1km">< 1 km</label>
-											</div>
-											<div class="custom-control custom-radio custom-control-inline">
-												<input type="radio" id="3km" name="jarakkesekolah" class="custom-control-input" value="1-3 km"<?php echo ($data_siswa->jarakkesekolah == '1-3 km' ? ' checked' : ''); ?>>
-												<label class="custom-control-label" for="3km">1-3 km</label>
-											</div>
-											<div class="custom-control custom-radio custom-control-inline">
-												<input type="radio" id="5km" name="jarakkesekolah" class="custom-control-input" value="3-5 km"<?php echo ($data_siswa->jarakkesekolah == '3-5 km' ? ' checked' : ''); ?>>
-												<label class="custom-control-label" for="5km">3-5 km</label>
-											</div>
-											<div class="custom-control custom-radio custom-control-inline">
-												<input type="radio" id="10km" name="jarakkesekolah" class="custom-control-input" value="5-10 km"<?php echo ($data_siswa->jarakkesekolah == '5-10 km' ? ' checked' : ''); ?>>
-												<label class="custom-control-label" for="10km">5-10 km</label>
-											</div>
-											<div class="custom-control custom-radio custom-control-inline">
-												<input type="radio" id="over10" name="jarakkesekolah" class="custom-control-input" value=">10 km"<?php echo ($data_siswa->jarakkesekolah == '>10 km' ? ' checked' : ''); ?>>
-												<label class="custom-control-label" for="over10">>10 km</label>
-											</div>
+											<select class="form-control" id="jarakkesekolah" name="jarakkesekolah">
+												<option value="<?php echo $data_siswa->jarakkesekolah ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->jarakkesekolah ?>)</span></option>
+												<option value="< 5 km" class="font-weight-bolder">< 5 km</option>
+												<option value="5-10 km" class="font-weight-bolder">5-10 km</option>
+                                                <option value="11-20 km" class="font-weight-bolder">11-20 km</option>
+                                                <option value="21-30 km" class="font-weight-bolder">21-30 km</option>
+                                                <option value="> 30km" class="font-weight-bolder">> 30km</option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group row">
+										<label class="col-sm-3">Waktu Tempuh</label>
+										<div class="col-sm-9">
+											<select class="form-control" id="waktu_tempuh" name="waktu_tempuh">
+												<option value="<?php echo $data_siswa->waktu_tempuh ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->waktu_tempuh ?>)</span></option>
+												<option value="1-10 menit" class="font-weight-bolder">1-10 menit</option>
+												<option value="10-19 menit" class="font-weight-bolder">10-19 menit</option>
+                                                <option value="20-29 menit" class="font-weight-bolder">20-29 menit</option>
+                                                <option value="30-39 menit" class="font-weight-bolder">30-39 menit</option>
+                                                <option value="1-2 jam" class="font-weight-bolder">1-2 jam</option>
+                                                <option value="> 2 jam" class="font-weight-bolder">> 2 jam</option>
+											</select>
 										</div>
 									</div>
 									<div class="form row">
@@ -642,6 +692,89 @@
 											<div class="custom-control custom-radio custom-control-inline">
 												<input type="radio" id="yatimpiatu" name="status_anakyatim" class="custom-control-input" value="Yatim Piatu"<?php echo ($data_siswa->status_anakyatim == 'Yatim Piatu' ? ' checked' : ''); ?>>
 												<label class="custom-control-label" for="yatimpiatu">Yatim Piatu</label>
+											</div>
+										</div>
+									</div>
+									<div class="form row">
+										<label class="col-sm-3">Yg Membiayai Sekolah</label>
+										<div class="col-sm-9">
+											<select class="form-control" id="membiayai_sekolah" name="membiayai_sekolah">
+												<option value="<?php echo $data_siswa->membiayai_sekolah ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->membiayai_sekolah ?>)</span></option>
+												<option value="Orang Tua" class="font-weight-bolder">Orang Tua</option>
+                                                <option value="Wali/Orang Tua Asuh" class="font-weight-bolder">Wali/Orang Tua Asuh</option>
+                                                <option value="Tanggungan Sendiri" class="font-weight-bolder">Tanggungan Sendiri</option>
+                                                <option value="Lainnya" class="font-weight-bolder">Lainnya</option>
+											</select>
+										</div>
+									</div>
+									<div class="form row">
+										<label class="col-sm-3">Kebutuhan Khusus</label>
+										<div class="col-sm-9">
+											<select class="form-control" id="kebutuhan_khusus" name="kebutuhan_khusus">
+												<option value="<?php echo $data_siswa->kebutuhan_khusus ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->kebutuhan_khusus ?>)</span></option>
+												<option value="Tidak ada" class="font-weight-bolder">Tidak ada</option>
+                                                <option value="Lamban belajar" class="font-weight-bolder">Lamban belajar</option>
+                                                <option value="Kesulitan Belajar spesifik" class="font-weight-bolder">Kesulitan Belajar spesifik</option>
+                                                <option value="Gangguan Komunikasi" class="font-weight-bolder">Gangguan Komunikasi</option>
+                                                <option value="Berbakat/memiliki kemampuan dan kecerdasan luar biasa" class="font-weight-bolder">Berbakat/memiliki kemampuan dan kecerdasan luar biasa</option>
+                                                <option value="Lainnya" class="font-weight-bolder">Lainnya</option>
+											</select>
+										</div>
+									</div>
+									<div class="form row">
+										<label class="col-sm-3">Kebutuhan Disabilitas</label>
+										<div class="col-sm-9">
+											<select class="form-control" id="kebutuhan_disabilitas" name="kebutuhan_disabilitas">
+												<option value="<?php echo $data_siswa->kebutuhan_disabilitas ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->kebutuhan_disabilitas ?>)</span></option>
+												<option value="Tidak ada" class="font-weight-bolder">Tidak ada</option>
+                                                <option value="Tuna netra" class="font-weight-bolder">Tuna netra</option>
+                                                <option value="Tuna runggu" class="font-weight-bolder">Tuna runggu</option>
+                                                <option value="Tuna daksa" class="font-weight-bolder">Tuna daksa</option>
+                                                <option value="Tuna grahita" class="font-weight-bolder">Tuna grahita</option>
+                                                <option value="Tuna laras" class="font-weight-bolder">Tuna laras</option>
+                                                <option value="Lainnya" class="font-weight-bolder">Lainnya</option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group row">
+										<label class="col-sm-3">Pra Sekolah</label>
+										<div class="col-sm-9">
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="pernah_tk" name="pra_sekolah[]" class="custom-control-input" value="Pernah TK/RA"<?php echo ($data_siswa->pra_sekolah == 'Pernah TK/RA' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="pernah_tk">Pernah TK/RA</label>
+											</div>
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="pernah_paud" name="pra_sekolah[]" class="custom-control-input" value="Pernah PAUD"<?php echo ($data_siswa->pra_sekolah == 'Pernah PAUD' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="pernah_paud">Pernah PAUD</label>
+											</div>
+										</div>
+									</div>
+									<div class="form-group row">
+										<label class="col-sm-3">Imunisasi</label>
+										<div class="col-sm-9">
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="hepatitis_b" name="imunisasi[]" class="custom-control-input" value="Hepatitis B"<?php echo ($data_siswa->imunisasi == 'Hepatitis B' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="hepatitis_b">Hepatitis B</label>
+											</div>
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="bcg" name="imunisasi[]" class="custom-control-input" value="BCG"<?php echo ($data_siswa->imunisasi == 'BCG' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="bcg">BCG</label>
+											</div>
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="dpt" name="imunisasi[]" class="custom-control-input" value="DPT"<?php echo ($data_siswa->imunisasi == 'DPT' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="dpt">DPT</label>
+											</div>
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="polio" name="imunisasi[]" class="custom-control-input" value="Polio"<?php echo ($data_siswa->imunisasi == 'Polio' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="polio">Polio</label>
+											</div>
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="campak" name="imunisasi[]" class="custom-control-input" value="Campak"<?php echo ($data_siswa->imunisasi == 'Campak' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="campak">Campak</label>
+											</div>
+											<div class="custom-control custom-control-inline">
+												<input type="checkbox" id="covid" name="imunisasi[]" class="custom-control-input" value="Covid"<?php echo ($data_siswa->imunisasi == 'Covid' ? 'checked' : ''); ?> >
+												<label class="custom-control-label" for="covid">Covid</label>
 											</div>
 										</div>
 									</div>
@@ -1127,7 +1260,7 @@
 									<div class="form row">
 										<label class="col-sm-3">Tanggal Lahir</label>
 										<div class="col-sm-9">
-											<input type="text" name="ayah_tanggallahir" class="form-control" value="<?php echo $data_siswa->ayah_tanggallahir ?>">
+											<input type="date" name="ayah_tanggallahir" class="form-control" value="<?php echo $data_siswa->ayah_tanggallahir ?>">
 										</div>
 									</div>   
 									<div class="form row">
@@ -1161,14 +1294,15 @@
 										<div class="col-sm-9">
 											<select class="form-control" id="ayah_pendidikan" name="ayah_pendidikan">
 												<option value="<?php echo $data_siswa->ayah_pendidikan ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->ayah_pendidikan ?>)</span></option>
-												<option value="SLTP" class="font-weight-bolder">SLTP</option>
-												<option value="SLTA" class="font-weight-bolder">SLTA</option>
+												<option value="SD/Sederajat" class="font-weight-bolder">SD/Sederajat</option>
+												<option value="SMP/Sederajat" class="font-weight-bolder">SMP/Sederajat</option>
+												<option value="SMA/Sederajat" class="font-weight-bolder">SMA/Sederajat</option>
                                                 <option value="D1" class="font-weight-bolder">D1</option>
                                                 <option value="D2" class="font-weight-bolder">D2</option>
                                                 <option value="D3" class="font-weight-bolder">D3</option>
-												<option value="D4" class="font-weight-bolder">D4</option>
-												<option value="S1" class="font-weight-bolder">S1</option>
+												<option value="D4/S1" class="font-weight-bolder">D4/S1</option>
 												<option value="S2" class="font-weight-bolder">S2</option>
+												<option value="S3" class="font-weight-bolder">S3</option>
 											</select>
 										</div>
 									</div>
@@ -1176,13 +1310,40 @@
 									<div class="form row">
 										<label class="col-sm-3">Pekerjaan</label>
 										<div class="col-sm-9">
-											<input type="text" name="ayah_pekerjaan" class="form-control" value="<?php echo $data_siswa->ayah_pekerjaan ?>">
+											<select class="form-control" id="ayah_pekerjaan" name="ayah_pekerjaan">
+												<option value="<?php echo $data_siswa->ayah_pekerjaan ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->ayah_pekerjaan ?>)</span></option>
+												<option value="Tidak Bekerja" class="font-weight-bolder">Tidak Bekerja</option>
+												<option value="Pensiunan" class="font-weight-bolder">Pensiunan</option>
+												<option value="PNS" class="font-weight-bolder">PNS</option>
+                                                <option value="TNI/Polri" class="font-weight-bolder">TNI/Polri</option>
+                                                <option value="Guru/Dosen" class="font-weight-bolder">Guru/Dosen</option>
+                                                <option value="Pegawai Swasta" class="font-weight-bolder">Pegawai Swasta</option>
+												<option value="Wiraswasta" class="font-weight-bolder">Wiraswasta</option>
+												<option value="Pengacara/Jaksa/Hakim/Notaris" class="font-weight-bolder">Pengacara/Jaksa/Hakim/Notaris</option>
+												<option value="Dokter/Bidan/Perawat, Pilot/Pramugara" class="font-weight-bolder">Dokter/Bidan/Perawat, Pilot/Pramugara</option>
+												<option value="Pedagang" class="font-weight-bolder">Pedagang</option>
+												<option value="Petani/peternak" class="font-weight-bolder">Petani/peternak</option>
+												<option value="Nelayan" class="font-weight-bolder">Nelayan</option>
+												<option value="Buruh (Tani/Pabrik/Bangunan)" class="font-weight-bolder">Buruh (Tani/Pabrik/Bangunan)</option>
+												<option value="Sopir/Masinis/Kondektur" class="font-weight-bolder">Sopir/Masinis/Kondektur</option>
+												<option value="Politikus" class="font-weight-bolder">Politikus</option>
+												<option value="Lainnya" class="font-weight-bolder">Lainnya</option>
+											</select>
 										</div>
 									</div>     
 									<div class="form row">
 										<label class="col-sm-3">Penghasilan</label>
 										<div class="col-sm-9">
-											<input type="text" id="rupiah" name="ayah_penghasilan" class="form-control" value="<?php echo $data_siswa->ayah_penghasilan ?>">
+											<select class="form-control" id="ayah_penghasilan" name="ayah_penghasilan">
+												<option value="<?php echo $data_siswa->ayah_penghasilan ?>">Pilihan Saat ini <span class="font-weight-bolder">(<?php echo $data_siswa->ayah_penghasilan ?>)</span></option>
+												<option value="Kurang dari 500.000" class="font-weight-bolder">Kurang dari 500.000</option>
+												<option value="500.000 – 1.000.000" class="font-weight-bolder">500.000 – 1.000.000</option>
+												<option value="1.000.001 – 2.000.000" class="font-weight-bolder">1.000.001 – 2.000.000</option>
+                                                <option value="2.000.001- 3.000.000" class="font-weight-bolder">2.000.001- 3.000.000</option>
+                                                <option value="3.000.001- 5.000.000" class="font-weight-bolder">3.000.001- 5.000.000</option>
+                                                <option value="Lebih dari 5.000.000" class="font-weight-bolder">Lebih dari 5.000.000</option>
+												<option value="Tidak Ada" class="font-weight-bolder">Tidak Ada</option>
+											</select>
 										</div>
 									</div>   
 									<div class="form row">

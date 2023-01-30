@@ -29,6 +29,14 @@ class M_master extends CI_Model {
         return $this->db->get();
     }
 
+    public function get_content_surat($id)
+    {
+        $this->db->select('*');
+        $this->db->from('surat_baru');
+        $this->db->where('id',$id);
+        return $this->db->get();
+    }
+
     // EDIT SISWA-------------------------------------------
     public function edit_siswa($id_pendaftar)
     {
@@ -207,16 +215,36 @@ public function get_suratketeranganaktifsiswa()
     $this->db->order_by('tanggal', 'DESC');
     return $this->db->get();
 }
+
+public function get_suratbaru()
+{
+    $this->db->select('*');
+    $this->db->from('surat_baru');
+    $this->db->order_by('created_at', 'DESC');
+    return $this->db->get();
+}
 // SIMPAN SURAT KETERANGAN AKTIF-------------------------------------------
 public function simpan_suratketeranganaktif($data)
 {
     return $this->db->insert("suratketeranganaktif", $data);
 }
 
+public function simpan_suratbaru($data)
+{
+    return $this->db->insert("surat_baru", $data);
+}
+
 // HAPUS SURAT KETERANGAN AKTIF-------------------------------------------
 public function hapus_suratketeranganaktifsiswa($id_suratketeranganaktifsiswa)
 {
     return $this->db->delete("suratketeranganaktif", $id_suratketeranganaktifsiswa);
+
+}
+
+public function hapus_suratbaru($id)
+{
+    $query = $this->db->delete("surat_baru", $id);
+    print_r($query);die();
 
 }
 
@@ -462,6 +490,15 @@ public function get_cetaksuratketeranganaktifsiswa($id_siswa)
         $this->db->select('*');
         $this->db->from('guru');
         $this->db->order_by('nama_guru', 'ASC');
+        return $this->db->get();
+    }
+
+    public function get_datapendidikanguru($id_guru)
+    {
+        $this->db->select('*');
+        $this->db->from('pendidikan_guru');
+        $this->db->where('id_guru',$id_guru);
+        $this->db->order_by('id', 'ASC');
         return $this->db->get();
     }
 

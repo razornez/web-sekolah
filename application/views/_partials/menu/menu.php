@@ -182,6 +182,16 @@
 							<li><a href="<?php echo base_url() ?>master/dataundanganortu">Surat Panggilan</a></li>
 							<li><a href="<?php echo base_url() ?>master/dataundanganwalimurid">Surat Undangan</a></li>
 							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Mutasi Siswa</a></li>
+							<li><a href="<?php echo base_url() ?>master/suratbaru">Surat Baru</a></li>
+							<!-- <li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keterangan Perubahan NISN Siswa</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Rekomendasi</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keterangan Berkelakukan Baik</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keterangan Kesalahan Penulisan Izazah</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keputusan Kepala Madrasah</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keterangan Kesalahan Biodata Izazah</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keterangan Siswa Pindahan</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keterangan Siswa</a></li>
+							<li><a href="<?php echo base_url() ?>master/datamutasisiswa">Keterangan Keluar/Pindah</a></li> -->
 						</ul>
 					</li>
 

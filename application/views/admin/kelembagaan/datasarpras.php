@@ -66,7 +66,11 @@
                                         <th>Kategori</th>
                                         <th>Digunakan / Disimpan</th>
                                         <th>Jumlah</th>
+                                        <th>Jml Baik</th>
+                                        <th>Jml Rusak Ringan</th>
+                                        <th>Jml Rusak Berat</th>
                                         <th>Sumber Dana</th>
+                                        <th>Keterangan</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -83,7 +87,11 @@
                                         <td class="text-center"><?php echo $res->nama_kategorisarpras ?></td>
                                         <td class="text-center"><?php echo $res->tempat ?></td>
                                         <td class="text-center"><?php echo $res->jumlah ?> <?php echo $res->satuan ?></td>
+                                        <td class="text-center"><?php echo $res->jumlah_baik ?> <?php echo $res->satuan ?></td>
+                                        <td class="text-center"><?php echo $res->jumlah_ringan ?> <?php echo $res->satuan ?></td>
+                                        <td class="text-center"><?php echo $res->jumlah_berat ?> <?php echo $res->satuan ?></td>
                                         <td class="text-center"><?php echo $res->sumberdana ?></td>
+                                        <td class="text-center"><?php echo $res->keterangan ?></td>
                                         <td class="text-center">
                                             <a href="<?php echo base_url() ?>master/editsarpras/<?php echo $res->id_sarpras ?>" data-toggle="modal" data-target="#modal-report2<?php echo $res->id_sarpras ?>" class="btn btn-icon btn-sm" style="background-color: #01605A; color: #ffffff;"><i class="feather icon-edit"></i></a>
                                             <a href="<?php echo base_url() ?>master/hapussarpras/<?php echo $res->id_sarpras ?>"  class="btn btn-icon btn-danger btn-sm tombol-hapus" style="background-color: #FF0000; color: #ffffff;"><i class="feather icon-trash-2"></i></a>
@@ -131,6 +139,27 @@
 
                                                             <div class="col-xl-6">
                                                                 <div class="form-group">
+                                                                    <label class="floating-label" for="jumlah_baik">Jumlah Baik</label>
+                                                                    <input type="number" class="form-control" name="jumlah_baik" value="<?php echo $res->jumlah_baik ?>" >
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-xl-6">
+                                                                <div class="form-group">
+                                                                    <label class="floating-label" for="jumlah_ringan">Jumlah Rusak Ringan</label>
+                                                                    <input type="number" class="form-control" name="jumlah_ringan" value="<?php echo $res->jumlah_ringan ?>" >
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-xl-6">
+                                                                <div class="form-group">
+                                                                    <label class="floating-label" for="jumlah_berat">Jumlah Rusak Berat</label>
+                                                                    <input type="number" class="form-control" name="jumlah_berat" value="<?php echo $res->jumlah_berat ?>" >
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-xl-6">
+                                                                <div class="form-group">
                                                                     <label class="floating-label" for="satuan">Satuan</label>
                                                                     <select class="form-control" id="satuan" name="satuan">
                                                                         <option value="<?php echo $res->satuan ?>">-- <?php echo $res->satuan ?> --</option>
@@ -171,6 +200,13 @@
                                                                 <div class="form-group">
                                                                     <label class="floating-label" for="sumberdana">Sumber Dana</label>
                                                                     <input type="text" class="form-control" name="sumberdana" value="<?php echo $res->sumberdana ?>" oninput="this.value = this.value.toUpperCase()">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-xl-6">
+                                                                <div class="form-group">
+                                                                    <label class="floating-label" for="keterangan">Keterangan</label>
+                                                                    <input type="text" class="form-control" name="keterangan" value="<?php echo $res->keterangan ?>" oninput="this.value = this.value.toUpperCase()">
                                                                 </div>
                                                             </div>
 
@@ -237,6 +273,27 @@
 
                         <div class="col-sm-6">
                             <div class="form-group">
+                                <label class="floating-label" for="jumlah_baik">Jumlah Baik</label>
+                                <input type="number" class="form-control" name="jumlah_baik" placeholder="Jumlah Baik" autocomplete="off" required>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="floating-label" for="jumlah_ringan">Jumlah Rusak Ringan</label>
+                                <input type="number" class="form-control" name="jumlah_ringan" placeholder="Jumlah Rusak Ringan" autocomplete="off" required>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="floating-label" for="jumlah_berat">Jumlah Rusak Berat</label>
+                                <input type="number" class="form-control" name="jumlah_berat" placeholder="Jumlah Rusak Berat" autocomplete="off" required>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group">
                                 <label class="floating-label" for="satuan">Satuan</label>
                                 <select class="form-control" id="satuan" name="satuan">
                                     <option value="Batang">Batang</option>
@@ -281,6 +338,14 @@
                                 <input type="text" class="form-control" name="sumberdana" placeholder="Dana Bos" oninput="this.value = this.value.toUpperCase()" autocomplete="off" required>
                             </div>
                         </div>
+
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="floating-label" for="keterangan">Keterangan</label>
+                                <input type="text" class="form-control" name="keterangan" placeholder="Keterangan" oninput="this.value = this.value.toUpperCase()" autocomplete="off" required>
+                            </div>
+                        </div>
+
 
                         
                         <div class="col-sm-12">

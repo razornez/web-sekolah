@@ -144,6 +144,12 @@
                                         <?php echo $data_lengkap->nik ?>
 										</div>
 									</div>
+									<div class="form row">
+										<label class="col-sm-3 font-weight-bolder">Nama Kepala Keluarga</label>
+										<div class="col-md-9">:
+                                        <?php echo $data_lengkap->nama_kepala_keluarga ?>
+										</div>
+									</div>
                                     <div class="form row">
 										<label class="col-sm-3 font-weight-bolder">Nama Lengkap</label>
 										<div class="col-sm-9">:

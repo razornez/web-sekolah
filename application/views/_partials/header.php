@@ -26,5 +26,7 @@
     <!-- vendor css -->
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/style.css">
     <script src="<?php echo base_url() ?>assets/js/Chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/4.0.16/css/froala_editor.pkgd.min.css" integrity="sha512-vuMfJiP1mynSaBWEsouDLOvvRmMeib2s936m2d+OalK9nYIzrPmSM6kOxBLoydHWLjWSZY99Yx1zqnYSR2nqvQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/froala-editor/4.0.16/js/froala_editor.pkgd.min.js" integrity="sha512-cdPreUNlEBCU2l+Z2oMzxKbfATPuqSK8scXsAw6h/AEzmXhbxd8wxFCn5s386wyEv37ljkKMRXhzGaisKPPNmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 

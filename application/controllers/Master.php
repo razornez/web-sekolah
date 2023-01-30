@@ -606,6 +606,20 @@ public function hapustahunrapor($id_raportahun)
         redirect('master/suratketeranganaktifsiswa');
     } 
 
+    public function simpansuratbaru()
+    {
+        $this->load->model('m_master'); 
+        {
+          $data['content']    = $this->input->post('content');
+          $data['title']    = $this->input->post('title');
+          $data['created_by']    = 72;
+        $this->load->view('admin/persuratan/datasuratbaru',$data);
+        }
+        $this->m_master->simpan_suratbaru($data);
+        $this->session->set_flashdata('tambah_berhasil','<i class="fas fa-check"></i> Data Berhasil Ditambahkan Ke Database');
+        redirect('master/suratbaru');
+    } 
+
     // HAPUS SURAT KETERANGAN AKTIF ---------------------------------------------------------------------
     public function hapussuratketeranganaktifsiswa($id_suratketeranganaktifsiswa)
     {
@@ -613,6 +627,14 @@ public function hapustahunrapor($id_raportahun)
         $id['id_suratketeranganaktifsiswa'] = $this->uri->segment(3);
         $this->m_master->hapus_suratketeranganaktifsiswa($id);
         redirect('master/suratketeranganaktifsiswa');
+    }
+
+    public function hapussuratbaru($id)
+    {
+        $this->load->model('m_master');
+        $id['id'] = $this->uri->segment(3);
+        $this->m_master->hapus_suratbaru($id);
+        redirect('master/suratbaru');
     }
 
 
@@ -885,10 +907,14 @@ public function simpansarpras()
     $data['tahun']                  = $this->input->post('tahun');
     $data['kode_kategorisarpras']   = $this->input->post('kode_kategorisarpras');
     $data['jumlah']                 = $this->input->post('jumlah');
+    $data['jumlah_baik']            = $this->input->post('jumlah_baik');
+    $data['jumlah_ringan']          = $this->input->post('jumlah_ringan');
+    $data['jumlah_berat']           = $this->input->post('jumlah_berat');
     $data['satuan']                 = $this->input->post('satuan');
     $data['tempat']                 = $this->input->post('tempat');
     $data['kodebarang']             = $this->input->post('kodebarang');
     $data['sumberdana']             = $this->input->post('sumberdana');
+    $data['keterangan']             = $this->input->post('keterangan');
 
     $this->load->view('admin/kelembagaan/datasarpras',$data);
     }
@@ -905,18 +931,25 @@ public function updatesarpras()
     $nama_sarpras             = $this->input->post('nama_sarpras');
     $tahun                    = $this->input->post('tahun');
     $jumlah                   = $this->input->post('jumlah');
+    $jumlah_baik              = $this->input->post('jumlah_baik');
+    $jumlah_ringan            = $this->input->post('jumlah_ringan');
+    $jumlah_berat             = $this->input->post('jumlah_berat');
     $satuan                   = $this->input->post('satuan');
     $kode_kategorisarpras     = $this->input->post('kode_kategorisarpras');
     $sumberdana               = $this->input->post('sumberdana');
-    $sumberdana               = $this->input->post('sumberdana');
+    $keterangan               = $this->input->post('keterangan');
     $data = array(
         'nama_sarpras'          =>$nama_sarpras,
         'tahun'                 =>$tahun,
         'jumlah'                =>$jumlah,
+        'jumlah_baik'           =>$jumlah_baik,
+        'jumlah_ringan'         =>$jumlah_ringan,
+        'jumlah_berat'          =>$jumlah_berat,
         'satuan'                =>$satuan,
         'kode_kategorisarpras'  =>$kode_kategorisarpras,
         'kodebarang'            =>$kodebarang,
-        'sumberdana'            =>$sumberdana
+        'sumberdana'            =>$sumberdana,
+        'keterangan'            =>$keterangan
     );
     
     $this->m_master->update_sarpras($data, $id_sarpras);
@@ -1104,28 +1137,71 @@ public function hapussemuasarpras()
     }
 
 
+    // fungsi dan data guru
+    public function datapendidikanguru()
+    {
+        $this->load->model('m_master');
+        $id_guru = $_GET['id'];
+        $data = array(
+        'pendidikan'    => $this->m_master->get_datapendidikanguru($id_guru)->result() );
+
+        header('Content-Type: application/json');
+        echo json_encode(['data' => 'OK', 'data' => $data], 200);
+    }
+
+
     public function updateguru()
       {
       $this->load->model('m_master');
       
-      $id_guru['id_guru']    = $this->input->post("id_guru");
-      $nama_guru             = $this->input->post('nama_guru');
-      $nip                   = $this->input->post('nip');
-      $jeniskelamin          = $this->input->post('jeniskelamin');
-      $notelp                = $this->input->post('notelp');
-      $email                 = $this->input->post('email');
-      $status_guru           = $this->input->post('status_guru');
-      $golongan              = $this->input->post('golongan');
-      $namamapel             = $this->input->post('namamapel');
+      $id_guru['id_guru']   = $this->input->post("id_guru");
+      $npk                  = $this->input->post('npk');
+      $nuptk                = $this->input->post('nuptk');
+      $nik                  = $this->input->post('nik');
+      $tmt                  = $this->input->post('tmt');
+      $tempat_lahir         = $this->input->post('tempat_lahir');
+      $tahun_lahir          = $this->input->post('tahun_lahir');
+      $golongan_darah       = $this->input->post('golongan_darah');
+      $alamat               = $this->input->post('alamat');
+      $transportasi         = $this->input->post('transportasi');
+      $jarak_tempat_tinggal = $this->input->post('jarak_tempat_tinggal');
+      $waktu_tempuh         = $this->input->post('waktu_tempuh');
+      $nama_ibu_kandung     = $this->input->post('nama_ibu_kandung');
+      $status_kawin         = $this->input->post('status_kawin');
+      $nama_suami_istri     = $this->input->post('nama_suami_istri');
+      $jumlah_anak          = $this->input->post('jumlah_anak');
+      $nama_guru            = $this->input->post('nama_guru');
+      $nip                  = $this->input->post('nip');
+      $jeniskelamin         = $this->input->post('jeniskelamin');
+      $notelp               = $this->input->post('notelp');
+      $email                = $this->input->post('email');
+      $status_guru          = $this->input->post('status_guru');
+      $golongan             = $this->input->post('golongan');
+      $namamapel            = $this->input->post('namamapel');
       $data = array(
-          'nama_guru'        =>$nama_guru,
-          'nip'              =>$nip,
-          'jeniskelamin'     =>$jeniskelamin,
-          'notelp'           =>$notelp,
-          'email'            =>$email,
-          'status_guru'      =>$status_guru,
-          'golongan'         =>$golongan,
-          'namamapel'        =>$namamapel
+          'nama_guru'           =>$nama_guru,
+          'nip'                 =>$nip,
+          'jeniskelamin'        =>$jeniskelamin,
+          'notelp'              =>$notelp,
+          'email'               =>$email,
+          'status_guru'         =>$status_guru,
+          'golongan'            =>$golongan,
+          'namamapel'           =>$namamapel,
+          'npk'                 =>$npk,
+          'nuptk'               =>$nuptk,
+          'nik'                 =>$nik,
+          'tmt'                 =>$tmt,
+          'tempat_lahir'        =>$tempat_lahir,
+          'tahun_lahir'         =>$tahun_lahir,
+          'golongan_darah'      =>$golongan_darah,
+          'alamat'              =>$alamat,
+          'transportasi'        =>$transportasi,
+          'jarak_tempat_tinggal'=>$jarak_tempat_tinggal,
+          'waktu_tempuh'        =>$waktu_tempuh,
+          'nama_ibu_kandung'    =>$nama_ibu_kandung,
+          'status_kawin'        =>$status_kawin,
+          'nama_suami_istri'    =>$nama_suami_istri,
+          'jumlah_anak'         =>$jumlah_anak,
       );
       $this->m_master->update_guru($data, $id_guru);
       redirect('master/dataguru');
@@ -1136,15 +1212,31 @@ public function hapussemuasarpras()
     {
         $this->load->model('m_master'); 
         {
-        $data['nip']            = $this->input->post('nip');
-        $data['nama_guru']      = $this->input->post('nama_guru');
-        $data['notelp']         = $this->input->post('notelp');
-        $data['email']          = $this->input->post('email');
-        $data['status_guru']    = $this->input->post('status_guru');
-        $data['golongan']       = $this->input->post('golongan');
-        $data['username']       = $this->input->post('nip');
-        $data['password']       = $this->input->post('password');
-        $data['role']           = $this->input->post('role');
+        $data['nip']                    = $this->input->post('nip');
+        $data['nama_guru']              = $this->input->post('nama_guru');
+        $data['notelp']                 = $this->input->post('notelp');
+        $data['email']                  = $this->input->post('email');
+        $data['status_guru']            = $this->input->post('status_guru');
+        $data['golongan']               = $this->input->post('golongan');
+        $data['namamapel']               = $this->input->post('namamapel');
+        $data['username']               = $this->input->post('nip');
+        $data['password']               = $this->input->post('password');
+        $data['role']                   = $this->input->post('role');
+        $data['npk']                    = $this->input->post('npk');
+        $data['nuptk']                  = $this->input->post('nuptk');
+        $data['nik']                    = $this->input->post('nik');
+        $data['tmt']                    = $this->input->post('tmt');
+        $data['tempat_lahir']           = $this->input->post('tempat_lahir');
+        $data['tahun_lahir']            = $this->input->post('tahun_lahir');
+        $data['golongan_darah']         = $this->input->post('golongan_darah');
+        $data['alamat']                 = $this->input->post('alamat');
+        $data['transportasi']           = $this->input->post('transportasi');
+        $data['jarak_tempat_tinggal']   = $this->input->post('jarak_tempat_tinggal');
+        $data['waktu_tempuh']           = $this->input->post('waktu_tempuh');
+        $data['nama_ibu_kandung']       = $this->input->post('nama_ibu_kandung');
+        $data['status_kawin']           = $this->input->post('status_kawin');
+        $data['nama_suami_istri']       = $this->input->post('nama_suami_istri');
+        $data['jumlah_anak']            = $this->input->post('jumlah_anak');
 		    $this->load->view('admin/datamaster/dataguru',$data);
 	      }
         $this->m_master->simpan_guru($data);
@@ -2384,6 +2476,7 @@ public function simpankelas()
         $in['alamatwebsite']        = $this->input->post("alamatwebsite");
         $in['pesanberjalan']        = $this->input->post("pesanberjalan");
         $in['video_profil']         = $this->input->post("video_profil");
+        $in['nsm']                  = $this->input->post("nsm");
 
         $config['upload_path']      = './upload/';
         $config['allowed_types']    = 'jpg|png|jpeg';
@@ -3789,6 +3882,49 @@ public function print_suratketeranganaktifsiswa()
     $pdf->lastPage();
     $pdf->output();
 }
+
+    public function print_suratbaru()
+    {
+        $this->load->model('m_master');
+        $this->load->model('m_beranda');
+        $this->load->library('tcpdf_gen');
+        $pdf = new TCPDF('P', 'pt', ['format' => 'A4', 'Rotate' => 260]);
+        $id      = $this->uri->segment(3);
+        $data = array(
+          'data_surat'    => $this->m_master->get_content_surat($id)->result(),
+          'data_profil'   => 'test123',
+        );
+        $pdf->setTitle($data['data_surat'][0]->title);
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->setFont('times', '', 11, '', false); 
+        $pdf->addPage();
+        
+        $html = $this->load->view('cetak/print_suratbaru', $data, true);
+        // var_dump($data['data_surat'][0]->title);die();
+        $pdf->writeHtml($html, true, false, true, false, '');    
+        $pdf->lastPage();
+        $pdf->output();
+    }
+
+
+    public function suratbaru()
+    {
+        $this->load->model('m_master');
+        $data = array(
+        'setting'                        => $this->m_master->setup()->result(),
+        'dataprofil'                     => $this->m_master->get_profil()->result(),
+        'datatema'                       => $this->m_pengaturan->get_tema()->result(),
+        'temaaktif'                      => $this->m_pengaturan->get_temaaktif()->result(),
+        'datasiswa'                      => $this->m_master->get_datasiswa()->result(),
+        'datasuratbaru'  => $this->m_master->get_suratbaru()->result()
+        );
+        // var_dump($data['datasuratbaru'][0]->title);die();
+        $this->load->view('_partials/header', $data);
+        $this->load->view('_partials/menu/menu.php', $data);
+        $this->load->view('admin/persuratan/datasuratbaru', $data);
+        $this->load->view('_partials/footer');
+    }
 
 
   public function cetak_buku()

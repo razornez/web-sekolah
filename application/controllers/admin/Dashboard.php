@@ -61,6 +61,7 @@ class Dashboard extends CI_Controller {
        $nisn                            = $this->input->post('nisn');
        $nik                             = $this->input->post('nik');
        $nokk                            = $this->input->post('nokk');
+       $nama_kepala_keluarga            = $this->input->post('nama_kepala_keluarga');
        $nama_lengkap                    = $this->input->post('nama_lengkap');
        $tempatlahir                     = $this->input->post('tempatlahir');
        $tanggallahir                    = $this->input->post('tanggallahir');
@@ -71,6 +72,7 @@ class Dashboard extends CI_Controller {
        $anakke                          = $this->input->post('anakke');
        $jumlahsaudara                   = $this->input->post('jumlahsaudara');
        $jarakkesekolah                  = $this->input->post('jarakkesekolah');
+       $waktu_tempuh                     = $this->input->post('waktu_tempuh');
        $transportasi                    = $this->input->post('transportasi');
        $siswa_alamat                    = $this->input->post('siswa_alamat');
        $siswa_desakel                   = $this->input->post('siswa_desakel');
@@ -88,6 +90,11 @@ class Dashboard extends CI_Controller {
        $siswa_kelas                     = $this->input->post('siswa_kelas');
        $siswa_nomorabsen                = $this->input->post('siswa_nomorabsen');
        $status_anakyatim                = $this->input->post('status_anakyatim');
+       $membiayai_sekolah               = $this->input->post('membiayai_sekolah');
+       $kebutuhan_khusus                = $this->input->post('kebutuhan_khusus');
+       $kebutuhan_disabilitas           = $this->input->post('kebutuhan_disabilitas');
+       $pra_sekolah                     = $this->input->post('pra_sekolah');
+       $imunisasi                       = $this->input->post('imunisasi');
        $pendukung_golongandarah         = $this->input->post('pendukung_golongandarah');
        $pendukung_penyakit              = $this->input->post('pendukung_penyakit');
        $pendukung_kelainanjasmani       = $this->input->post('pendukung_kelainanjasmani');
@@ -112,12 +119,57 @@ class Dashboard extends CI_Controller {
        $lanjut_bekerjaperusahaan       = $this->input->post('lanjut_bekerjaperusahaan');
        $lanjut_penghasilan             = $this->input->post('lanjut_penghasilan');
 
+       if(empty($pra_sekolah)) 
+          {
+            $pra_sekolah = "";
+          } 
+          else
+          {
+            $N = count($pra_sekolah);
+            $arr = '';
+
+            for($i=0; $i < $N; $i++)
+            {   
+              // array_push($arr, $pra_sekolah[$i]);
+              if ($i != count($pra_sekolah) - 1){
+                $arr .=  ($pra_sekolah[$i] . ", ");
+              }else{
+                $arr .=  ($pra_sekolah[$i] . "");
+              }
+            }
+          }
+        $pra_sekolah = $arr;
+
+        if(empty($imunisasi)) 
+          {
+            $imunisasi = "";
+          } 
+          else
+          {
+            $N = count($imunisasi);
+            $arr2 = '';
+
+            for($i=0; $i < $N; $i++)
+            {   
+              // array_push($arr, $imunisasi[$i]);
+              if ($i != count($imunisasi) - 1){
+                $arr2 .=  ($imunisasi[$i] . ", ");
+              }else{
+                $arr2 .=  ($imunisasi[$i] . "");
+              }
+            }
+          }
+        $imunisasi = $arr2;
+
+        // print_r($pra_sekolah);
+        // die();
 
        $data = array(
         'nis'                           =>$nis,
         'nisn'                          =>$nisn,
         'nik'                           =>$nik,
         'nokk'                          =>$nokk,
+        'nama_kepala_keluarga'          =>$nama_kepala_keluarga,
         'nama_lengkap'                  =>$nama_lengkap,
         'tempatlahir'                   =>$tempatlahir,
         'tanggallahir'                  =>$tanggallahir,
@@ -128,6 +180,7 @@ class Dashboard extends CI_Controller {
         'anakke'                        =>$anakke,
         'jumlahsaudara'                 =>$jumlahsaudara,
         'jarakkesekolah'                =>$jarakkesekolah,
+        'waktu_tempuh'                  =>$waktu_tempuh,
         'transportasi'                  =>$transportasi,
         'siswa_alamat'                  =>$siswa_alamat,
         'siswa_desakel'                 =>$siswa_desakel,
@@ -140,6 +193,11 @@ class Dashboard extends CI_Controller {
         'email'                         =>$email,
         'kewarganegaraan'               =>$kewarganegaraan,
         'status_anakyatim'              =>$status_anakyatim,
+        'membiayai_sekolah'             =>$membiayai_sekolah,
+        'kebutuhan_khusus'              =>$kebutuhan_khusus,
+        'kebutuhan_disabilitas'         =>$kebutuhan_disabilitas,
+        'pra_sekolah'                   =>$pra_sekolah,
+        'imunisasi'                     =>$imunisasi,
         'pendukung_golongandarah'       =>$pendukung_golongandarah,
         'pendukung_penyakit'            =>$pendukung_penyakit,
         'pendukung_kelainanjasmani'     =>$pendukung_kelainanjasmani,
@@ -172,6 +230,7 @@ class Dashboard extends CI_Controller {
        
        );
        $id = $_POST['id_pendaftar']; 
+
        $this->m_master->update_siswa($data, $id_pendaftar);
        redirect('master/editsiswa/'. "$id");
     }
