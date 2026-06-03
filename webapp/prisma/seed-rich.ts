@@ -7,6 +7,7 @@ import {
   PrismaClient,
   StatusPresensi,
   StatusPembayaran,
+  StatusPpdb,
   JenisKelamin,
   TipeSoal,
   PredikatP5,
@@ -351,7 +352,7 @@ async function main() {
     if (!ex) await prisma.jalurPpdb.create({ data: { sekolahId: sid, nama: jn, kuota: rnd(30, 80) } });
   }
   const jalurAll = await prisma.jalurPpdb.findMany({ where: { sekolahId: sid }, select: { id: true } });
-  const STATUS_PPDB = ["baru","baru","baru","diterima","diterima","ditolak","cadangan"] as const;
+  const STATUS_PPDB: StatusPpdb[] = ["baru","baru","baru","diterima","diterima","ditolak","cadangan"];
   const existPPDB = await prisma.pendaftaranPpdb.count({ where: { sekolahId: sid } });
   let newPPDB = 0;
   for (let i = existPPDB; i < 80; i++) {

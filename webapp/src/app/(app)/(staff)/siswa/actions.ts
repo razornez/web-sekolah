@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { siswaSchema } from "@/lib/validations";
+import { auditLog } from "@/lib/audit";
 
 export type SiswaFormState = {
   ok: boolean;
@@ -50,8 +51,10 @@ export async function saveSiswa(
       });
       if (!existing) return { ok: false, message: "Data siswa tidak ditemukan." };
       await prisma.siswa.update({ where: { id }, data });
+      await auditLog({ aksi: "update", entitas: "siswa", entitasId: id, detail: `Update siswa: ${d.namaLengkap}` });
     } else {
-      await prisma.siswa.create({ data: { ...data, sekolahId } });
+      const s = await prisma.siswa.create({ data: { ...data, sekolahId } });
+      await auditLog({ aksi: "create", entitas: "siswa", entitasId: s.id, detail: `Buat siswa: ${d.namaLengkap}` });
     }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
@@ -70,5 +73,6 @@ export async function deleteSiswa(formData: FormData) {
   if (!id) return;
   // deleteMany dengan filter tenant → aman lintas-sekolah & tidak error bila tak ada.
   await prisma.siswa.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "siswa", entitasId: id, detail: `Hapus siswa id: ${id}` });
   revalidatePath("/siswa");
 }

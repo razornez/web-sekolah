@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { kategoriKasusSchema, kasusSchema } from "@/lib/validations";
+import { auditLog } from "@/lib/audit";
 
 // ---- Kategori Kasus (master) --------------------------------------------
 export async function createKategori(formData: FormData) {

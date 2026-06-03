@@ -234,6 +234,7 @@ model Sekolah {
   ekstrakurikuler  Ekstrakurikuler[]
   tugas            Tugas[]
   ujian            Ujian[]
+  auditLog         AuditLog[]
 
   @@map("sekolah")
 }
@@ -1576,4 +1577,25 @@ model JawabanUjian {
 
   @@unique([hasilId, soalId])
   @@map("jawaban_ujian")
+}
+
+/// Audit log — mencatat setiap aksi tulis (create/update/delete) oleh staf.
+model AuditLog {
+  id        BigInt   @id @default(autoincrement())
+  sekolahId Int?     @map("sekolah_id")
+  userId    String?  @map("user_id") @db.Uuid
+  userName  String   @map("user_name")
+  role      String
+  aksi      String                       // "create" | "update" | "delete"
+  entitas   String                       // "siswa" | "nilai" | "spp" | dll
+  entitasId String?  @map("entitas_id")  // id record yang terpengaruh
+  detail    String?                      // deskripsi singkat human-readable
+  meta      Json?                        // data tambahan (diff, nilai baru, dll)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sekolah Sekolah? @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+
+  @@index([sekolahId, createdAt])
+  @@index([userId])
+  @@map("audit_log")
 }

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import { guruSchema } from "@/lib/validations";
 
 export type GuruFormState = {
@@ -71,6 +72,6 @@ export async function deleteGuru(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
-  await prisma.guru.deleteMany({ where: { id, sekolahId } });
+  await prisma.guru.deleteMany({ where: { id, sekolahId } }); await auditLog({ aksi: "delete", entitas: "guru", entitasId: id, detail: "Hapus guru" });
   revalidatePath("/guru");
 }

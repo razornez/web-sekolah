@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const num = (v: FormDataEntryValue | null): number | null => {
   const n = parseInt(String(v ?? ""), 10);
@@ -78,7 +79,7 @@ export async function saveNilai(formData: FormData) {
     }),
   );
 
-  revalidatePath("/nilai");
+  await auditLog({ aksi: "update", entitas: "nilai_rapor", detail: "Simpan nilai batch rombel" }); revalidatePath("/nilai");
   redirect(
     `/nilai?rombelId=${rombelId}&periodeId=${periodeId}&mapelId=${mapelId}&kurikulum=${kurikulum}`,
   );

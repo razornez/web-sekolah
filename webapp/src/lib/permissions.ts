@@ -4,7 +4,7 @@ import { getCurrentUser, isStaff } from "@/lib/session";
 export const MODULE_KEYS = [
   "siswa", "guru", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal",
   "elearning", "presensi", "bk", "perpustakaan", "sarpras", "surat", "spp",
-  "ppdb", "kelulusan", "osis", "pengumuman", "ekstrakurikuler", "tugas", "ujian",
+  "ppdb", "kelulusan", "osis", "pengumuman", "ekstrakurikuler", "tugas", "ujian", "audit",
 ] as const;
 export type ModuleKey = (typeof MODULE_KEYS)[number];
 

@@ -4,6 +4,7 @@ import { Prisma, StatusPembayaran } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import { jenisPembayaranSchema, tagihanSchema } from "@/lib/validations";
 
 // ---- Jenis Pembayaran ----------------------------------------------------
@@ -86,7 +87,7 @@ export async function bayarTagihan(formData: FormData) {
     await tx.kwitansi.create({
       data: { pembayaranId: bayar.id, nomor: `KW-${Date.now()}-${tagihanId}` },
     });
-    await tx.tagihanSpp.update({
+    await auditLog({ aksi: "update", entitas: "spp", entitasId: tagihanId, detail: "Bayar SPP" }); await tx.tagihanSpp.update({
       where: { id: tagihanId },
       data: { status: StatusPembayaran.lunas },
     });

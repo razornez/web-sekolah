@@ -5,6 +5,7 @@ import { Prisma, Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import { akunSchema } from "@/lib/validations";
 
 export type AccountState = { ok: boolean; message?: string };
@@ -64,7 +65,7 @@ async function createAccount(
     throw e;
   }
 
-  revalidatePath(`/${kind}/${ownerId}`);
+  await auditLog({ aksi: "create", entitas: "akun_user", detail: `Buat akun ${kind}` }); revalidatePath(`/${kind}/${ownerId}`);
   return { ok: true, message: "Akun berhasil dibuat." };
 }
 
@@ -98,5 +99,5 @@ export async function toggleAktif(fd: FormData) {
   const u = await prisma.user.findFirst({ where: { id: userId, sekolahId }, select: { isActive: true } });
   if (!u) return;
   await prisma.user.update({ where: { id: userId }, data: { isActive: !u.isActive } });
-  if (kind && ownerId) revalidatePath(`/${kind}/${ownerId}`);
+  if (kind && ownerId) await auditLog({ aksi: "create", entitas: "akun_user", detail: `Buat akun ${kind}` }); revalidatePath(`/${kind}/${ownerId}`);
 }
