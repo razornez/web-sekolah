@@ -21,7 +21,9 @@ Aplikasi yang di-deploy adalah folder [`webapp/`](../webapp) (Next.js). Set **Ro
 1. Push branch ke GitHub. Import repo di Vercel, set **Root Directory = `webapp`**.
 2. Tambah env di atas (`DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_TRUST_HOST`) untuk environment Production (dan Preview bila perlu).
 3. Build Command default (`next build`) — Prisma Client di-generate via `postinstall`/`prisma generate` (pastikan ada bila perlu).
-4. Jalankan migrasi DB ke Supabase: `prisma migrate deploy` (atau `db push` untuk awal) memakai `DIRECT_URL`.
-5. Deploy.
+4. Jalankan migrasi DB **berversi**: `npm run db:migrate:deploy` (`prisma migrate deploy`) memakai `DIRECT_URL`. Skema sudah di-baseline (`prisma/migrations/0_init`), jadi gunakan migrate (bukan `db push`) di produksi.
+5. (Opsional) Aktifkan RLS untuk isolasi multi-tenant di level DB — lihat [RLS.md](RLS.md). Tenancy sudah ditegakkan di kode, jadi ini hardening tambahan.
+6. Deploy.
 
 > Catatan: file [.env.example](../webapp/.env.example) berisi daftar variabel (tanpa nilai rahasia) sebagai acuan. Jangan commit `.env` asli.
+> Upload file (foto): di Vercel ganti `webapp/src/lib/upload.ts` ke object storage (Supabase Storage/Vercel Blob) — filesystem serverless ephemeral.
