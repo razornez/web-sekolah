@@ -8,6 +8,9 @@ const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
   { href: "/dashboard", label: "Dashboard" }, // selalu tampil utk staf
   { href: "/pengumuman", label: "Pengumuman", key: "pengumuman" },
   { href: "/siswa", label: "Data Siswa", key: "siswa" },
+  { href: "/prestasi", label: "Prestasi & Beasiswa", key: "siswa" },
+  { href: "/mutasi", label: "Mutasi Siswa", key: "siswa" },
+  { href: "/kenaikan-kelas", label: "Kenaikan Kelas", key: "rombel" },
   { href: "/guru", label: "Data Guru", key: "guru" },
   { href: "/rombel", label: "Rombel / Kelas", key: "rombel" },
   { href: "/mapel", label: "Mata Pelajaran", key: "mapel" },
