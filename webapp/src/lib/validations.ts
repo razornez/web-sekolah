@@ -97,3 +97,20 @@ export const akunSchema = z.object({
   username: z.string().trim().min(3, "Username minimal 3 karakter"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
+
+export const kategoriKasusSchema = z.object({
+  nama: z.string().trim().min(1, "Nama wajib diisi"),
+  poin: z.coerce.number().int().min(0).default(0),
+});
+
+export const kasusSchema = z.object({
+  siswaId: z.coerce.number().int().positive(),
+  kategoriId: z.preprocess(
+    emptyToNull,
+    z.coerce.number().int().positive().nullable(),
+  ),
+  namaKasus: optStr,
+  poin: z.coerce.number().int().min(0).default(0),
+  tanggal: optStr,
+  keterangan: optStr,
+});
