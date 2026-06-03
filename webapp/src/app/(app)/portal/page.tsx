@@ -81,6 +81,11 @@ export default async function PortalPage() {
         include: { jenis: { select: { nama: true } } },
         orderBy: [{ tahun: "desc" }, { bulan: "desc" }],
       },
+      kehadiran: {
+        orderBy: { tanggal: "desc" },
+        take: 60,
+        select: { tanggal: true, status: true },
+      },
     },
   });
 
@@ -94,6 +99,10 @@ export default async function PortalPage() {
   }
 
   const kelas = siswa.anggotaRombel[0]?.rombel;
+  const rekapHadir = siswa.kehadiran.reduce<Record<string, number>>((acc, k) => {
+    acc[k.status] = (acc[k.status] ?? 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-5">
@@ -162,6 +171,20 @@ export default async function PortalPage() {
                 ))}
               </tbody>
             </table>
+          )}
+        </Card>
+
+        <Card title="Rekap Kehadiran">
+          {siswa.kehadiran.length === 0 ? (
+            <p className="text-sm text-gray-400">Belum ada data presensi.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2 text-sm">
+              {["hadir", "izin", "sakit", "alpa", "terlambat"].map((s) => (
+                <span key={s} className="rounded bg-gray-100 px-2 py-1 text-gray-700">
+                  <b>{rekapHadir[s] ?? 0}</b> {s}
+                </span>
+              ))}
+            </div>
           )}
         </Card>
       </div>

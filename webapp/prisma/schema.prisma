@@ -889,8 +889,8 @@ model KehadiranSiswa {
   siswa   Siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
   periode Periode? @relation(fields: [periodeId], references: [id])
 
+  @@unique([siswaId, tanggal])
   @@index([sekolahId, tanggal])
-  @@index([siswaId, tanggal])
   @@map("kehadiran_siswa")
 }
 
