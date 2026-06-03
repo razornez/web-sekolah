@@ -222,6 +222,7 @@ model Sekolah {
   pengumuman       Pengumuman[]
   raporCatatan     RaporCatatan[]
   ekstrakurikuler  Ekstrakurikuler[]
+  tugas            Tugas[]
 
   @@map("sekolah")
 }
@@ -426,6 +427,7 @@ model Siswa {
   user             User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   anggotaRombel    AnggotaRombel[]
   anggotaEkstra    AnggotaEkstra[]
+  pengumpulanTugas PengumpulanTugas[]
   orangTuaWali     OrangTuaWali[]
   beasiswa         BeasiswaSiswa[]
   prestasi         PrestasiSiswa[]
@@ -1452,4 +1454,39 @@ model AnggotaEkstra {
   @@unique([ekstraId, siswaId])
   @@index([siswaId])
   @@map("anggota_ekstra")
+}
+
+model Tugas {
+  id        Int       @id @default(autoincrement())
+  sekolahId Int       @map("sekolah_id")
+  guruId    Int?      @map("guru_id")
+  rombelId  Int?      @map("rombel_id")
+  judul     String
+  deskripsi String?
+  mapel     String?
+  deadline  DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  sekolah     Sekolah            @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  pengumpulan PengumpulanTugas[]
+
+  @@index([sekolahId])
+  @@map("tugas")
+}
+
+model PengumpulanTugas {
+  id            Int      @id @default(autoincrement())
+  tugasId       Int      @map("tugas_id")
+  siswaId       Int      @map("siswa_id")
+  teks          String?
+  link          String?
+  nilai         Int?
+  tanggalKumpul DateTime @default(now()) @map("tanggal_kumpul")
+
+  tugas Tugas @relation(fields: [tugasId], references: [id], onDelete: Cascade)
+  siswa Siswa @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+
+  @@unique([tugasId, siswaId])
+  @@index([siswaId])
+  @@map("pengumpulan_tugas")
 }

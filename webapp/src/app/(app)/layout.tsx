@@ -16,6 +16,7 @@ const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
   { href: "/jurnal", label: "Jurnal Mengajar", key: "jurnal" },
   { href: "/jadwal", label: "Jadwal Mengajar", key: "jadwal" },
   { href: "/elearning", label: "E-Learning", key: "elearning" },
+  { href: "/tugas", label: "Tugas", key: "tugas" },
   { href: "/presensi", label: "Presensi", key: "presensi" },
   { href: "/ekstrakurikuler", label: "Ekstrakurikuler", key: "ekstrakurikuler" },
   { href: "/bk", label: "BK / Pelanggaran", key: "bk" },
@@ -29,6 +30,7 @@ const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
 ];
 const PORTAL_NAV = [
   { href: "/portal", label: "Portal Saya" },
+  { href: "/tugas-saya", label: "Tugas Saya" },
   { href: "/vote", label: "Pemilihan OSIS" },
 ];
 

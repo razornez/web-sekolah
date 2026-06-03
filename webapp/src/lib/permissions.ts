@@ -4,7 +4,7 @@ import { getCurrentUser, isStaff } from "@/lib/session";
 export const MODULE_KEYS = [
   "siswa", "guru", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal",
   "elearning", "presensi", "bk", "perpustakaan", "sarpras", "surat", "spp",
-  "ppdb", "kelulusan", "osis", "pengumuman", "ekstrakurikuler",
+  "ppdb", "kelulusan", "osis", "pengumuman", "ekstrakurikuler", "tugas",
 ] as const;
 export type ModuleKey = (typeof MODULE_KEYS)[number];
 
@@ -15,10 +15,10 @@ export const ROLE_MODULES: Record<string, ModuleKey[]> = {
   admin: ALL,
   operator: ALL,
   kepsek: ALL,
-  kurikulum: ["siswa", "guru", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal", "elearning", "presensi", "kelulusan"],
+  kurikulum: ["siswa", "guru", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal", "elearning", "presensi", "kelulusan", "tugas"],
   kesiswaan: ["siswa", "rombel", "presensi", "bk", "osis", "ppdb", "kelulusan", "pengumuman", "ekstrakurikuler"],
   humas: ["ppdb", "surat", "pengumuman"],
-  guru: ["siswa", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal", "elearning", "presensi", "ekstrakurikuler"],
+  guru: ["siswa", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal", "elearning", "presensi", "ekstrakurikuler", "tugas"],
   walikelas: ["siswa", "rombel", "nilai", "p5", "presensi", "kelulusan"],
   bk: ["siswa", "bk"],
   bendahara: ["spp"],
