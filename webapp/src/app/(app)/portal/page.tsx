@@ -106,13 +106,18 @@ export default async function PortalPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Portal Siswa</h1>
-        <p className="text-gray-600">
-          {siswa.namaLengkap}
-          {siswa.nisn ? ` · NISN ${siswa.nisn}` : ""}
-          {kelas ? ` · ${kelas.nama} (${kelas.tahunAjaran.tahun})` : ""}
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Portal Siswa</h1>
+          <p className="text-gray-600">
+            {siswa.namaLengkap}
+            {siswa.nisn ? ` · NISN ${siswa.nisn}` : ""}
+            {kelas ? ` · ${kelas.nama} (${kelas.tahunAjaran.tahun})` : ""}
+          </p>
+        </div>
+        <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
+          Cetak Rapor
+        </a>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

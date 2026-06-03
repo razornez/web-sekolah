@@ -19,7 +19,12 @@ export default async function EditSiswaPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">Edit Siswa</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-gray-900">Edit Siswa</h1>
+        <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
+          Cetak Rapor
+        </a>
+      </div>
       <SiswaForm
         initial={{
           id: siswa.id,

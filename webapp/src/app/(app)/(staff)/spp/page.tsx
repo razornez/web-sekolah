@@ -44,7 +44,10 @@ export default async function SppPage({
         prisma.tagihanSpp.findMany({
           where: { siswaId: siswa.id, sekolahId },
           orderBy: [{ tahun: "desc" }, { bulan: "desc" }],
-          include: { jenis: { select: { nama: true } } },
+          include: {
+            jenis: { select: { nama: true } },
+            pembayaran: { orderBy: { id: "desc" }, take: 1, select: { id: true } },
+          },
         }),
         prisma.jenisPembayaran.findMany({ where: { sekolahId }, orderBy: { nama: "asc" } }),
       ])
@@ -153,6 +156,11 @@ export default async function SppPage({
                             <input type="hidden" name="siswaId" value={siswa.id} />
                             <button className="rounded-md bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700">Bayar</button>
                           </form>
+                        )}
+                        {t.status === "lunas" && t.pembayaran[0] && (
+                          <Link href={`/cetak/kwitansi/${t.pembayaran[0].id}`} target="_blank" className="text-gray-600 hover:underline">
+                            Kwitansi
+                          </Link>
                         )}
                         <form action={deleteTagihan}>
                           <input type="hidden" name="id" value={t.id} />
