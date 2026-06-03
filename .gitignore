@@ -29,3 +29,16 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 *.sublime-project
 /tests/tests/
 /tests/results/
+
+# Node / Next.js / Prisma (stack baru)
+#-------------------------
+node_modules/
+.next/
+out/
+.env
+.env*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+/coverage/
