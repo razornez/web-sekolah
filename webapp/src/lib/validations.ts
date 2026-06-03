@@ -103,6 +103,14 @@ export const kategoriKasusSchema = z.object({
   poin: z.coerce.number().int().min(0).default(0),
 });
 
+export const calonOsisSchema = z.object({
+  noUrut: z.coerce.number().int().min(1, "No urut minimal 1"),
+  namaKetua: z.string().trim().min(1, "Nama ketua wajib diisi"),
+  namaWakil: optStr,
+  visi: optStr,
+  misi: optStr,
+});
+
 export const jalurPpdbSchema = z.object({
   nama: z.string().trim().min(1, "Nama wajib diisi"),
   kuota: z.preprocess(emptyToNull, z.coerce.number().int().min(0).nullable()),

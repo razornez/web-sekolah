@@ -18,8 +18,12 @@ const STAFF_NAV = [
   { href: "/spp", label: "SPP / Keuangan" },
   { href: "/ppdb", label: "PPDB" },
   { href: "/kelulusan", label: "Kelulusan" },
+  { href: "/osis", label: "Pemilihan OSIS" },
 ];
-const PORTAL_NAV = [{ href: "/portal", label: "Portal Saya" }];
+const PORTAL_NAV = [
+  { href: "/portal", label: "Portal Saya" },
+  { href: "/vote", label: "Pemilihan OSIS" },
+];
 
 export default async function AppLayout({
   children,
