@@ -16,6 +16,7 @@ const STAFF_NAV = [
   { href: "/sarpras", label: "Sarpras" },
   { href: "/surat", label: "Surat" },
   { href: "/spp", label: "SPP / Keuangan" },
+  { href: "/ppdb", label: "PPDB" },
 ];
 const PORTAL_NAV = [{ href: "/portal", label: "Portal Saya" }];
 

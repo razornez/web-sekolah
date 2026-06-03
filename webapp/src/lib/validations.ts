@@ -103,6 +103,23 @@ export const kategoriKasusSchema = z.object({
   poin: z.coerce.number().int().min(0).default(0),
 });
 
+export const jalurPpdbSchema = z.object({
+  nama: z.string().trim().min(1, "Nama wajib diisi"),
+  kuota: z.preprocess(emptyToNull, z.coerce.number().int().min(0).nullable()),
+  keterangan: optStr,
+});
+
+export const pendaftaranPpdbSchema = z.object({
+  namaLengkap: z.string().trim().min(1, "Nama lengkap wajib diisi"),
+  jenisKelamin: z.preprocess(emptyToNull, z.enum(["L", "P"])),
+  jalurId: z.preprocess(emptyToNull, z.coerce.number().int().positive().nullable()),
+  nisn: optStr,
+  tempatLahir: optStr,
+  tanggalLahir: optStr,
+  asalSekolah: optStr,
+  noHp: optStr,
+});
+
 export const kategoriSarprasSchema = z.object({
   nama: z.string().trim().min(1, "Nama wajib diisi"),
 });
