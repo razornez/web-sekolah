@@ -141,6 +141,16 @@ enum PengumumanTarget {
   ortu
 }
 
+enum TipeSoal {
+  pilihan_ganda
+  esai
+}
+
+enum StatusHasil {
+  berlangsung
+  selesai
+}
+
 // =============================================================================
 // TENANT ROOT — SEKOLAH (sekaligus profil sekolah; align NPSN/Dapodik)
 // =============================================================================
@@ -223,6 +233,7 @@ model Sekolah {
   raporCatatan     RaporCatatan[]
   ekstrakurikuler  Ekstrakurikuler[]
   tugas            Tugas[]
+  ujian            Ujian[]
 
   @@map("sekolah")
 }
@@ -428,6 +439,7 @@ model Siswa {
   anggotaRombel    AnggotaRombel[]
   anggotaEkstra    AnggotaEkstra[]
   pengumpulanTugas PengumpulanTugas[]
+  hasilUjian       HasilUjian[]
   orangTuaWali     OrangTuaWali[]
   beasiswa         BeasiswaSiswa[]
   prestasi         PrestasiSiswa[]
@@ -1489,4 +1501,79 @@ model PengumpulanTugas {
   @@unique([tugasId, siswaId])
   @@index([siswaId])
   @@map("pengumpulan_tugas")
+}
+
+// =============================================================================
+// UJIAN ONLINE / CBT
+// =============================================================================
+
+model Ujian {
+  id          Int       @id @default(autoincrement())
+  sekolahId   Int       @map("sekolah_id")
+  guruId      Int?      @map("guru_id")
+  rombelId    Int?      @map("rombel_id")
+  judul       String
+  deskripsi   String?
+  mapel       String?
+  durasiMenit Int?      @map("durasi_menit")
+  acakSoal    Boolean   @default(false) @map("acak_soal")
+  mulai       DateTime?
+  selesai     DateTime?
+  aktif       Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  sekolah Sekolah      @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  soal    Soal[]
+  hasil   HasilUjian[]
+
+  @@index([sekolahId])
+  @@map("ujian")
+}
+
+model Soal {
+  id         Int      @id @default(autoincrement())
+  ujianId    Int      @map("ujian_id")
+  nomor      Int      @default(1)
+  pertanyaan String
+  tipe       TipeSoal @default(pilihan_ganda)
+  opsi       Json? // [{ "label": "A", "teks": "..." }]
+  kunci      String? // label kunci utk pilihan ganda
+  bobot      Int      @default(1)
+
+  ujian   Ujian          @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+  jawaban JawabanUjian[]
+
+  @@index([ujianId])
+  @@map("soal")
+}
+
+model HasilUjian {
+  id        Int         @id @default(autoincrement())
+  ujianId   Int         @map("ujian_id")
+  siswaId   Int         @map("siswa_id")
+  status    StatusHasil @default(berlangsung)
+  skor      Int?
+  mulaiAt   DateTime?   @map("mulai_at")
+  selesaiAt DateTime?   @map("selesai_at")
+
+  ujian   Ujian          @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+  siswa   Siswa          @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  jawaban JawabanUjian[]
+
+  @@unique([ujianId, siswaId])
+  @@map("hasil_ujian")
+}
+
+model JawabanUjian {
+  id      Int     @id @default(autoincrement())
+  hasilId Int     @map("hasil_id")
+  soalId  Int     @map("soal_id")
+  jawaban String? // label opsi (PG) atau teks (esai)
+  nilai   Int? // poin diperoleh utk soal ini
+
+  hasil HasilUjian @relation(fields: [hasilId], references: [id], onDelete: Cascade)
+  soal  Soal       @relation(fields: [soalId], references: [id], onDelete: Cascade)
+
+  @@unique([hasilId, soalId])
+  @@map("jawaban_ujian")
 }
