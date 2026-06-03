@@ -103,6 +103,29 @@ export const kategoriKasusSchema = z.object({
   poin: z.coerce.number().int().min(0).default(0),
 });
 
+export const kategoriSarprasSchema = z.object({
+  nama: z.string().trim().min(1, "Nama wajib diisi"),
+});
+
+export const sarprasSchema = z.object({
+  nama: z.string().trim().min(1, "Nama wajib diisi"),
+  kategoriId: z.preprocess(
+    emptyToNull,
+    z.coerce.number().int().positive().nullable(),
+  ),
+  jumlah: z.coerce.number().int().min(0).default(0),
+  kondisi: optStr,
+  keterangan: optStr,
+});
+
+export const suratSchema = z.object({
+  perihal: z.string().trim().min(1, "Perihal wajib diisi"),
+  nomor: optStr,
+  jenis: optStr,
+  isi: optStr,
+  tanggal: optStr,
+});
+
 export const bukuSchema = z.object({
   judul: z.string().trim().min(1, "Judul wajib diisi"),
   pengarang: optStr,
