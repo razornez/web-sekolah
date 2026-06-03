@@ -407,7 +407,9 @@ model Siswa {
   bahasa          String?
   statusAnakYatim String?      @map("status_anak_yatim")
   foto            String?
+  tahunMasuk      Int?         @map("tahun_masuk")
   status          StatusSiswa  @default(aktif)
+  deletedAt       DateTime?    @map("deleted_at") // soft delete
 
   // Alamat (1:1 inline)
   alamat        String?
