@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSekolahId } from "@/lib/session";
 import { AccountPanel } from "@/components/AccountPanel";
+import { FotoUpload } from "@/components/FotoUpload";
 import SiswaForm from "../_components/SiswaForm";
 
 export default async function EditSiswaPage({
@@ -43,6 +44,7 @@ export default async function EditSiswaPage({
           status: siswa.status,
         }}
       />
+      <FotoUpload kind="siswa" ownerId={siswa.id} current={siswa.foto} />
       <AccountPanel
         kind="siswa"
         ownerId={siswa.id}

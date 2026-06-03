@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSekolahId } from "@/lib/session";
 import { AccountPanel } from "@/components/AccountPanel";
+import { FotoUpload } from "@/components/FotoUpload";
 import GuruForm from "../_components/GuruForm";
 
 export default async function EditGuruPage({
@@ -42,6 +43,7 @@ export default async function EditGuruPage({
           statusGuru: guru.statusGuru,
         }}
       />
+      <FotoUpload kind="guru" ownerId={guru.id} current={guru.foto} />
       <AccountPanel
         kind="guru"
         ownerId={guru.id}

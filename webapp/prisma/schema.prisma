@@ -381,6 +381,7 @@ model Siswa {
   kewarganegaraan String?
   bahasa          String?
   statusAnakYatim String?      @map("status_anak_yatim")
+  foto            String?
   status          StatusSiswa  @default(aktif)
 
   // Alamat (1:1 inline)
