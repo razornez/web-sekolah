@@ -17,6 +17,7 @@ const STAFF_NAV = [
   { href: "/surat", label: "Surat" },
   { href: "/spp", label: "SPP / Keuangan" },
   { href: "/ppdb", label: "PPDB" },
+  { href: "/kelulusan", label: "Kelulusan" },
 ];
 const PORTAL_NAV = [{ href: "/portal", label: "Portal Saya" }];
 
