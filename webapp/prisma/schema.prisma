@@ -220,6 +220,7 @@ model Sekolah {
   counter          Counter[]
   logLogin         LogLogin[]
   pengumuman       Pengumuman[]
+  raporCatatan     RaporCatatan[]
 
   @@map("sekolah")
 }
@@ -306,6 +307,7 @@ model Periode {
   tahunAjaran      TahunAjaran        @relation(fields: [tahunAjaranId], references: [id], onDelete: Cascade)
   nilaiRapor       NilaiRapor[]
   nilaiRaporEkstra NilaiRaporEkstra[]
+  raporCatatan     RaporCatatan[]
   kehadiranSiswa   KehadiranSiswa[]
 
   @@unique([tahunAjaranId, urutan])
@@ -429,6 +431,7 @@ model Siswa {
   mutasi           MutasiSiswa[]
   nilaiRapor       NilaiRapor[]
   nilaiRaporEkstra NilaiRaporEkstra[]
+  raporCatatan     RaporCatatan[]
   penilaianP5      PenilaianP5[]
   kehadiran        KehadiranSiswa[]
   tagihanSpp       TagihanSpp[]
@@ -666,6 +669,23 @@ model NilaiRaporEkstra {
   periode Periode @relation(fields: [periodeId], references: [id])
 
   @@map("nilai_rapor_ekstra")
+}
+
+/// Catatan wali kelas & nilai sikap per siswa per periode (rapor halaman 2).
+model RaporCatatan {
+  id        Int     @id @default(autoincrement())
+  sekolahId Int     @map("sekolah_id")
+  siswaId   Int     @map("siswa_id")
+  periodeId Int     @map("periode_id")
+  catatan   String?
+  sikap     String?
+
+  sekolah Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  siswa   Siswa   @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  periode Periode @relation(fields: [periodeId], references: [id])
+
+  @@unique([siswaId, periodeId])
+  @@map("rapor_catatan")
 }
 
 // =============================================================================

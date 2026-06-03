@@ -60,17 +60,33 @@ export default async function CetakRaporPage({
     );
   }
 
-  const [periode, nilai] = await Promise.all([
+  const [periode, nilai, ekstra, catatan] = await Promise.all([
     prisma.periode.findFirst({ where: { id: periodeId, tahunAjaran: { sekolahId: siswa.sekolahId } }, include: { tahunAjaran: { select: { tahun: true } } } }),
     prisma.nilaiRapor.findMany({
       where: { siswaId, periodeId },
       orderBy: { mapel: { noUrut: "asc" } },
       include: { mapel: { select: { namaMapel: true } } },
     }),
+    prisma.nilaiRaporEkstra.findMany({ where: { siswaId, periodeId }, orderBy: { id: "asc" } }),
+    prisma.raporCatatan.findUnique({ where: { siswaId_periodeId: { siswaId, periodeId } } }),
   ]);
   if (!periode) notFound();
 
   const merdeka = siswa.sekolah.kurikulumDefault === "MERDEKA";
+
+  // Rekap ketidakhadiran (rentang periode bila tersedia, jika tidak seluruhnya)
+  const kehadiran = await prisma.kehadiranSiswa.groupBy({
+    by: ["status"],
+    where: {
+      siswaId,
+      ...(periode.tanggalMulai && periode.tanggalSelesai
+        ? { tanggal: { gte: periode.tanggalMulai, lte: periode.tanggalSelesai } }
+        : {}),
+    },
+    _count: true,
+  });
+  const hadirMap: Record<string, number> = {};
+  for (const k of kehadiran) hadirMap[k.status] = k._count;
 
   return (
     <div className="mx-auto max-w-3xl p-8 text-sm">
@@ -139,6 +155,48 @@ export default async function CetakRaporPage({
           ))}
         </tbody>
       </table>
+
+      {/* Ekstrakurikuler */}
+      <h2 className="mb-1 mt-5 text-sm font-semibold">Ekstrakurikuler</h2>
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-black px-2 py-1 text-left">Kegiatan</th>
+            <th className="border border-black px-2 py-1">Predikat</th>
+            <th className="border border-black px-2 py-1 text-left">Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ekstra.length === 0 ? (
+            <tr><td colSpan={3} className="border border-black px-2 py-2 text-center text-gray-400">-</td></tr>
+          ) : (
+            ekstra.map((e) => (
+              <tr key={e.id}>
+                <td className="border border-black px-2 py-1">{e.namaEkstra}</td>
+                <td className="border border-black px-2 py-1 text-center">{e.nilai ?? "-"}</td>
+                <td className="border border-black px-2 py-1">{e.deskripsi ?? "-"}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+
+      {/* Ketidakhadiran */}
+      <h2 className="mb-1 mt-5 text-sm font-semibold">Ketidakhadiran</h2>
+      <table className="border-collapse text-sm">
+        <tbody>
+          <tr><td className="border border-black px-3 py-1">Sakit</td><td className="border border-black px-3 py-1 text-center">{hadirMap.sakit ?? 0} hari</td></tr>
+          <tr><td className="border border-black px-3 py-1">Izin</td><td className="border border-black px-3 py-1 text-center">{hadirMap.izin ?? 0} hari</td></tr>
+          <tr><td className="border border-black px-3 py-1">Tanpa Keterangan</td><td className="border border-black px-3 py-1 text-center">{hadirMap.alpa ?? 0} hari</td></tr>
+        </tbody>
+      </table>
+
+      {/* Catatan wali kelas */}
+      <h2 className="mb-1 mt-5 text-sm font-semibold">Catatan Wali Kelas</h2>
+      <div className="min-h-12 whitespace-pre-line rounded border border-black p-2 text-sm">
+        {catatan?.catatan ?? "-"}
+        {catatan?.sikap ? `\n\nSikap: ${catatan.sikap}` : ""}
+      </div>
 
       {/* Tanda tangan */}
       <div className="mt-10 flex justify-between text-center text-sm">
