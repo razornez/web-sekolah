@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { PengumumanFeed } from "@/components/PengumumanFeed";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -45,6 +46,8 @@ export default async function DashboardPage() {
           );
         })}
       </div>
+
+      {user.sekolahId != null && <PengumumanFeed sekolahId={user.sekolahId} audience="staf" />}
     </div>
   );
 }

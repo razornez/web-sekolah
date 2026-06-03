@@ -6,6 +6,7 @@ import { canAccess, type ModuleKey } from "@/lib/permissions";
 
 const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
   { href: "/dashboard", label: "Dashboard" }, // selalu tampil utk staf
+  { href: "/pengumuman", label: "Pengumuman", key: "pengumuman" },
   { href: "/siswa", label: "Data Siswa", key: "siswa" },
   { href: "/guru", label: "Data Guru", key: "guru" },
   { href: "/rombel", label: "Rombel / Kelas", key: "rombel" },

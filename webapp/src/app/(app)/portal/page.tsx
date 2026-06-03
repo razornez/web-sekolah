@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isStaff } from "@/lib/session";
+import { PengumumanFeed } from "@/components/PengumumanFeed";
 
 const BULAN = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 const rupiah = (n: number) => "Rp " + n.toLocaleString("id-ID");
@@ -56,6 +57,7 @@ export default async function PortalPage() {
             </ul>
           )}
         </Card>
+        {user.sekolahId != null && <PengumumanFeed sekolahId={user.sekolahId} audience="ortu" />}
       </div>
     );
   }
@@ -119,6 +121,8 @@ export default async function PortalPage() {
           Cetak Rapor
         </a>
       </div>
+
+      {user.sekolahId != null && <PengumumanFeed sekolahId={user.sekolahId} audience="siswa" />}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Card title="Nilai Terbaru">

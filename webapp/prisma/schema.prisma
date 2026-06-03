@@ -134,6 +134,13 @@ enum PredikatP5 {
   SAB // Sangat Berkembang
 }
 
+enum PengumumanTarget {
+  semua
+  staf
+  siswa
+  ortu
+}
+
 // =============================================================================
 // TENANT ROOT — SEKOLAH (sekaligus profil sekolah; align NPSN/Dapodik)
 // =============================================================================
@@ -212,6 +219,7 @@ model Sekolah {
   tema             Tema[]
   counter          Counter[]
   logLogin         LogLogin[]
+  pengumuman       Pengumuman[]
 
   @@map("sekolah")
 }
@@ -1379,4 +1387,20 @@ model Counter {
   sekolah Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
 
   @@map("counter")
+}
+
+model Pengumuman {
+  id          Int              @id @default(autoincrement())
+  sekolahId   Int              @map("sekolah_id")
+  judul       String
+  isi         String
+  target      PengumumanTarget @default(semua)
+  pinned      Boolean          @default(false)
+  createdById String?          @map("created_by") @db.Uuid
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  sekolah Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+
+  @@index([sekolahId, createdAt])
+  @@map("pengumuman")
 }
