@@ -2,27 +2,28 @@ import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import { isStaff } from "@/lib/session";
+import { canAccess, type ModuleKey } from "@/lib/permissions";
 
-const STAFF_NAV = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/siswa", label: "Data Siswa" },
-  { href: "/guru", label: "Data Guru" },
-  { href: "/rombel", label: "Rombel / Kelas" },
-  { href: "/mapel", label: "Mata Pelajaran" },
-  { href: "/nilai", label: "Nilai / Rapor" },
-  { href: "/p5", label: "Projek P5" },
-  { href: "/jurnal", label: "Jurnal Mengajar" },
-  { href: "/jadwal", label: "Jadwal Mengajar" },
-  { href: "/elearning", label: "E-Learning" },
-  { href: "/presensi", label: "Presensi" },
-  { href: "/bk", label: "BK / Pelanggaran" },
-  { href: "/perpustakaan", label: "Perpustakaan" },
-  { href: "/sarpras", label: "Sarpras" },
-  { href: "/surat", label: "Surat" },
-  { href: "/spp", label: "SPP / Keuangan" },
-  { href: "/ppdb", label: "PPDB" },
-  { href: "/kelulusan", label: "Kelulusan" },
-  { href: "/osis", label: "Pemilihan OSIS" },
+const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
+  { href: "/dashboard", label: "Dashboard" }, // selalu tampil utk staf
+  { href: "/siswa", label: "Data Siswa", key: "siswa" },
+  { href: "/guru", label: "Data Guru", key: "guru" },
+  { href: "/rombel", label: "Rombel / Kelas", key: "rombel" },
+  { href: "/mapel", label: "Mata Pelajaran", key: "mapel" },
+  { href: "/nilai", label: "Nilai / Rapor", key: "nilai" },
+  { href: "/p5", label: "Projek P5", key: "p5" },
+  { href: "/jurnal", label: "Jurnal Mengajar", key: "jurnal" },
+  { href: "/jadwal", label: "Jadwal Mengajar", key: "jadwal" },
+  { href: "/elearning", label: "E-Learning", key: "elearning" },
+  { href: "/presensi", label: "Presensi", key: "presensi" },
+  { href: "/bk", label: "BK / Pelanggaran", key: "bk" },
+  { href: "/perpustakaan", label: "Perpustakaan", key: "perpustakaan" },
+  { href: "/sarpras", label: "Sarpras", key: "sarpras" },
+  { href: "/surat", label: "Surat", key: "surat" },
+  { href: "/spp", label: "SPP / Keuangan", key: "spp" },
+  { href: "/ppdb", label: "PPDB", key: "ppdb" },
+  { href: "/kelulusan", label: "Kelulusan", key: "kelulusan" },
+  { href: "/osis", label: "Pemilihan OSIS", key: "osis" },
 ];
 const PORTAL_NAV = [
   { href: "/portal", label: "Portal Saya" },
@@ -37,7 +38,9 @@ export default async function AppLayout({
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user;
-  const nav = isStaff(user.role) ? STAFF_NAV : PORTAL_NAV;
+  const nav = isStaff(user.role)
+    ? STAFF_NAV.filter((n) => !n.key || canAccess(user.role, n.key))
+    : PORTAL_NAV;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
