@@ -19,3 +19,21 @@ export async function getSekolahId(): Promise<number> {
   }
   return user.sekolahId;
 }
+
+// Role end-user (bukan staf back-office). Sisanya dianggap staf.
+const END_USER_ROLES = ["siswa", "ortu"];
+
+export function isStaff(role: string): boolean {
+  return role !== "superadmin" && !END_USER_ROLES.includes(role);
+}
+
+/**
+ * Guard back-office: hanya staf. Siswa/ortu diarahkan ke /portal.
+ * Mengembalikan sekolahId (tenant) sekaligus.
+ */
+export async function requireStaff(): Promise<number> {
+  const user = await getCurrentUser();
+  if (END_USER_ROLES.includes(user.role)) redirect("/portal");
+  if (user.sekolahId == null) redirect("/dashboard?error=pilih-sekolah");
+  return user.sekolahId;
+}

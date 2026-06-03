@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireStaff } from "@/lib/session";
 import { guruSchema } from "@/lib/validations";
 
 export type GuruFormState = {
@@ -17,7 +17,7 @@ export async function saveGuru(
   _prev: GuruFormState,
   formData: FormData,
 ): Promise<GuruFormState> {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -68,7 +68,7 @@ export async function saveGuru(
 }
 
 export async function deleteGuru(formData: FormData) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.guru.deleteMany({ where: { id, sekolahId } });

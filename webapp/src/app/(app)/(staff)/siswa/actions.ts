@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireStaff } from "@/lib/session";
 import { siswaSchema } from "@/lib/validations";
 
 export type SiswaFormState = {
@@ -17,7 +17,7 @@ export async function saveSiswa(
   _prev: SiswaFormState,
   formData: FormData,
 ): Promise<SiswaFormState> {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -65,7 +65,7 @@ export async function saveSiswa(
 }
 
 export async function deleteSiswa(formData: FormData) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
   // deleteMany dengan filter tenant → aman lintas-sekolah & tidak error bila tak ada.

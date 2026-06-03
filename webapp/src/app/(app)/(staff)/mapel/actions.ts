@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireStaff } from "@/lib/session";
 import { mapelSchema } from "@/lib/validations";
 
 export type MapelFormState = {
@@ -17,7 +17,7 @@ export async function saveMapel(
   _prev: MapelFormState,
   formData: FormData,
 ): Promise<MapelFormState> {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -65,7 +65,7 @@ export async function saveMapel(
 }
 
 export async function deleteMapel(formData: FormData) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.mapel.deleteMany({ where: { id, sekolahId } });

@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { Prisma, Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireStaff } from "@/lib/session";
 import { akunSchema } from "@/lib/validations";
 
 export type AccountState = { ok: boolean; message?: string };
@@ -13,7 +13,7 @@ async function createAccount(
   kind: "guru" | "siswa",
   fd: FormData,
 ): Promise<AccountState> {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const ownerId = Number(fd.get("ownerId"));
   const parsed = akunSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) {
@@ -76,7 +76,7 @@ export async function createAccountSiswa(_prev: AccountState, fd: FormData) {
 }
 
 export async function resetPassword(fd: FormData) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const userId = String(fd.get("userId") ?? "");
   const password = String(fd.get("password") ?? "");
   if (!userId || password.length < 6) return;
@@ -90,7 +90,7 @@ export async function resetPassword(fd: FormData) {
 }
 
 export async function toggleAktif(fd: FormData) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const userId = String(fd.get("userId") ?? "");
   const kind = String(fd.get("kind") ?? "");
   const ownerId = Number(fd.get("ownerId"));

@@ -4,7 +4,7 @@ import { Kurikulum } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireStaff } from "@/lib/session";
 
 const num = (v: FormDataEntryValue | null): number | null => {
   const n = parseInt(String(v ?? ""), 10);
@@ -17,7 +17,7 @@ const str = (v: FormDataEntryValue | null): string | null => {
 
 /** Simpan nilai satu rombel × periode × mapel sekaligus (batch). */
 export async function saveNilai(formData: FormData) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireStaff();
   const rombelId = Number(formData.get("rombelId"));
   const periodeId = Number(formData.get("periodeId"));
   const mapelId = Number(formData.get("mapelId"));

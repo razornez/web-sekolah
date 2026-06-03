@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
+import { isStaff } from "@/lib/session";
 
-const NAV = [
+const STAFF_NAV = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/siswa", label: "Data Siswa" },
   { href: "/guru", label: "Data Guru" },
@@ -11,6 +12,7 @@ const NAV = [
   { href: "/nilai", label: "Nilai / Rapor" },
   { href: "/spp", label: "SPP / Keuangan" },
 ];
+const PORTAL_NAV = [{ href: "/portal", label: "Portal Saya" }];
 
 export default async function AppLayout({
   children,
@@ -20,6 +22,7 @@ export default async function AppLayout({
   const session = await auth();
   if (!session?.user) redirect("/login");
   const user = session.user;
+  const nav = isStaff(user.role) ? STAFF_NAV : PORTAL_NAV;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -28,7 +31,7 @@ export default async function AppLayout({
           Smart School
         </div>
         <nav className="flex-1 space-y-1 p-3">
-          {NAV.map((n) => (
+          {nav.map((n) => (
             <Link
               key={n.href}
               href={n.href}
