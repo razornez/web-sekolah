@@ -103,6 +103,16 @@ export const kategoriKasusSchema = z.object({
   poin: z.coerce.number().int().min(0).default(0),
 });
 
+export const bukuSchema = z.object({
+  judul: z.string().trim().min(1, "Judul wajib diisi"),
+  pengarang: optStr,
+  penerbit: optStr,
+  tahunTerbit: optStr,
+  isbn: optStr,
+  jumlahBuku: z.coerce.number().int().min(0).default(0),
+  jumlahEksemplar: z.coerce.number().int().min(0).default(0),
+});
+
 export const kasusSchema = z.object({
   siswaId: z.coerce.number().int().positive(),
   kategoriId: z.preprocess(
