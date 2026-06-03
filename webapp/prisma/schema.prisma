@@ -679,8 +679,10 @@ model ElemenProfil {
   dimensiId Int    @map("dimensi_id")
   nama      String
 
-  dimensi   DimensiProfil     @relation(fields: [dimensiId], references: [id], onDelete: Cascade)
-  subElemen SubElemenProfil[]
+  dimensi     DimensiProfil    @relation(fields: [dimensiId], references: [id], onDelete: Cascade)
+  subElemen   SubElemenProfil[]
+  targetP5    ProjekP5Target[]
+  penilaianP5 PenilaianP5[]
 
   @@unique([dimensiId, nama])
   @@map("elemen_profil")
@@ -692,9 +694,7 @@ model SubElemenProfil {
   nama     String
   fase     Fase?
 
-  elemen      ElemenProfil     @relation(fields: [elemenId], references: [id], onDelete: Cascade)
-  targetP5    ProjekP5Target[]
-  penilaianP5 PenilaianP5[]
+  elemen ElemenProfil @relation(fields: [elemenId], references: [id], onDelete: Cascade)
 
   @@unique([elemenId, nama])
   @@map("sub_elemen_profil")
@@ -717,33 +717,33 @@ model ProjekP5 {
   @@map("projek_p5")
 }
 
-/// Sub-elemen yang ditargetkan oleh sebuah projek P5.
+/// Elemen Profil yang ditargetkan oleh sebuah projek P5.
 model ProjekP5Target {
-  id          Int @id @default(autoincrement())
-  projekP5Id  Int @map("projek_p5_id")
-  subElemenId Int @map("sub_elemen_id")
+  id         Int @id @default(autoincrement())
+  projekP5Id Int @map("projek_p5_id")
+  elemenId   Int @map("elemen_id")
 
-  projekP5  ProjekP5        @relation(fields: [projekP5Id], references: [id], onDelete: Cascade)
-  subElemen SubElemenProfil @relation(fields: [subElemenId], references: [id])
+  projekP5 ProjekP5     @relation(fields: [projekP5Id], references: [id], onDelete: Cascade)
+  elemen   ElemenProfil @relation(fields: [elemenId], references: [id])
 
-  @@unique([projekP5Id, subElemenId])
+  @@unique([projekP5Id, elemenId])
   @@map("projek_p5_target")
 }
 
-/// Penilaian P5 per siswa per sub-elemen (predikat MB/SB/BSH/SAB).
+/// Penilaian P5 per siswa per elemen (predikat MB/SB/BSH/SAB).
 model PenilaianP5 {
-  id          Int        @id @default(autoincrement())
-  projekP5Id  Int        @map("projek_p5_id")
-  siswaId     Int        @map("siswa_id")
-  subElemenId Int        @map("sub_elemen_id")
-  predikat    PredikatP5
-  catatan     String?
+  id         Int        @id @default(autoincrement())
+  projekP5Id Int        @map("projek_p5_id")
+  siswaId    Int        @map("siswa_id")
+  elemenId   Int        @map("elemen_id")
+  predikat   PredikatP5
+  catatan    String?
 
-  projekP5  ProjekP5        @relation(fields: [projekP5Id], references: [id], onDelete: Cascade)
-  siswa     Siswa           @relation(fields: [siswaId], references: [id], onDelete: Cascade)
-  subElemen SubElemenProfil @relation(fields: [subElemenId], references: [id])
+  projekP5 ProjekP5     @relation(fields: [projekP5Id], references: [id], onDelete: Cascade)
+  siswa    Siswa        @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  elemen   ElemenProfil @relation(fields: [elemenId], references: [id])
 
-  @@unique([projekP5Id, siswaId, subElemenId])
+  @@unique([projekP5Id, siswaId, elemenId])
   @@map("penilaian_p5")
 }
 

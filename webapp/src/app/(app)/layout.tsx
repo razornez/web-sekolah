@@ -10,6 +10,7 @@ const STAFF_NAV = [
   { href: "/rombel", label: "Rombel / Kelas" },
   { href: "/mapel", label: "Mata Pelajaran" },
   { href: "/nilai", label: "Nilai / Rapor" },
+  { href: "/p5", label: "Projek P5" },
   { href: "/presensi", label: "Presensi" },
   { href: "/bk", label: "BK / Pelanggaran" },
   { href: "/perpustakaan", label: "Perpustakaan" },
