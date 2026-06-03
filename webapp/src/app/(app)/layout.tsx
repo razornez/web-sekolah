@@ -17,6 +17,7 @@ const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
   { href: "/jadwal", label: "Jadwal Mengajar", key: "jadwal" },
   { href: "/elearning", label: "E-Learning", key: "elearning" },
   { href: "/presensi", label: "Presensi", key: "presensi" },
+  { href: "/ekstrakurikuler", label: "Ekstrakurikuler", key: "ekstrakurikuler" },
   { href: "/bk", label: "BK / Pelanggaran", key: "bk" },
   { href: "/perpustakaan", label: "Perpustakaan", key: "perpustakaan" },
   { href: "/sarpras", label: "Sarpras", key: "sarpras" },

@@ -221,6 +221,7 @@ model Sekolah {
   logLogin         LogLogin[]
   pengumuman       Pengumuman[]
   raporCatatan     RaporCatatan[]
+  ekstrakurikuler  Ekstrakurikuler[]
 
   @@map("sekolah")
 }
@@ -424,6 +425,7 @@ model Siswa {
   sekolah          Sekolah            @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   user             User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   anggotaRombel    AnggotaRombel[]
+  anggotaEkstra    AnggotaEkstra[]
   orangTuaWali     OrangTuaWali[]
   beasiswa         BeasiswaSiswa[]
   prestasi         PrestasiSiswa[]
@@ -529,6 +531,7 @@ model Guru {
   skp         Skp[]
   rombelWali  Rombel[]         @relation("WaliKelas")
   mapelDiampu Mapel[]
+  ekstraDibina Ekstrakurikuler[] @relation("PembinaEkstra")
   jadwalGuru  JadwalGuru[]
   jurnalGuru  JurnalGuru[]
   kehadiran   KehadiranGuru[]
@@ -1423,4 +1426,30 @@ model Pengumuman {
 
   @@index([sekolahId, createdAt])
   @@map("pengumuman")
+}
+
+model Ekstrakurikuler {
+  id            Int    @id @default(autoincrement())
+  sekolahId     Int    @map("sekolah_id")
+  nama          String
+  pembinaGuruId Int?   @map("pembina_guru_id")
+
+  sekolah Sekolah         @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  pembina Guru?           @relation("PembinaEkstra", fields: [pembinaGuruId], references: [id])
+  anggota AnggotaEkstra[]
+
+  @@map("ekstrakurikuler")
+}
+
+model AnggotaEkstra {
+  id       Int @id @default(autoincrement())
+  ekstraId Int @map("ekstra_id")
+  siswaId  Int @map("siswa_id")
+
+  ekstra Ekstrakurikuler @relation(fields: [ekstraId], references: [id], onDelete: Cascade)
+  siswa  Siswa           @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+
+  @@unique([ekstraId, siswaId])
+  @@index([siswaId])
+  @@map("anggota_ekstra")
 }
