@@ -27,6 +27,7 @@ export function WilayahSelect({
   const [kecamatan, setKecamatan] = useState(defaultKecamatan ?? "");
   const [kelurahan, setKelurahan] = useState(defaultKelurahan ?? "");
   const [kodePos, setKodePos] = useState(defaultKodePos ?? "");
+  const [desaKelNama, setDesaKelNama] = useState(""); // nama desa, di-update saat items load
 
   const [kabState, setKabState] = useState<State>({ items: [], loading: false });
   const [kecState, setKecState] = useState<State>({ items: [], loading: false });
@@ -72,10 +73,26 @@ export function WilayahSelect({
     if (defaultKecamatan) fetchOpts(`/api/wilayah/kelurahan?kecamatanId=${defaultKecamatan}`, setKelState);
   }, []);
 
+  // Sinkronkan nama desa/kelurahan saat items berhasil dimuat (termasuk saat edit with default)
+  useEffect(() => {
+    if (kelurahan && kelState.items.length > 0) {
+      const found = kelState.items.find((k) => k.kode === kelurahan);
+      if (found) {
+        setDesaKelNama(found.nama);
+        if (found.kodePos && !kodePos) setKodePos(found.kodePos);
+      }
+    }
+  }, [kelurahan, kelState.items]);
+
   const handleKelurahan = (kodeKel: string) => {
     setKelurahan(kodeKel);
     const kel = kelState.items.find((k) => k.kode === kodeKel);
-    if (kel?.kodePos) setKodePos(kel.kodePos);
+    if (kel) {
+      setDesaKelNama(kel.nama);
+      if (kel.kodePos) setKodePos(kel.kodePos);
+    } else {
+      setDesaKelNama("");
+    }
   };
 
   const Loading = () => <option disabled>Memuat…</option>;
@@ -146,19 +163,15 @@ export function WilayahSelect({
           />
         </div>
 
-        {/* Nama desa/kelurahan untuk disimpan ke alamat siswa */}
+        {/* Nama desa/kelurahan — fully controlled, sinkron via state */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Nama Desa / Kelurahan</label>
           <input
             name="desaKel"
-            defaultValue={defaultKelurahan
-              ? kelState.items.find((k) => k.kode === kelurahan)?.nama ?? defaultKelurahan
-              : ""}
-            value={kelurahan ? kelState.items.find((k) => k.kode === kelurahan)?.nama ?? "" : ""}
-            onChange={() => {}}
-            placeholder="Terisi dari pilihan di atas"
-            className={`${inCls} bg-gray-50`}
-            readOnly
+            value={desaKelNama}
+            onChange={(e) => setDesaKelNama(e.target.value)}
+            placeholder="Dipilih dari dropdown, atau isi manual"
+            className={inCls}
           />
         </div>
       </div>
