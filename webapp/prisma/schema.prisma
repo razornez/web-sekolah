@@ -264,7 +264,8 @@ model User {
   siswa    Siswa?
   guru     Guru?
   ortu     OrangTuaWali[]
-  logLogin LogLogin[]
+  logLogin         LogLogin[]
+  pengumumanDibuat Pengumuman[]     @relation("PengumumanAuthor")
 
   @@unique([sekolahId, username])
   @@index([sekolahId, role])
@@ -1431,13 +1432,17 @@ model Pengumuman {
   id          Int              @id @default(autoincrement())
   sekolahId   Int              @map("sekolah_id")
   judul       String
-  isi         String
+  isi         String           // HTML dari Tiptap WYSIWYG
+  kategori    String           @default("umum")
   target      PengumumanTarget @default(semua)
   pinned      Boolean          @default(false)
+  viewCount   Int              @default(0) @map("view_count")
   createdById String?          @map("created_by") @db.Uuid
   createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
 
-  sekolah Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  sekolah   Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  author    User?   @relation("PengumumanAuthor", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([sekolahId, createdAt])
   @@map("pengumuman")
