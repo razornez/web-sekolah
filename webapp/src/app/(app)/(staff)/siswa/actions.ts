@@ -10,6 +10,7 @@ import { auditLog } from "@/lib/audit";
 
 export type SiswaFormState = {
   ok: boolean;
+  to?: string; // client-side redirect target (useFormRedirect)
   message?: string;
   errors?: Record<string, string[] | undefined>;
 };
@@ -87,7 +88,7 @@ export async function saveSiswa(
   }
 
   revalidatePath("/siswa");
-  redirect("/siswa");
+  return { ok: true, to: "/siswa" };
 }
 
 /** Soft delete: set deletedAt = now(). Data relasi tetap terjaga. */

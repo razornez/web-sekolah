@@ -1606,3 +1606,47 @@ model AuditLog {
   @@index([userId])
   @@map("audit_log")
 }
+
+// =============================================================================
+// REFERENSI WILAYAH INDONESIA (global, tidak per-sekolah)
+// Data: wilayah.id API / BPS / Kemendagri
+// =============================================================================
+
+model RefProvinsi {
+  kode      String         @id
+  nama      String
+  kabupaten RefKabupaten[]
+  @@map("ref_provinsi")
+}
+
+model RefKabupaten {
+  kode       String         @id
+  provinsiId String         @map("provinsi_id")
+  nama       String
+  seeded     Boolean        @default(false) // kecamatan sudah di-cache
+  provinsi   RefProvinsi    @relation(fields: [provinsiId], references: [kode])
+  kecamatan  RefKecamatan[]
+  @@index([provinsiId])
+  @@map("ref_kabupaten")
+}
+
+model RefKecamatan {
+  kode        String         @id
+  kabupatenId String         @map("kabupaten_id")
+  nama        String
+  seeded      Boolean        @default(false) // kelurahan sudah di-cache
+  kabupaten   RefKabupaten   @relation(fields: [kabupatenId], references: [kode])
+  kelurahan   RefKelurahan[]
+  @@index([kabupatenId])
+  @@map("ref_kecamatan")
+}
+
+model RefKelurahan {
+  kode        String       @id
+  kecamatanId String       @map("kecamatan_id")
+  nama        String
+  kodePos     String?      @map("kode_pos")
+  kecamatan   RefKecamatan @relation(fields: [kecamatanId], references: [kode])
+  @@index([kecamatanId])
+  @@map("ref_kelurahan")
+}

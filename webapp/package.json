@@ -15,7 +15,8 @@
     "etl": "tsx prisma/etl.ts",
     "seed:testusers": "tsx prisma/seed-testusers.ts",
     "seed:dummy": "tsx prisma/seed-dummy.ts",
-    "seed:rich": "tsx prisma/seed-rich.ts"
+    "seed:rich": "tsx prisma/seed-rich.ts",
+    "seed:wilayah": "tsx prisma/seed-wilayah.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -8,6 +8,7 @@ import SiswaForm from "../_components/SiswaForm";
 
 export default async function EditSiswaPage({ params }: { params: Promise<{ id: string }> }) {
   const sekolahId = await requireModule("siswa");
+  const provinsiOpts = await prisma.refProvinsi.findMany({ orderBy: { nama: "asc" }, select: { kode: true, nama: true } });
   const { id } = await params;
   const siswa = await prisma.siswa.findFirst({
     where: { id: Number(id), sekolahId, deletedAt: null },
@@ -34,6 +35,7 @@ export default async function EditSiswaPage({ params }: { params: Promise<{ id: 
 
       <div className="rounded-lg border border-gray-200 bg-white p-6">
         <SiswaForm
+          provinsiOptions={provinsiOpts}
           initial={{
             id: siswa.id,
             namaLengkap: siswa.namaLengkap,

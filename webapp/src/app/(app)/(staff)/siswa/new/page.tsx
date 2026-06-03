@@ -1,10 +1,14 @@
+import { prisma } from "@/lib/prisma";
 import SiswaForm from "../_components/SiswaForm";
 
-export default function NewSiswaPage() {
+export default async function NewSiswaPage() {
+  const provinsiOpts = await prisma.refProvinsi.findMany({ orderBy: { nama: "asc" }, select: { kode: true, nama: true } });
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold text-gray-900">Tambah Siswa</h1>
-      <SiswaForm />
+      <div className="rounded-lg border border-gray-200 bg-white p-6">
+        <SiswaForm provinsiOptions={provinsiOpts} />
+      </div>
     </div>
   );
 }

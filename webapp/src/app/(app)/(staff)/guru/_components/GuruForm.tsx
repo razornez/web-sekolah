@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { saveGuru, type GuruFormState } from "../actions";
+import { useFormRedirect } from "@/hooks/useFormRedirect";
 
 export type GuruInitial = {
   id?: number;
@@ -36,6 +37,7 @@ export default function GuruForm({ initial }: { initial?: GuruInitial }) {
     saveGuru,
     { ok: false },
   );
+  useFormRedirect(state);
   const e = state.errors ?? {};
 
   return (

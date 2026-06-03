@@ -10,6 +10,7 @@ import { guruSchema } from "@/lib/validations";
 
 export type GuruFormState = {
   ok: boolean;
+  to?: string;
   message?: string;
   errors?: Record<string, string[] | undefined>;
 };
@@ -65,7 +66,7 @@ export async function saveGuru(
   }
 
   revalidatePath("/guru");
-  redirect("/guru");
+  return { ok: true, to: "/guru" };
 }
 
 export async function deleteGuru(formData: FormData) {

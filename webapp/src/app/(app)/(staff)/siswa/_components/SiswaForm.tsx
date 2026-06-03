@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { JKSwitch } from "@/components/JKSwitch";
 import { saveSiswa, type SiswaFormState } from "../actions";
+import { useFormRedirect } from "@/hooks/useFormRedirect";
+import { WilayahSelect } from "@/components/WilayahSelect";
 
 export type SiswaInitial = {
   id?: number;
@@ -58,8 +60,9 @@ function Divider({ title }: { title: string }) {
   );
 }
 
-export default function SiswaForm({ initial }: { initial?: SiswaInitial }) {
+export default function SiswaForm({ initial, provinsiOptions = [] }: { initial?: SiswaInitial; provinsiOptions?: { kode: string; nama: string }[] }) {
   const [state, formAction, pending] = useActionState<SiswaFormState, FormData>(saveSiswa, { ok: false });
+  useFormRedirect(state); // seamless client-side redirect setelah simpan
   const e = state.errors ?? {};
 
   return (
@@ -126,11 +129,20 @@ export default function SiswaForm({ initial }: { initial?: SiswaInitial }) {
       <Divider title="Alamat & Kontak" />
 
       <div><label className="block text-sm font-medium text-gray-700">Alamat Lengkap</label><textarea name="alamat" defaultValue={initial?.alamat ?? ""} rows={2} className={inCls} /></div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <div><label className="block text-sm font-medium text-gray-700">Desa/Kel</label><input name="desaKel" defaultValue={initial?.desaKel ?? ""} className={inCls} /></div>
-        <div><label className="block text-sm font-medium text-gray-700">Kecamatan</label><input name="kecamatan" defaultValue={initial?.kecamatan ?? ""} className={inCls} /></div>
-        <div><label className="block text-sm font-medium text-gray-700">Kabupaten/Kota</label><input name="kabupaten" defaultValue={initial?.kabupaten ?? ""} className={inCls} /></div>
-        <div><label className="block text-sm font-medium text-gray-700">Kode Pos</label><input name="kodePos" defaultValue={initial?.kodePos ?? ""} maxLength={6} className={inCls} /></div>
+
+      {/* Wilayah cascade — provinsi→kab→kec→kel + kode pos otomatis */}
+      <WilayahSelect
+        provinsiOptions={provinsiOptions}
+        defaultProvinsi={null}
+        defaultKabupaten={null}
+        defaultKecamatan={null}
+        defaultKelurahan={null}
+        defaultKodePos={initial?.kodePos}
+      />
+      {/* Fallback manual untuk kecamatan & kabupaten bila belum pilih dari dropdown */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div><label className="block text-sm font-medium text-gray-700">Kecamatan (manual)</label><input name="kecamatan" defaultValue={initial?.kecamatan ?? ""} placeholder="Dari dropdown di atas, atau isi manual" className={inCls} /></div>
+        <div><label className="block text-sm font-medium text-gray-700">Kabupaten/Kota (manual)</label><input name="kabupaten" defaultValue={initial?.kabupaten ?? ""} className={inCls} /></div>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div><label className="block text-sm font-medium text-gray-700">No. HP</label><input name="noHp" defaultValue={initial?.noHp ?? ""} className={inCls} /></div>
