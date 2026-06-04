@@ -160,7 +160,7 @@ export default async function PresensiPage({
     const totalPertemuan = dates.length; // seluruh semester termasuk masa depan
 
     return (
-      <div className="space-y-4 min-w-0 max-w-full">
+      <div className="space-y-4 w-full">
         {/* Header */}
         <div className="flex flex-wrap items-start gap-3">
           <Link href="/presensi" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">
@@ -215,9 +215,9 @@ export default async function PresensiPage({
           <span className="text-gray-400">· Klik dot untuk ganti status</span>
         </div>
 
-        {/* Attendance grid — w-full + overflow-x-auto supaya scroll horizontal */}
-        <div className="w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <table className="border-collapse text-sm" style={{ minWidth: Math.max(700, 200 + dates.length * 36), width: "max-content" }}>
+        {/* Attendance grid — overflow-x-auto scroll horizontal, tabel melebar sesuai kolom */}
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <table className="border-collapse text-sm" style={{ minWidth: Math.max(700, 200 + dates.length * 36) }}>
             <thead>
               {/* Week group headers */}
               <tr>
