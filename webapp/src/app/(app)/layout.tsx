@@ -15,6 +15,7 @@ const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
   { href: "/rombel", label: "Rombel / Kelas", key: "rombel" },
   { href: "/mapel", label: "Mata Pelajaran", key: "mapel" },
   { href: "/nilai", label: "Nilai / Rapor", key: "nilai" },
+  { href: "/nilai/entri", label: "Entri Nilai Harian", key: "nilai" },
   { href: "/p5", label: "Projek P5", key: "p5" },
   { href: "/jurnal", label: "Jurnal Mengajar", key: "jurnal" },
   { href: "/jadwal", label: "Jadwal Mengajar", key: "jadwal" },

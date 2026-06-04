@@ -47,3 +47,7 @@ export async function deleteJadwal(formData: FormData) {
   await prisma.jadwalGuru.deleteMany({ where: { id, sekolahId } });
   revalidatePath("/jadwal");
 }
+
+// Alias untuk halaman baru
+export const saveJadwal = createJadwal;
+export const deleteJadwalAction = deleteJadwal;

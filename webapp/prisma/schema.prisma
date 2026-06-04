@@ -151,6 +151,18 @@ enum StatusHasil {
   selesai
 }
 
+enum TipeNilai {
+  harian         // Ulangan/kuis harian
+  tugas          // PR / proyek / tugas
+  ulangan        // Ulangan tengah bab
+  uts            // Ujian Tengah Semester (K13)
+  uas            // Ujian Akhir Semester (K13)
+  sumatif_harian // Kurikulum Merdeka: sumatif tengah/harian
+  sumatif_akhir  // Kurikulum Merdeka: Sumatif Akhir Semester (SAS)
+  formatif       // Kurikulum Merdeka: formatif (disimpan, tidak dihitung ke rapor)
+  praktik        // Nilai praktik/keterampilan
+}
+
 // =============================================================================
 // TENANT ROOT — SEKOLAH (sekaligus profil sekolah; align NPSN/Dapodik)
 // =============================================================================
@@ -237,6 +249,9 @@ model Sekolah {
   auditLog         AuditLog[]
   prestasiMaster   PrestasiMaster[]
   beasiswaMaster   BeasiswaMaster[]
+  entriNilai       EntriNilai[]
+  komponenNilai    KomponenNilai[]
+  templatRapor     TemplatRapor[]
 
   @@map("sekolah")
 }
@@ -327,6 +342,8 @@ model Periode {
   nilaiRaporEkstra NilaiRaporEkstra[]
   raporCatatan     RaporCatatan[]
   kehadiranSiswa   KehadiranSiswa[]
+  entriNilai       EntriNilai[]
+  komponenNilai    KomponenNilai[]
 
   @@unique([tahunAjaranId, urutan])
   @@map("periode")
@@ -361,8 +378,10 @@ model Rombel {
   tahunAjaran TahunAjaran     @relation(fields: [tahunAjaranId], references: [id])
   tingkat     Tingkat         @relation(fields: [tingkatId], references: [id])
   waliGuru    Guru?           @relation("WaliKelas", fields: [waliGuruId], references: [id])
-  anggota     AnggotaRombel[]
-  nilaiRapor  NilaiRapor[]
+  anggota    AnggotaRombel[]
+  nilaiRapor NilaiRapor[]
+  entriNilai EntriNilai[]
+  jadwalGuru JadwalGuru[]    @relation("JadwalRombel")
 
   @@unique([tahunAjaranId, nama])
   @@index([sekolahId])
@@ -452,6 +471,7 @@ model Siswa {
   prestasi             PrestasiSiswa[]
   penerimaPrestasiList PenerimaPrestasi[]
   penerimaBeasiswaList PenerimaBeasiswa[]
+  entriNilai           EntriNilai[]
   kasus            KasusSiswa[]
   mutasi           MutasiSiswa[]
   nilaiRapor       NilaiRapor[]
@@ -627,7 +647,9 @@ model Mapel {
   guru       Guru?                 @relation(fields: [guruId], references: [id])
   capaian    CapaianPembelajaran[]
   nilaiRapor NilaiRapor[]
-  guruHistory MapelGuru[]
+  guruHistory    MapelGuru[]
+  entriNilai     EntriNilai[]    @relation("EntriNilaiMapel")
+  komponenNilai  KomponenNilai[] @relation("KomponenMapel")
 
   @@unique([sekolahId, kodeMapel])
   @@index([sekolahId, kelompok])
@@ -850,9 +872,10 @@ model JadwalGuru {
   jamMulai   String? @map("jam_mulai")
   jamSelesai String? @map("jam_selesai")
 
-  sekolah Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
-  guru    Guru    @relation(fields: [guruId], references: [id], onDelete: Cascade)
-  hari    Hari    @relation(fields: [hariId], references: [id])
+  sekolah Sekolah  @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  guru    Guru     @relation(fields: [guruId], references: [id], onDelete: Cascade)
+  hari    Hari     @relation(fields: [hariId], references: [id])
+  rombel  Rombel?  @relation("JadwalRombel", fields: [rombelId], references: [id])
 
   @@map("jadwal_guru")
 }
@@ -1747,4 +1770,71 @@ model PenerimaBeasiswa {
   @@unique([beasiswaId, siswaId])
   @@index([siswaId])
   @@map("penerima_beasiswa")
+}
+
+// =============================================================================
+// NILAI MENTAH + RAPOR ARCHITECTURE
+// =============================================================================
+
+/// Konfigurasi bobot per tipe nilai per sekolah/mapel/periode.
+/// Jika tidak ada record → default K13: harian+tugas=60%, UTS=20%, UAS=20%.
+model KomponenNilai {
+  id        Int       @id @default(autoincrement())
+  sekolahId Int       @map("sekolah_id")
+  mapelId   Int?      @map("mapel_id")    // null = berlaku semua mapel
+  periodeId Int?      @map("periode_id")  // null = berlaku semua periode
+  kurikulum Kurikulum @default(MERDEKA)
+  tipe      TipeNilai
+  bobot     Decimal   @db.Decimal(5, 2)   // 0.00–100.00 (%)
+
+  sekolah Sekolah  @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  mapel   Mapel?   @relation("KomponenMapel", fields: [mapelId], references: [id])
+  periode Periode? @relation(fields: [periodeId], references: [id])
+
+  @@unique([sekolahId, mapelId, periodeId, tipe])
+  @@map("komponen_nilai")
+}
+
+/// Entri nilai mentah harian/tugas/UTS/UAS — sumber data sebelum dihitung ke NilaiRapor.
+model EntriNilai {
+  id         BigInt    @id @default(autoincrement())
+  sekolahId  Int       @map("sekolah_id")
+  siswaId    Int       @map("siswa_id")
+  mapelId    Int       @map("mapel_id")
+  periodeId  Int       @map("periode_id")
+  rombelId   Int?      @map("rombel_id")
+  guruId     Int?      @map("guru_id")
+  tipe       TipeNilai
+  nilai      Decimal   @db.Decimal(5, 2)  // 0.00–100.00
+  keterangan String?                       // judul ulangan / nama tugas
+  tanggal    DateTime  @db.Date
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  sekolah Sekolah  @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  siswa   Siswa    @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  mapel   Mapel    @relation("EntriNilaiMapel", fields: [mapelId], references: [id])
+  periode Periode  @relation(fields: [periodeId], references: [id])
+  rombel  Rombel?  @relation(fields: [rombelId], references: [id])
+
+  @@index([sekolahId, periodeId])
+  @@index([siswaId, mapelId, periodeId])
+  @@map("entri_nilai")
+}
+
+// =============================================================================
+// TEMPLATE RAPOR DENGAN VERSIONING
+// =============================================================================
+
+model TemplatRapor {
+  id           Int      @id @default(autoincrement())
+  sekolahId    Int      @map("sekolah_id")
+  nama         String                            // "Template 2024 Navy-Gold"
+  versi        String                            // "v1.0", "2024/2025"
+  aktif        Boolean  @default(false)
+  konfigurasi  Json                              // { warnaPrimary, warnaAccent, fontHeading, showWatermark, showLogo, ... }
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  sekolah Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+
+  @@map("templat_rapor")
 }
