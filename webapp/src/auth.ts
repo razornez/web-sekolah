@@ -9,7 +9,10 @@ const md5 = (s: string) => createHash("md5").update(s).digest("hex");
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 7 * 24 * 60 * 60, // 7 hari (default next-auth beta bisa sangat pendek)
+  },
   pages: { signIn: "/login" },
   providers: [
     Credentials({
