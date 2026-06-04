@@ -8,6 +8,15 @@ const prisma = new PrismaClient();
 
 const HARI_DOW = { Minggu:0,Senin:1,Selasa:2,Rabu:3,Kamis:4,Jumat:5,Sabtu:6 };
 
+// UTC-safe helpers (konsisten dengan page.tsx)
+function utcMidnight(d) {
+  return new Date(Date.UTC(
+    new Date(d).getUTCFullYear(),
+    new Date(d).getUTCMonth(),
+    new Date(d).getUTCDate()
+  ));
+}
+
 // Hash deterministik (siswaId + tanggal → status)
 function hashNum(s) {
   let h = 0;
@@ -53,17 +62,16 @@ function getStatus(siswaId, dateStr) {
 function occurrenceDates(hariNama, from, to) {
   const target = HARI_DOW[hariNama] ?? 1;
   const dates = [];
-  const cur = new Date(from);
-  cur.setHours(0,0,0,0);
-  while (cur.getDay() !== target) cur.setDate(cur.getDate() + 1);
+  let cur = utcMidnight(from);                         // UTC midnight
+  while (cur.getUTCDay() !== target) cur = new Date(cur.getTime() + 86400000);
   while (cur <= to) {
-    dates.push(new Date(cur));
-    cur.setDate(cur.getDate() + 7);
+    dates.push(cur);
+    cur = new Date(cur.getTime() + 7 * 86400000);      // +7 hari UTC-safe
   }
   return dates;
 }
 
-function isoDate(d) { return d.toISOString().slice(0,10); }
+function isoDate(d) { return d.toISOString().slice(0,10); } // UTC date string
 
 async function main() {
   const sekolahId = 2; // SEKOLAH NUSANTARA
