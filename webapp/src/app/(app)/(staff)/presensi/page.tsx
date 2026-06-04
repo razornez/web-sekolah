@@ -27,48 +27,51 @@ function hashColor(s: string) {
   return MAPEL_COLORS[h % MAPEL_COLORS.length];
 }
 
-/** Monday of the given week containing `d` */
+// ─── UTC-safe date helpers ────────────────────────────────────────────────────
+// Semua operasi tanggal pakai UTC agar konsisten dengan data DB (Prisma @db.Date
+// selalu mengembalikan UTC midnight). Menghindari timezone shift di server UTC+7.
+
+/** UTC midnight untuk tanggal yang diberikan */
+function utcMidnight(d: Date): Date {
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+/** Monday (UTC midnight) dari minggu yang mengandung d */
 function getMonday(d: Date): Date {
-  const r = new Date(d);
-  const dow = r.getDay();
-  r.setDate(r.getDate() - (dow === 0 ? 6 : dow - 1));
-  r.setHours(0, 0, 0, 0);
-  return r;
+  const base = utcMidnight(d);
+  const dow = base.getUTCDay(); // 0=Sun, 1=Mon...
+  const diff = dow === 0 ? -6 : 1 - dow;
+  return new Date(base.getTime() + diff * 86400000);
 }
 
-function addDays(d: Date, n: number) {
-  const r = new Date(d);
-  r.setDate(r.getDate() + n);
-  return r;
+/** Tambah n hari (UTC-safe, 86400000ms per hari) */
+function addDays(d: Date, n: number): Date {
+  return new Date(d.getTime() + n * 86400000);
 }
 
-// Pakai komponen lokal (bukan toISOString yang UTC) agar tidak timezone shift
-function isoDate(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+/** Format "YYYY-MM-DD" dari UTC date — konsisten dengan Prisma @db.Date */
+function isoDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
 }
 
 function fmtShort(d: Date) {
+  // toLocaleDateString menggunakan local time; UTC+7 July 18 00:00Z = July 18 07:00 local ✓
   return d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
 }
 
-// Format dengan tahun untuk navigasi minggu
 function fmtWithYear(d: Date) {
   return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
-/** All dates for `hariNama` between [from, to] */
+/** Semua kemunculan hariNama (UTC midnight) antara [from, to] */
 function occurrenceDates(hariNama: string, from: Date, to: Date): Date[] {
   const target = HARI_DOW[hariNama] ?? 1;
   const dates: Date[] = [];
-  const cur = new Date(from);
-  cur.setHours(0, 0, 0, 0);
-  while (cur.getDay() !== target) cur.setDate(cur.getDate() + 1);
+  let cur = utcMidnight(from);
+  while (cur.getUTCDay() !== target) cur = new Date(cur.getTime() + 86400000);
   while (cur <= to) {
-    dates.push(new Date(cur));
-    cur.setDate(cur.getDate() + 7);
+    dates.push(cur);
+    cur = new Date(cur.getTime() + 7 * 86400000);
   }
   return dates;
 }
@@ -84,19 +87,11 @@ export default async function PresensiPage({
   const sp = await searchParams;
   const jadwalId = Number(sp.jadwalId) || 0;
 
-  // Current week
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Current week — semua UTC midnight untuk konsistensi
+  const today = utcMidnight(new Date());
   const weekParam = sp.week;
-  // Parse weekParam dengan komponen lokal untuk menghindari UTC shift
-  const monday = weekParam
-    ? (() => {
-        const [y, m, d] = weekParam.split("-").map(Number);
-        const dt = new Date(y, m - 1, d); // local midnight, tidak ada timezone issue
-        dt.setHours(0, 0, 0, 0);
-        return dt;
-      })()
-    : getMonday(today);
+  // weekParam = "YYYY-MM-DD" dari isoDate (UTC), parse langsung sebagai UTC midnight
+  const monday = weekParam ? utcMidnight(new Date(weekParam)) : getMonday(today);
   const friday = addDays(monday, 4);
   const prevMonday = isoDate(addDays(monday, -7));
   const nextMonday = isoDate(addDays(monday, 7));
