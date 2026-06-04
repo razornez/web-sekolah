@@ -64,6 +64,35 @@ export async function saveMapel(
   redirect("/mapel");
 }
 
+/** Soft deactivate — tidak hard delete */
+export async function toggleMapelAktif(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const id = Number(formData.get("id"));
+  if (!id) return;
+  const m = await prisma.mapel.findFirst({ where: { id, sekolahId }, select: { aktif: true } });
+  if (!m) return;
+  await prisma.mapel.update({ where: { id }, data: { aktif: !m.aktif } });
+  revalidatePath("/mapel");
+}
+
+/** Tambah guru ke history mapel */
+export async function addGuruMapel(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const mapelId = Number(formData.get("mapelId"));
+  const guruId = Number(formData.get("guruId"));
+  const tahunAjaran = String(formData.get("tahunAjaran") ?? "").trim() || null;
+  if (!mapelId || !guruId) return;
+  const [mapel, guru] = await Promise.all([
+    prisma.mapel.findFirst({ where: { id: mapelId, sekolahId }, select: { id: true } }),
+    prisma.guru.findFirst({ where: { id: guruId, sekolahId }, select: { id: true } }),
+  ]);
+  if (!mapel || !guru) return;
+  try {
+    await prisma.mapelGuru.create({ data: { mapelId, guruId, tahunAjaran, aktif: true } });
+  } catch { /* duplikat ok */ }
+  revalidatePath(`/mapel/${mapelId}`);
+}
+
 export async function deleteMapel(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));

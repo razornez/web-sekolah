@@ -167,7 +167,7 @@ export default async function SiswaPage({
                 <td className="px-4 py-2"><span className={`rounded px-1.5 py-0.5 text-xs ${STATUS_BADGE[s.status]??STATUS_BADGE.aktif}`}>{s.status}</span></td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <Link href={`/siswa/${s.id}`} className="text-gray-600 hover:underline">Edit</Link>
+                    <Link href={`/siswa/${s.id}`} className="text-gray-600 hover:underline">Profil</Link>
                     <Link href={`/siswa/${s.id}/delete`} className="text-red-600 hover:underline">Hapus</Link>
                   </div>
                 </td>

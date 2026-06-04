@@ -555,7 +555,8 @@ model Guru {
   ekinerja    Ekinerja[]
   skp         Skp[]
   rombelWali  Rombel[]         @relation("WaliKelas")
-  mapelDiampu Mapel[]
+  mapelDiampu  Mapel[]
+  mapelHistory MapelGuru[] @relation("GuruMapelHistory")
   ekstraDibina Ekstrakurikuler[] @relation("PembinaEkstra")
   jadwalGuru  JadwalGuru[]
   jurnalGuru  JurnalGuru[]
@@ -615,18 +616,37 @@ model Mapel {
   kodeMapel String        @map("kode_mapel")
   namaMapel String        @map("nama_mapel")
   kelompok  KelompokMapel
-  fase      Fase? // relevan utk Kurikulum Merdeka
+  fase      Fase?
   kkm       Int           @default(0)
   noUrut    Int?          @map("no_urut")
-  guruId    Int?          @map("guru_id") // guru pengampu
+  guruId    Int?          @map("guru_id") // guru pengampu utama
+  aktif     Boolean       @default(true)   // soft activate/deactivate
+  deletedAt DateTime?     @map("deleted_at")
 
   sekolah    Sekolah               @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   guru       Guru?                 @relation(fields: [guruId], references: [id])
   capaian    CapaianPembelajaran[]
   nilaiRapor NilaiRapor[]
+  guruHistory MapelGuru[]
 
   @@unique([sekolahId, kodeMapel])
+  @@index([sekolahId, kelompok])
   @@map("mapel")
+}
+
+/// History guru yang pernah/sedang mengajar mapel ini (many-to-many)
+model MapelGuru {
+  id          Int     @id @default(autoincrement())
+  mapelId     Int     @map("mapel_id")
+  guruId      Int     @map("guru_id")
+  tahunAjaran String? @map("tahun_ajaran")
+  aktif       Boolean @default(true)
+
+  mapel Mapel @relation(fields: [mapelId], references: [id], onDelete: Cascade)
+  guru  Guru  @relation("GuruMapelHistory", fields: [guruId], references: [id], onDelete: Cascade)
+
+  @@unique([mapelId, guruId, tahunAjaran])
+  @@map("mapel_guru")
 }
 
 /// Capaian Pembelajaran (CP) per mapel per fase — Kurikulum Merdeka.

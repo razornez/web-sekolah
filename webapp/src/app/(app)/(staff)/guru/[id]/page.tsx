@@ -6,6 +6,7 @@ import { AccountPanel } from "@/components/AccountPanel";
 import { FotoUpload } from "@/components/FotoUpload";
 import GuruForm from "../_components/GuruForm";
 import { nonaktifkanGuru, aktifkanKembaliGuru } from "../actions";
+import { ConfirmForm } from "@/components/ConfirmForm";
 
 const fmt = (d: Date | null) => d ? d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
@@ -177,7 +178,11 @@ export default async function EditGuruPage({ params }: { params: Promise<{ id: s
             <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
               <h2 className="mb-1 text-sm font-semibold text-red-800">⛔ Nonaktifkan Guru</h2>
               <p className="mb-3 text-xs text-red-600">Data tidak dihapus permanen. Guru bisa diaktifkan kembali kapan saja.</p>
-              <form action={nonaktifkanGuru} className="space-y-2">
+              <ConfirmForm
+                action={nonaktifkanGuru}
+                message={`Yakin nonaktifkan ${guru.namaGuru}?`}
+                className="space-y-2"
+              >
                 <input type="hidden" name="id" value={guru.id} />
                 <div>
                   <label className="block text-xs font-medium text-red-700">Alasan nonaktif *</label>
@@ -188,14 +193,10 @@ export default async function EditGuruPage({ params }: { params: Promise<{ id: s
                     className="mt-1 w-full rounded-md border border-red-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-red-500"
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800"
-                  onClick={(e) => { if (!confirm("Yakin nonaktifkan guru ini?")) e.preventDefault(); }}
-                >
+                <button type="submit" className="w-full rounded-lg bg-red-700 px-4 py-2 text-sm font-medium text-white hover:bg-red-800">
                   Nonaktifkan
                 </button>
-              </form>
+              </ConfirmForm>
             </div>
           )}
         </div>
