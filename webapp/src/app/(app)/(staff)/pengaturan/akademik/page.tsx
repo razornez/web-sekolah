@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { ConfirmForm } from "@/components/ConfirmForm";
 import {
   saveTahunAjaran, setTahunAjaranAktif, deleteTahunAjaran,
   savePeriode, setPeriodeAktif, deletePeriode,
@@ -43,7 +44,12 @@ export default async function AkademikPage() {
     where: { sekolahId },
     orderBy: { tahun: "desc" },
     include: {
-      periode: { orderBy: { urutan: "asc" } },
+      periode: {
+        orderBy: { urutan: "asc" },
+        include: {
+          _count: { select: { nilaiRapor: true, raporCatatan: true } },
+        },
+      },
       _count: { select: { rombel: true } },
     },
   });
@@ -92,32 +98,36 @@ export default async function AkademikPage() {
         <div className="space-y-4">
           {tahunList.map((ta) => (
             <div key={ta.id} className={`rounded-2xl border bg-white shadow-sm overflow-hidden ${ta.aktif ? "border-indigo-300 ring-2 ring-indigo-100" : "border-gray-200"}`}>
+
               {/* TA header */}
               <div className={`flex items-center justify-between px-5 py-3.5 ${ta.aktif ? "bg-indigo-600" : "bg-gray-50"}`}>
                 <div className="flex items-center gap-3">
                   <span className={`text-lg font-black font-mono ${ta.aktif ? "text-white" : "text-gray-900"}`}>
                     {ta.tahun}
                   </span>
-                  {ta.aktif && (
-                    <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold text-white">
-                      ★ Aktif
-                    </span>
-                  )}
-                  <span className={`text-xs ${ta.aktif ? "text-indigo-200" : "text-gray-400"}`}>
-                    {ta._count.rombel} rombel · {ta.periode.length} periode
-                  </span>
+                  {ta.aktif
+                    ? <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold text-white">★ Aktif</span>
+                    : <span className="text-xs text-gray-400">{ta._count.rombel} rombel · {ta.periode.length} periode</span>
+                  }
                 </div>
                 <div className="flex gap-2">
                   {!ta.aktif && (
-                    <form action={setTahunAjaranAktif}>
+                    <ConfirmForm
+                      action={setTahunAjaranAktif}
+                      message={`Aktifkan Tahun Ajaran ${ta.tahun}?\n\nIni akan mengubah TA aktif. Filter rombel, nilai, dan jadwal akan menggunakan TA ini sebagai default.\n\nData di TA lain tidak akan dihapus.`}
+                    >
                       <input type="hidden" name="id" value={ta.id} />
                       <button className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium hover:bg-gray-50">
-                        Aktifkan
+                        Aktifkan TA
                       </button>
-                    </form>
+                    </ConfirmForm>
                   )}
-                  {ta._count.rombel === 0 && (
-                    <ConfirmDelete action={deleteTahunAjaran} id={ta.id} message={`Hapus tahun ajaran ${ta.tahun}?`} />
+                  {ta._count.rombel === 0 && ta.periode.every(p => p._count.nilaiRapor === 0 && p._count.raporCatatan === 0) ? (
+                    <ConfirmDelete action={deleteTahunAjaran} id={ta.id} message={`Hapus tahun ajaran ${ta.tahun}? Semua periode di dalamnya ikut terhapus.`} />
+                  ) : !ta.aktif && (
+                    <span className="rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs text-gray-400" title="Ada rombel atau data nilai yang terkait">
+                      🔒 Tidak bisa dihapus
+                    </span>
                   )}
                 </div>
               </div>
@@ -133,61 +143,76 @@ export default async function AkademikPage() {
                   const meet1x = meetingCount(schoolDays, 1);
                   const meet2x = meetingCount(schoolDays, 2);
                   const hasDates = p.tanggalMulai && p.tanggalSelesai;
+                  const dataCount = p._count.nilaiRapor + p._count.raporCatatan;
+                  const bisa_hapus = dataCount === 0;
+
                   return (
-                    <div key={p.id} className={`px-5 py-4 ${p.aktif ? "bg-green-50" : "hover:bg-gray-50"}`}>
-                      <div className="flex flex-wrap items-start gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-gray-900 text-sm">{p.nama}</span>
-                            {p.aktif && (
-                              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
-                                ★ Aktif
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
-                            <span>📅 {fmt(p.tanggalMulai)} — {fmt(p.tanggalSelesai)}</span>
-                            {weeks !== null && (
-                              <span className={`font-medium ${weeks <= 18 && weeks >= 14 ? "text-green-600" : "text-amber-600"}`}>
-                                {weeks} minggu
-                              </span>
-                            )}
-                          </div>
+                    <div key={p.id} className={`px-5 py-4 ${p.aktif ? "bg-green-50 border-l-4 border-l-green-500" : ""}`}>
+                      {/* Row 1: Nama + status + aksi */}
+                      <div className="flex flex-wrap items-center gap-3 mb-3">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-semibold text-gray-900">{p.nama}</span>
+                          {p.aktif
+                            ? <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">★ Aktif</span>
+                            : null
+                          }
+                          <span className="text-xs text-gray-400">Urutan {p.urutan}</span>
                         </div>
 
-                        {/* Pertemuan info chips */}
+                        {/* Aksi — dipisah jelas dari info */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {!p.aktif && (
+                            <ConfirmForm
+                              action={setPeriodeAktif}
+                              message={`Aktifkan periode "${p.nama}" (${ta.tahun})?\n\nDampak:\n• Form entri nilai akan default ke periode ini\n• Presensi akan menggunakan rentang tanggal periode ini\n• Periode aktif sebelumnya akan dinonaktifkan\n\nData yang sudah diinput tidak akan hilang.`}
+                            >
+                              <input type="hidden" name="id" value={p.id} />
+                              <input type="hidden" name="tahunAjaranId" value={ta.id} />
+                              <button className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100">
+                                Aktifkan
+                              </button>
+                            </ConfirmForm>
+                          )}
+                          {bisa_hapus ? (
+                            <ConfirmDelete action={deletePeriode} id={p.id} message={`Hapus periode "${p.nama}"? Periode kosong, tidak ada data terkait.`} />
+                          ) : (
+                            <span className="rounded-lg border border-gray-200 bg-gray-100 px-2.5 py-1.5 text-xs text-gray-400"
+                              title={`${dataCount} data nilai/catatan terkait — tidak bisa dihapus`}>
+                              🔒 {dataCount} data
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Row 2: Tanggal + stats */}
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div className="text-xs text-gray-500">
+                          📅 {fmt(p.tanggalMulai)} — {fmt(p.tanggalSelesai)}
+                          {weeks !== null && (
+                            <span className={`ml-2 font-semibold ${weeks <= 18 && weeks >= 14 ? "text-green-600" : "text-amber-600"}`}>
+                              ({weeks} minggu)
+                            </span>
+                          )}
+                        </div>
+
                         {hasDates ? (
-                          <div className="flex flex-wrap gap-2">
-                            <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-center min-w-[70px]">
-                              <div className="text-lg font-black text-gray-900 leading-none">{schoolDays}</div>
-                              <div className="text-[10px] text-gray-400 mt-0.5">hari sekolah</div>
+                          <div className="flex gap-2 ml-auto">
+                            <div className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-center min-w-[60px]">
+                              <div className="text-base font-black text-gray-900 leading-none">{schoolDays}</div>
+                              <div className="text-[10px] text-gray-400">hari sekolah</div>
                             </div>
-                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-center min-w-[70px]">
-                              <div className="text-lg font-black text-blue-700 leading-none">{meet1x}×</div>
-                              <div className="text-[10px] text-blue-500 mt-0.5">1x/minggu</div>
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-center min-w-[60px]">
+                              <div className="text-base font-black text-blue-700 leading-none">{meet1x}×</div>
+                              <div className="text-[10px] text-blue-500">1x/minggu</div>
                             </div>
-                            <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-center min-w-[70px]">
-                              <div className="text-lg font-black text-indigo-700 leading-none">{meet2x}×</div>
-                              <div className="text-[10px] text-indigo-500 mt-0.5">2x/minggu</div>
+                            <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-center min-w-[60px]">
+                              <div className="text-base font-black text-indigo-700 leading-none">{meet2x}×</div>
+                              <div className="text-[10px] text-indigo-500">2x/minggu</div>
                             </div>
                           </div>
                         ) : (
-                          <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                            ⚠ Isi tanggal mulai & selesai<br/>untuk hitung pertemuan
-                          </div>
+                          <span className="ml-auto text-xs text-amber-600">⚠ Isi tanggal untuk hitung pertemuan</span>
                         )}
-                        <div className="flex items-center gap-2 shrink-0">
-                          {!p.aktif && (
-                            <form action={setPeriodeAktif}>
-                              <input type="hidden" name="id" value={p.id} />
-                              <input type="hidden" name="tahunAjaranId" value={ta.id} />
-                              <button className="rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-xs hover:bg-gray-50">
-                                Aktifkan
-                              </button>
-                            </form>
-                          )}
-                          <ConfirmDelete action={deletePeriode} id={p.id} message={`Hapus periode "${p.nama}"?`} />
-                        </div>
                       </div>
                     </div>
                   );
@@ -209,8 +234,7 @@ export default async function AkademikPage() {
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-500 mb-1">Urutan</label>
-                      <input name="urutan" type="number" min={1} defaultValue={ta.periode.length + 1}
-                        className={`${inCls} w-16`} />
+                      <input name="urutan" type="number" min={1} defaultValue={ta.periode.length + 1} className={`${inCls} w-16`} />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-500 mb-1">Tanggal Mulai</label>
