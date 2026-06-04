@@ -126,6 +126,8 @@ export const pendaftaranPpdbSchema = z.object({
   tanggalLahir: optStr,
   asalSekolah: optStr,
   noHp: optStr,
+  alamat: optStr,
+  tahunAjaran: optStr,
 });
 
 export const kategoriSarprasSchema = z.object({

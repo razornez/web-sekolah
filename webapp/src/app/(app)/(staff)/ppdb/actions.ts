@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { getCurrentUser } from "@/lib/session";
-import { jalurPpdbSchema } from "@/lib/validations";
+import { jalurPpdbSchema, pendaftaranPpdbSchema } from "@/lib/validations";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_TYPES = [
@@ -44,6 +44,34 @@ export async function deleteJalur(formData: FormData) {
 }
 
 // ---- Pendaftar -----------------------------------------------------------
+export type PendaftarFormState = { ok: boolean; message?: string; errors?: Record<string, string[] | undefined> };
+
+export async function createPendaftar(
+  _prev: PendaftarFormState,
+  formData: FormData,
+): Promise<PendaftarFormState> {
+  const sekolahId = await requireStaff();
+  const parsed = pendaftaranPpdbSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { ok: false, errors: parsed.error.flatten().fieldErrors };
+
+  const { tanggalLahir, ...rest } = parsed.data;
+  const pendaftaran = await prisma.pendaftaranPpdb.create({
+    data: {
+      ...rest,
+      sekolahId,
+      tanggalLahir: tanggalLahir ? new Date(tanggalLahir) : null,
+      status: "baru",
+    },
+  });
+
+  // Catat status awal ke riwayat
+  await prisma.riwayatStatusPpdb.create({
+    data: { pendaftaranId: pendaftaran.id, status: "baru", catatan: "Pendaftar baru ditambahkan oleh staf" },
+  });
+
+  revalidatePath("/ppdb");
+  return { ok: true, message: String(pendaftaran.id) };
+}
 const VALID: StatusPpdb[] = [
   StatusPpdb.baru,
   StatusPpdb.verifikasi,

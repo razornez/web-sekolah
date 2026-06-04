@@ -134,6 +134,10 @@ export default async function PpdbPage({
           </p>
         </div>
         <div className="flex gap-2">
+          <Link href="/ppdb/new" className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            Tambah Pendaftar
+          </Link>
           <Link href="/ppdb/jalur" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">Kelola Jalur</Link>
           <Link href={showArsip ? "/ppdb" : "/ppdb?arsip=1"}
             className={`rounded-lg border px-3 py-2 text-sm ${showArsip ? "border-red-300 bg-red-50 text-red-700" : "border-gray-300 hover:bg-gray-50"}`}>
