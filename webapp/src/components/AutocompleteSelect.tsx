@@ -19,16 +19,18 @@ export function AutocompleteSelect({
   required = false,
   className = "w-full rounded-lg border border-gray-300 py-1.5 pl-3 pr-8 text-sm outline-none focus:border-gray-900",
   emptyLabel = "— tidak ada —",
+  onChange,
 }: {
   options: ACOption[];
-  name?: string;          // nama hidden input (id/value)
-  hiddenName?: string;    // alias untuk name
+  name?: string;
+  hiddenName?: string;
   placeholder?: string;
   defaultValue?: string | number;
   defaultLabel?: string;
   required?: boolean;
   className?: string;
   emptyLabel?: string;
+  onChange?: (value: string) => void;
 }) {
   const fieldName = hiddenName ?? name ?? "id";
   const id = useId();
@@ -72,12 +74,14 @@ export function AutocompleteSelect({
     setSelected(String(o.value));
     setQuery(o.label);
     setOpen(false);
+    onChange?.(String(o.value));
   };
 
   const handleClear = () => {
     setSelected("");
     setQuery("");
     setOpen(false);
+    onChange?.("");
   };
 
   return (

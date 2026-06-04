@@ -3,6 +3,7 @@
 import { useActionState, useState, useEffect } from "react";
 import Link from "next/link";
 import { saveRombel, type RombelFormState } from "../actions";
+import { AutocompleteSelect } from "@/components/AutocompleteSelect";
 import type { GuruOption } from "../options";
 
 export type Option = { id: number; label: string; aktif?: boolean };
@@ -235,17 +236,19 @@ export default function RombelForm({
         {/* Wali Kelas */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Wali Kelas</label>
-          <select
+          <AutocompleteSelect
+            options={guruList.map((g) => ({
+              key: g.id, value: g.id, label: g.namaGuru,
+              sub: [g.jenisJabatan, g.statusGuru].filter(Boolean).join(" · ") || undefined,
+            }))}
             name="waliGuruId"
-            value={waliId}
-            onChange={(e) => setWaliId(e.target.value)}
+            defaultValue={initial?.waliGuruId ?? ""}
+            defaultLabel={guruList.find((g) => g.id === initial?.waliGuruId)?.namaGuru ?? ""}
+            placeholder="Cari nama guru…"
+            emptyLabel="— tidak ada —"
             className={inputCls}
-          >
-            <option value="">— tidak ada —</option>
-            {guruList.map((g) => (
-              <option key={g.id} value={g.id}>{g.namaGuru}</option>
-            ))}
-          </select>
+            onChange={(val) => setWaliId(val)}
+          />
 
           {/* Summary card */}
           {selectedGuru && <GuruSummaryCard guru={selectedGuru} />}

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import MapelForm from "../_components/MapelForm";
+import { GuruSelect } from "@/components/filters/GuruSelect";
+import type { ACOption } from "@/components/AutocompleteSelect";
 import { addGuruMapel } from "../actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1.5 text-sm outline-none focus:border-gray-900";
@@ -11,7 +13,7 @@ export default async function EditMapelPage({ params }: { params: Promise<{ id: 
   const sekolahId = await requireModule("mapel");
   const { id } = await params;
 
-  const [mapel, guru] = await Promise.all([
+  const [mapel, guruList] = await Promise.all([
     prisma.mapel.findFirst({
       where: { id: Number(id), sekolahId },
       include: {
@@ -22,9 +24,13 @@ export default async function EditMapelPage({ params }: { params: Promise<{ id: 
         _count: { select: { nilaiRapor: true } },
       },
     }),
-    prisma.guru.findMany({ where: { sekolahId, deletedAt: null }, orderBy: { namaGuru: "asc" }, select: { id: true, namaGuru: true, statusGuru: true } }),
+    prisma.guru.findMany({ where: { sekolahId, deletedAt: null }, orderBy: { namaGuru: "asc" }, select: { id: true, namaGuru: true, jenisJabatan: true } }),
   ]);
   if (!mapel) notFound();
+
+  const guruOptions: ACOption[] = guruList.map((g) => ({
+    key: g.id, value: g.id, label: g.namaGuru, sub: g.jenisJabatan ?? undefined,
+  }));
 
   const tahunList = await prisma.tahunAjaran.findMany({ where: { sekolahId }, orderBy: { tahun: "desc" }, select: { tahun: true } });
 
@@ -51,7 +57,7 @@ export default async function EditMapelPage({ params }: { params: Promise<{ id: 
         <div className="lg:col-span-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-gray-700">✏️ Edit Data Mapel</h2>
           <MapelForm
-            guruOptions={guru.map((g) => ({ id: g.id, label: `${g.namaGuru}${g.statusGuru ? ` (${g.statusGuru})` : ""}` }))}
+            guruOptions={guruOptions}
             initial={{
               id: mapel.id,
               namaMapel: mapel.namaMapel,
@@ -102,10 +108,7 @@ export default async function EditMapelPage({ params }: { params: Promise<{ id: 
               <input type="hidden" name="mapelId" value={mapel.id} />
               <div>
                 <label className="block text-xs text-gray-500">Guru</label>
-                <select name="guruId" required defaultValue="" className={`${inCls} w-full`}>
-                  <option value="">— pilih guru —</option>
-                  {guru.map((g) => <option key={g.id} value={g.id}>{g.namaGuru} ({g.statusGuru ?? "—"})</option>)}
-                </select>
+                <GuruSelect sekolahId={sekolahId} name="guruId" required emptyLabel="— pilih guru —" className={`${inCls} w-full`} />
               </div>
               <div>
                 <label className="block text-xs text-gray-500">Tahun Ajaran</label>

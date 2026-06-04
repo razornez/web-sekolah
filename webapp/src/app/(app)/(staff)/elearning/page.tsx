@@ -1,16 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { GuruSelect } from "@/components/filters/GuruSelect";
 import { createElearning, deleteElearning } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
 export default async function ElearningPage() {
   const sekolahId = await requireStaff();
-  const [rows, guru] = await Promise.all([
-    prisma.elearning.findMany({ where: { sekolahId }, orderBy: { createdAt: "desc" }, take: 100 }),
-    prisma.guru.findMany({ where: { sekolahId }, orderBy: { namaGuru: "asc" }, select: { id: true, namaGuru: true } }),
-  ]);
+  const rows = await prisma.elearning.findMany({ where: { sekolahId }, orderBy: { createdAt: "desc" }, take: 100 });
 
   return (
     <div className="space-y-4">
@@ -20,10 +18,7 @@ export default async function ElearningPage() {
         <div><label className="block text-xs text-gray-500">Judul</label><input name="judul" required className={inCls} /></div>
         <div>
           <label className="block text-xs text-gray-500">Guru</label>
-          <select name="guruId" defaultValue="" className={inCls}>
-            <option value="">-</option>
-            {guru.map((g) => <option key={g.id} value={g.id}>{g.namaGuru}</option>)}
-          </select>
+          <GuruSelect sekolahId={sekolahId} name="guruId" emptyLabel="— tidak ada —" className={inCls} />
         </div>
         <div><label className="block text-xs text-gray-500">Kelas</label><input name="kelas" className={`${inCls} w-24`} /></div>
         <div><label className="block text-xs text-gray-500">Mapel</label><input name="mapel" className={inCls} /></div>

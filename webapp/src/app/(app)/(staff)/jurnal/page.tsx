@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { GuruSelect } from "@/components/filters/GuruSelect";
 import { createJurnal, deleteJurnal } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
@@ -8,15 +9,12 @@ const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: 
 
 export default async function JurnalPage() {
   const sekolahId = await requireStaff();
-  const [rows, guru] = await Promise.all([
-    prisma.jurnalGuru.findMany({
-      where: { sekolahId },
-      orderBy: { tanggal: "desc" },
-      take: 100,
-      include: { guru: { select: { namaGuru: true } } },
-    }),
-    prisma.guru.findMany({ where: { sekolahId }, orderBy: { namaGuru: "asc" }, select: { id: true, namaGuru: true } }),
-  ]);
+  const rows = await prisma.jurnalGuru.findMany({
+    where: { sekolahId },
+    orderBy: { tanggal: "desc" },
+    take: 100,
+    include: { guru: { select: { namaGuru: true } } },
+  });
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -25,11 +23,8 @@ export default async function JurnalPage() {
 
       <form action={createJurnal} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-white p-4">
         <div>
-          <label className="block text-xs text-gray-500">Guru</label>
-          <select name="guruId" required defaultValue="" className={inCls}>
-            <option value="">- pilih -</option>
-            {guru.map((g) => <option key={g.id} value={g.id}>{g.namaGuru}</option>)}
-          </select>
+          <label className="block text-xs text-gray-500">Guru *</label>
+          <GuruSelect sekolahId={sekolahId} name="guruId" required emptyLabel="— pilih guru —" className={inCls} />
         </div>
         <div><label className="block text-xs text-gray-500">Tanggal</label><input type="date" name="tanggal" defaultValue={today} className={inCls} /></div>
         <div><label className="block text-xs text-gray-500">Kelas</label><input name="kelas" className={`${inCls} w-24`} /></div>

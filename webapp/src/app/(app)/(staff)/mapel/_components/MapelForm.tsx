@@ -3,8 +3,8 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { saveMapel, type MapelFormState } from "../actions";
+import { AutocompleteSelect, type ACOption } from "@/components/AutocompleteSelect";
 
-export type Option = { id: number; label: string };
 export type MapelInitial = {
   id?: number;
   namaMapel?: string;
@@ -34,10 +34,10 @@ function autoKode(nama: string): string {
 
 export default function MapelForm({
   initial,
-  guruOptions,
+  guruOptions = [],
 }: {
   initial?: MapelInitial;
-  guruOptions: Option[];
+  guruOptions?: ACOption[];
 }) {
   const [state, formAction, pending] = useActionState<MapelFormState, FormData>(saveMapel, { ok: false });
   const e = state.errors ?? {};
@@ -107,12 +107,15 @@ export default function MapelForm({
 
       <div>
         <label className="block text-sm font-medium text-gray-700">Guru Pengampu Utama</label>
-        <select name="guruId" defaultValue={initial?.guruId ?? ""} className={inputCls}>
-          <option value="">- tidak ada -</option>
-          {guruOptions.map((o) => (
-            <option key={o.id} value={o.id}>{o.label}</option>
-          ))}
-        </select>
+        <AutocompleteSelect
+          options={guruOptions}
+          name="guruId"
+          defaultValue={initial?.guruId ?? ""}
+          defaultLabel={guruOptions.find((o) => String(o.value) === String(initial?.guruId))?.label ?? ""}
+          placeholder="Cari nama guru…"
+          emptyLabel="— tidak ada —"
+          className={inputCls}
+        />
       </div>
 
       <div className="flex items-center gap-3">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
+import { GuruSelect } from "@/components/filters/GuruSelect";
 import { PageGuide } from "@/components/PageGuide";
 import { deleteJadwalAction } from "./actions";
 import { TambahJadwalForm } from "./_components/TambahJadwalForm";
@@ -62,10 +63,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
       <form className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <input type="hidden" name="mode" value={mode} />
         <div><label className="mb-1 block text-xs font-medium text-gray-500">Guru</label>
-          <select name="guruId" defaultValue={fGuru||""} className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[200px]">
-            <option value="">— Semua Guru —</option>
-            {guruList.map((g) => <option key={g.id} value={g.id}>{g.namaGuru}</option>)}
-          </select></div>
+          <GuruSelect sekolahId={sekolahId} name="guruId" defaultValue={fGuru||""} emptyLabel="— Semua Guru —" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[220px]" /></div>
         <div><label className="mb-1 block text-xs font-medium text-gray-500">Kelas / Rombel</label>
           <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={fRombel||""} className="rounded-md border border-gray-300 px-2 py-1.5 text-sm" /></div>
         <button className="rounded-md bg-gray-900 px-4 py-1.5 text-sm font-semibold text-white hover:bg-gray-800">Filter</button>
