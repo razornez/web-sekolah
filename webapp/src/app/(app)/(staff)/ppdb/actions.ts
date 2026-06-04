@@ -1,11 +1,21 @@
 "use server";
 
+import path from "path";
+import { mkdir, writeFile } from "fs/promises";
 import { StatusPpdb, JenisDokumenPpdb } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { getCurrentUser } from "@/lib/session";
 import { jalurPpdbSchema } from "@/lib/validations";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_TYPES = [
+  "application/pdf",
+  "image/jpeg","image/png","image/webp","image/gif",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
 
 // ---- Jalur PPDB ----------------------------------------------------------
 export async function createJalur(formData: FormData) {
@@ -91,15 +101,36 @@ export async function addDokumen(formData: FormData) {
   const sekolahId = await requireStaff();
   const pendaftaranId = Number(formData.get("pendaftaranId"));
   const jenis = (formData.get("jenis") as JenisDokumenPpdb | null) ?? "lainnya";
-  const nama = (formData.get("nama") as string | null)?.trim() ?? "";
-  const url = (formData.get("url") as string | null)?.trim() || null;
   const keterangan = (formData.get("keterangan") as string | null)?.trim() || null;
+  const urlManual = (formData.get("url") as string | null)?.trim() || null;
+  const file = formData.get("file") as File | null;
 
-  if (!pendaftaranId || !nama) return;
+  if (!pendaftaranId) return;
   if (!VALID_JENIS.includes(jenis)) return;
 
   const existing = await prisma.pendaftaranPpdb.findFirst({ where: { id: pendaftaranId, sekolahId }, select: { id: true } });
   if (!existing) return;
+
+  let url = urlManual;
+  let nama = (formData.get("nama") as string | null)?.trim() || "";
+
+  // Handle file upload
+  if (file && file.size > 0) {
+    if (file.size > MAX_FILE_SIZE) return; // 10MB limit
+    if (!ALLOWED_TYPES.includes(file.type)) return;
+
+    const uploadDir = path.join(process.cwd(), "public", "uploads", "ppdb", String(sekolahId), String(pendaftaranId));
+    await mkdir(uploadDir, { recursive: true });
+
+    const ext = path.extname(file.name) || "";
+    const slug = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+    await writeFile(path.join(uploadDir, slug), Buffer.from(await file.arrayBuffer()));
+
+    url = `/uploads/ppdb/${sekolahId}/${pendaftaranId}/${slug}`;
+    if (!nama) nama = file.name; // auto-fill nama dari filename
+  }
+
+  if (!nama) return;
 
   await prisma.dokumenPpdb.create({ data: { sekolahId, pendaftaranId, jenis, nama, url, keterangan } });
   revalidatePath(`/ppdb/${pendaftaranId}`);
