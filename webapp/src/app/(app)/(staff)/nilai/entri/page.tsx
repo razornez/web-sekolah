@@ -30,7 +30,7 @@ export default async function EntriNilaiPage({
   const mapelId = Number(sp.mapelId) || 0;
   const tipe = sp.tipe ?? "harian";
 
-  const ready = rombelId && periodeId && mapelId;
+  const ready = rombelId > 0 && periodeId > 0 && mapelId > 0;
 
   // Load existing entri for this combination
   let anggota: {

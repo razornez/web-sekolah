@@ -27,7 +27,7 @@ export default async function NilaiPage({
       ? sp.kurikulum
       : (sekolah?.kurikulumDefault ?? "MERDEKA");
 
-  const ready = rombelId && periodeId && mapelId;
+  const ready = rombelId > 0 && periodeId > 0 && mapelId > 0;
 
   let anggota: {
     siswaId: number;

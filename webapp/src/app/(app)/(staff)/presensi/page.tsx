@@ -57,7 +57,7 @@ export default async function PresensiPage({
 
       {!rombelId && <p className="text-sm text-gray-500">Pilih rombel dan tanggal untuk input presensi.</p>}
 
-      {rombelId && (
+      {rombelId > 0 && (
         <form action={savePresensi} className="space-y-3">
           <input type="hidden" name="rombelId" value={rombelId} />
           <input type="hidden" name="tanggal" value={tanggal} />
