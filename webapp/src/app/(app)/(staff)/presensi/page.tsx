@@ -106,19 +106,33 @@ export default async function PresensiPage({
       include: { siswa: { select: { id: true, namaLengkap: true } } },
     });
 
-    // Semester start from active tahun ajaran
-    const ta = await prisma.tahunAjaran.findFirst({
-      where: { sekolahId, aktif: true },
-      select: { tahun: true },
+    // Semester boundaries dari Periode aktif
+    const periodeAktif = await prisma.periode.findFirst({
+      where: { aktif: true, tahunAjaran: { sekolahId } },
+      select: { tanggalMulai: true, tanggalSelesai: true, nama: true },
     });
-    const startYear = ta ? parseInt(ta.tahun.slice(0, 4)) : today.getFullYear() - (today.getMonth() < 6 ? 1 : 0);
-    const semStart = new Date(startYear, 6, 14); // July 14
-    // 1 semester = 16 minggu, tapi tidak melebihi minggu depan
-    const semMax = addDays(semStart, 16 * 7);
-    const semEnd = semMax < addDays(today, 7) ? semMax : addDays(today, 7);
 
-    // All occurrence dates for this jadwal's day (max 16)
-    const dates = occurrenceDates(jadwal.hari.nama, semStart, semEnd).slice(0, 16);
+    let semStart: Date;
+    let semEnd: Date;
+
+    if (periodeAktif?.tanggalMulai && periodeAktif?.tanggalSelesai) {
+      semStart = periodeAktif.tanggalMulai;
+      // Tidak melebihi hari ini + 7 hari
+      semEnd = periodeAktif.tanggalSelesai < addDays(today, 7)
+        ? periodeAktif.tanggalSelesai
+        : addDays(today, 7);
+    } else {
+      // Fallback: Juli 14 tahun aktif + 16 minggu
+      const ta = await prisma.tahunAjaran.findFirst({ where: { sekolahId, aktif: true }, select: { tahun: true } });
+      const yr = ta ? parseInt(ta.tahun.slice(0, 4)) : today.getFullYear() - (today.getMonth() < 6 ? 1 : 0);
+      semStart = new Date(yr, 6, 14);
+      semEnd = addDays(semStart, 16 * 7) < addDays(today, 7)
+        ? addDays(semStart, 16 * 7)
+        : addDays(today, 7);
+    }
+
+    // Semua tanggal kemunculan jadwal ini dalam 1 semester
+    const dates = occurrenceDates(jadwal.hari.nama, semStart, semEnd);
 
     // Current week's Monday for highlight
     const thisMonday = getMonday(today);
