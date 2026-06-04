@@ -113,10 +113,12 @@ export default async function PresensiPage({
     });
     const startYear = ta ? parseInt(ta.tahun.slice(0, 4)) : today.getFullYear() - (today.getMonth() < 6 ? 1 : 0);
     const semStart = new Date(startYear, 6, 14); // July 14
-    const semEnd = addDays(today, 7);
+    // 1 semester = 16 minggu, tapi tidak melebihi minggu depan
+    const semMax = addDays(semStart, 16 * 7);
+    const semEnd = semMax < addDays(today, 7) ? semMax : addDays(today, 7);
 
-    // All occurrence dates for this jadwal's day
-    const dates = occurrenceDates(jadwal.hari.nama, semStart, semEnd);
+    // All occurrence dates for this jadwal's day (max 16)
+    const dates = occurrenceDates(jadwal.hari.nama, semStart, semEnd).slice(0, 16);
 
     // Current week's Monday for highlight
     const thisMonday = getMonday(today);
