@@ -15,6 +15,27 @@ function weeksBetween(a: Date | null, b: Date | null): number | null {
   return Math.round((b.getTime() - a.getTime()) / (7 * 86400000));
 }
 
+/** Hitung hari sekolah (Senin–Jumat) dalam rentang [from, to] */
+function countSchoolDays(from: Date | null, to: Date | null): number {
+  if (!from || !to) return 0;
+  let count = 0;
+  const cur = new Date(from);
+  cur.setHours(0, 0, 0, 0);
+  const end = new Date(to);
+  end.setHours(23, 59, 59, 999);
+  while (cur <= end) {
+    const dow = cur.getDay();
+    if (dow >= 1 && dow <= 5) count++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
+}
+
+/** Pertemuan per jadwal berdasarkan frekuensi */
+function meetingCount(schoolDays: number, freqPerWeek: number): number {
+  return Math.round((schoolDays / 5) * freqPerWeek);
+}
+
 export default async function AkademikPage() {
   const sekolahId = await requireModule("pengaturan");
 
@@ -108,38 +129,65 @@ export default async function AkademikPage() {
                 )}
                 {ta.periode.map((p) => {
                   const weeks = weeksBetween(p.tanggalMulai, p.tanggalSelesai);
+                  const schoolDays = countSchoolDays(p.tanggalMulai, p.tanggalSelesai);
+                  const meet1x = meetingCount(schoolDays, 1);
+                  const meet2x = meetingCount(schoolDays, 2);
+                  const hasDates = p.tanggalMulai && p.tanggalSelesai;
                   return (
-                    <div key={p.id} className={`flex flex-wrap items-center gap-4 px-5 py-3 ${p.aktif ? "bg-green-50" : "hover:bg-gray-50"}`}>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-gray-900 text-sm">{p.nama}</span>
-                          {p.aktif && (
-                            <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
-                              ★ Aktif
-                            </span>
-                          )}
+                    <div key={p.id} className={`px-5 py-4 ${p.aktif ? "bg-green-50" : "hover:bg-gray-50"}`}>
+                      <div className="flex flex-wrap items-start gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-900 text-sm">{p.nama}</span>
+                            {p.aktif && (
+                              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">
+                                ★ Aktif
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                            <span>📅 {fmt(p.tanggalMulai)} — {fmt(p.tanggalSelesai)}</span>
+                            {weeks !== null && (
+                              <span className={`font-medium ${weeks <= 18 && weeks >= 14 ? "text-green-600" : "text-amber-600"}`}>
+                                {weeks} minggu
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-3 mt-0.5 text-xs text-gray-500">
-                          <span>📅 {fmt(p.tanggalMulai)} — {fmt(p.tanggalSelesai)}</span>
-                          {weeks !== null && (
-                            <span className={`font-medium ${weeks <= 18 && weeks >= 14 ? "text-green-600" : "text-amber-600"}`}>
-                              {weeks} minggu efektif
-                            </span>
-                          )}
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        {!p.aktif && (
-                          <form action={setPeriodeAktif}>
-                            <input type="hidden" name="id" value={p.id} />
-                            <input type="hidden" name="tahunAjaranId" value={ta.id} />
-                            <button className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs hover:bg-white">
-                              Aktifkan
-                            </button>
-                          </form>
+                        {/* Pertemuan info chips */}
+                        {hasDates ? (
+                          <div className="flex flex-wrap gap-2">
+                            <div className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-center min-w-[70px]">
+                              <div className="text-lg font-black text-gray-900 leading-none">{schoolDays}</div>
+                              <div className="text-[10px] text-gray-400 mt-0.5">hari sekolah</div>
+                            </div>
+                            <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-center min-w-[70px]">
+                              <div className="text-lg font-black text-blue-700 leading-none">{meet1x}×</div>
+                              <div className="text-[10px] text-blue-500 mt-0.5">1x/minggu</div>
+                            </div>
+                            <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-center min-w-[70px]">
+                              <div className="text-lg font-black text-indigo-700 leading-none">{meet2x}×</div>
+                              <div className="text-[10px] text-indigo-500 mt-0.5">2x/minggu</div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                            ⚠ Isi tanggal mulai & selesai<br/>untuk hitung pertemuan
+                          </div>
                         )}
-                        <ConfirmDelete action={deletePeriode} id={p.id} message={`Hapus periode "${p.nama}"?`} />
+                        <div className="flex items-center gap-2 shrink-0">
+                          {!p.aktif && (
+                            <form action={setPeriodeAktif}>
+                              <input type="hidden" name="id" value={p.id} />
+                              <input type="hidden" name="tahunAjaranId" value={ta.id} />
+                              <button className="rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-xs hover:bg-gray-50">
+                                Aktifkan
+                              </button>
+                            </form>
+                          )}
+                          <ConfirmDelete action={deletePeriode} id={p.id} message={`Hapus periode "${p.nama}"?`} />
+                        </div>
                       </div>
                     </div>
                   );
