@@ -219,20 +219,16 @@ export default async function AkademikPage() {
                           </span>
                         )}
 
-                        {/* Pertemuan chips */}
+                        {/* Pertemuan info */}
                         {hasDates && (
                           <div className="flex gap-1.5 ml-auto">
-                            <div className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-center min-w-[56px]">
+                            <div className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-center min-w-[64px]">
                               <div className="text-sm font-black text-gray-900 leading-none">{schoolDays}</div>
-                              <div className="text-[10px] text-gray-400">hari</div>
+                              <div className="text-[10px] text-gray-400">hari sekolah</div>
                             </div>
-                            <div className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-center min-w-[56px]">
-                              <div className="text-sm font-black text-blue-700 leading-none">{meet1x}×</div>
-                              <div className="text-[10px] text-blue-500">1x/mgg</div>
-                            </div>
-                            <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-center min-w-[56px]">
-                              <div className="text-sm font-black text-indigo-700 leading-none">{meet2x}×</div>
-                              <div className="text-[10px] text-indigo-500">2x/mgg</div>
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-center min-w-[64px]" title="Pertemuan per mapel jika jadwal 1x seminggu">
+                              <div className="text-sm font-black text-blue-700 leading-none">{meet1x}</div>
+                              <div className="text-[10px] text-blue-500">pertemuan</div>
                             </div>
                           </div>
                         )}

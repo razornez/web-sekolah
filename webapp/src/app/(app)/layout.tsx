@@ -104,7 +104,7 @@ export default async function AppLayout({
           </form>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto p-6">{children}</main>
+      <main className="flex-1 overflow-auto min-w-0 p-6">{children}</main>
     </div>
   );
 }
