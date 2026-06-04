@@ -187,7 +187,15 @@ export default async function PresensiPage({
             </div>
             <p className="mt-1 text-xs text-gray-500">
               {anggota.length} siswa ·{" "}
-              <span className="font-semibold text-gray-700">{totalPertemuan} pertemuan semester</span>
+              <span className="font-semibold text-gray-700">{totalPertemuan} pertemuan</span>
+              {" "}·{" "}
+              {dates[0] && (
+                <span>
+                  {dates[0].toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                  {" "}–{" "}
+                  {dates[dates.length - 1]?.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+              )}
               {" "}({pastDates.length} sudah berlalu · {totalPertemuan - pastDates.length} akan datang)
             </p>
           </div>
@@ -231,54 +239,59 @@ export default async function PresensiPage({
         <div className="w-fit max-w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
           <table className="border-collapse text-sm" style={{ minWidth: Math.max(700, 200 + dates.length * 36) }}>
             <thead>
-              {/* Week group headers */}
+              {/* Baris 1: Group by BULAN — jauh lebih jelas dari group-by-minggu */}
               <tr>
-                <th className="sticky left-0 z-20 border-b border-r border-gray-200 bg-gray-50 px-4 py-2 text-left text-xs font-semibold text-gray-600 min-w-[180px]">
+                <th className="sticky left-0 z-20 border-b border-r border-gray-200 bg-gray-900 px-4 py-2.5 text-left text-xs font-semibold text-white min-w-[200px]">
                   Siswa
                 </th>
                 {(() => {
-                  // Group dates by week
-                  const groups: { weekLabel: string; count: number; isCurrentWeek: boolean }[] = [];
-                  let curWeek = "";
+                  const groups: { label: string; count: number; hasThisWeek: boolean }[] = [];
+                  let curKey = "";
                   for (const d of dates) {
-                    const wMon = getMonday(d);
-                    const wKey = isoDate(wMon);
+                    // Key = "YYYY-MM" (bulan + tahun)
+                    const key = isoDate(d).slice(0, 7);
                     const isCur = d >= thisMonday && d <= thisFriday;
-                    if (wKey !== curWeek) {
-                      curWeek = wKey;
-                      groups.push({ weekLabel: `${fmtShort(wMon)}`, count: 1, isCurrentWeek: isCur });
+                    if (key !== curKey) {
+                      curKey = key;
+                      const monthLabel = d.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+                      groups.push({ label: monthLabel, count: 1, hasThisWeek: isCur });
                     } else {
                       groups[groups.length - 1].count++;
-                      if (isCur) groups[groups.length - 1].isCurrentWeek = true;
+                      if (isCur) groups[groups.length - 1].hasThisWeek = true;
                     }
                   }
                   return groups.map((g, i) => (
                     <th key={i} colSpan={g.count}
-                      className={`border-b border-r border-gray-200 px-1 py-1.5 text-center text-[10px] font-semibold whitespace-nowrap ${
-                        g.isCurrentWeek ? "bg-indigo-600 text-white" : "bg-gray-50 text-gray-500"
+                      className={`border-b border-r border-gray-200 px-2 py-1.5 text-center text-[10px] font-bold whitespace-nowrap ${
+                        g.hasThisWeek ? "bg-indigo-600 text-white" : "bg-gray-800 text-gray-300"
                       }`}>
-                      {g.isCurrentWeek ? "⭐ " : ""}{g.weekLabel}
+                      {g.label}
                     </th>
                   ));
                 })()}
               </tr>
-              {/* Date headers */}
+              {/* Baris 2: Tanggal sebenarnya dari jadwal (mis. Kam 18) */}
               <tr>
-                <th className="sticky left-0 z-20 border-b border-r border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-500 font-medium" />
+                <th className="sticky left-0 z-20 border-b border-r border-gray-200 bg-gray-800 px-4 py-1.5 text-[10px] text-gray-400 font-medium text-left">
+                  No · Nama
+                </th>
                 {dates.map((d) => {
                   const isToday = isoDate(d) === isoDate(today);
                   const isThisWeek = d >= thisMonday && d <= thisFriday;
                   const isFuture = d > today;
+                  const dayName = d.toLocaleDateString("id-ID", { weekday: "short" }).slice(0, 3);
                   return (
                     <th key={isoDate(d)}
-                      className={`border-b border-r border-gray-100 py-1.5 px-0.5 text-center text-[10px] font-medium whitespace-nowrap ${
-                        isToday ? "bg-indigo-100 text-indigo-700 font-bold" :
-                        isThisWeek ? "bg-indigo-50 text-indigo-600" :
-                        isFuture ? "text-gray-300" : "text-gray-500"
+                      className={`border-b border-r border-gray-700 py-1.5 px-0.5 text-center text-[10px] font-medium whitespace-nowrap ${
+                        isToday ? "bg-indigo-500 text-white font-bold" :
+                        isThisWeek ? "bg-indigo-700 text-indigo-100" :
+                        isFuture ? "bg-gray-700 text-gray-500" : "bg-gray-800 text-gray-300"
                       }`}
-                      style={{ width: 36 }}>
-                      <div>{d.toLocaleDateString("id-ID", { weekday: "short" }).slice(0,3)}</div>
-                      <div className="font-bold">{d.getDate()}</div>
+                      style={{ width: 36 }}
+                      title={d.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                    >
+                      <div className="text-[9px] opacity-70">{dayName}</div>
+                      <div className="font-bold text-[11px]">{d.getUTCDate()}</div>
                     </th>
                   );
                 })}
