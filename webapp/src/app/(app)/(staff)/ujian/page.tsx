@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 import { createUjian, deleteUjian } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
@@ -31,10 +32,7 @@ export default async function UjianPage() {
         <div><label className="block text-xs text-gray-500">Mapel</label><input name="mapel" className={inCls} /></div>
         <div>
           <label className="block text-xs text-gray-500">Rombel</label>
-          <select name="rombelId" defaultValue="" className={inCls}>
-            <option value="">- semua -</option>
-            {rombel.map((r) => <option key={r.id} value={r.id}>{r.nama}</option>)}
-          </select>
+          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" emptyLabel="- semua -" className={inCls} />
         </div>
         <div><label className="block text-xs text-gray-500">Durasi (menit)</label><input name="durasiMenit" type="number" min={1} className={`${inCls} w-28`} /></div>
         <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Buat</button>

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { saveKelulusan, saveSettingKelulusan } from "./actions";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 
 const selCls = "rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";
 
@@ -12,9 +13,8 @@ export default async function KelulusanPage({
   const sekolahId = await requireStaff();
   const rombelId = Number((await searchParams).rombelId) || 0;
 
-  const [setting, rombelOpts, sekolah] = await Promise.all([
+  const [setting, sekolah] = await Promise.all([
     prisma.settingKelulusan.findFirst({ where: { sekolahId } }),
-    prisma.rombel.findMany({ where: { sekolahId }, orderBy: { nama: "asc" }, include: { tahunAjaran: { select: { tahun: true } } } }),
     prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { slug: true } }),
   ]);
 
@@ -61,10 +61,7 @@ export default async function KelulusanPage({
       <form className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-white p-4">
         <div>
           <label className="block text-xs text-gray-500">Rombel</label>
-          <select name="rombelId" defaultValue={rombelId || ""} className={selCls}>
-            <option value="">- pilih -</option>
-            {rombelOpts.map((r) => <option key={r.id} value={r.id}>{r.nama} ({r.tahunAjaran.tahun})</option>)}
-          </select>
+          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId || ""} className={selCls} />
         </div>
         <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Tampilkan</button>
       </form>

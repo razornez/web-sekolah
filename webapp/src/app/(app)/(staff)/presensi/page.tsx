@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { savePresensi } from "./actions";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 
 const STATUS = ["hadir", "izin", "sakit", "alpa", "terlambat"] as const;
 const selCls = "rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";
@@ -14,12 +15,6 @@ export default async function PresensiPage({
   const sp = await searchParams;
   const rombelId = Number(sp.rombelId) || 0;
   const tanggal = sp.tanggal || new Date().toISOString().slice(0, 10);
-
-  const rombelOpts = await prisma.rombel.findMany({
-    where: { sekolahId },
-    orderBy: { nama: "asc" },
-    include: { tahunAjaran: { select: { tahun: true } } },
-  });
 
   let anggota: {
     siswaId: number;
@@ -49,12 +44,7 @@ export default async function PresensiPage({
       <form className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-white p-4">
         <div>
           <label className="block text-xs text-gray-500">Rombel</label>
-          <select name="rombelId" defaultValue={rombelId || ""} className={selCls}>
-            <option value="">- pilih -</option>
-            {rombelOpts.map((r) => (
-              <option key={r.id} value={r.id}>{r.nama} ({r.tahunAjaran.tahun})</option>
-            ))}
-          </select>
+          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId || ""} className={selCls} />
         </div>
         <div>
           <label className="block text-xs text-gray-500">Tanggal</label>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { saveTarget, savePenilaian } from "../actions";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 
 const PREDIKAT = ["MB", "SB", "BSH", "SAB"];
 
@@ -17,13 +18,12 @@ export default async function P5DetailPage({
   const projekP5Id = Number((await params).id);
   const rombelId = Number((await searchParams).rombelId) || 0;
 
-  const [projek, dimensi, rombelOpts] = await Promise.all([
+  const [projek, dimensi] = await Promise.all([
     prisma.projekP5.findFirst({
       where: { id: projekP5Id, sekolahId },
       include: { tahunAjaran: { select: { tahun: true } }, target: { include: { elemen: { select: { id: true, nama: true } } } } },
     }),
     prisma.dimensiProfil.findMany({ orderBy: { urutan: "asc" }, include: { elemen: { orderBy: { id: "asc" } } } }),
-    prisma.rombel.findMany({ where: { sekolahId }, orderBy: { nama: "asc" } }),
   ]);
   if (!projek) notFound();
 
@@ -85,10 +85,7 @@ export default async function P5DetailPage({
             <form className="flex items-end gap-3">
               <div>
                 <label className="block text-xs text-gray-500">Rombel</label>
-                <select name="rombelId" defaultValue={rombelId || ""} className="rounded-md border border-gray-300 px-3 py-2 text-sm">
-                  <option value="">- pilih -</option>
-                  {rombelOpts.map((r) => <option key={r.id} value={r.id}>{r.nama}</option>)}
-                </select>
+                <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId || ""} className="rounded-md border border-gray-300 px-3 py-2 text-sm" />
               </div>
               <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Tampilkan</button>
             </form>

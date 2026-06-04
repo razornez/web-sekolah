@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { naikanKelas } from "./actions";
 import { PageGuide } from "@/components/PageGuide";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 
 const selCls =
   "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition-colors focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 hover:border-gray-400 appearance-none";
@@ -34,7 +35,8 @@ export default async function KenaikanKelasPage({
     prisma.tingkat.findMany({ where: { sekolahId }, orderBy: { urutan: "asc" } }),
   ]);
 
-  // Group rombel by tahun ajaran for better display
+  // rombelByTahun tidak lagi dipakai — digantikan oleh RombelSelect reusable
+  // Tetap ambil rombelList untuk tabel ringkasan di bawah
   const rombelByTahun = rombelList.reduce<Record<string, typeof rombelList>>((acc, r) => {
     const key = r.tahunAjaran.tahun;
     if (!acc[key]) acc[key] = [];
@@ -81,25 +83,13 @@ export default async function KenaikanKelasPage({
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">1</span>
               Rombel Sumber <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <select name="rombelLamaId" required defaultValue="" className={selCls}>
-                <option value="">— pilih rombel yang akan dipromosikan —</option>
-                {Object.entries(rombelByTahun).map(([tahun, rombels]) => (
-                  <optgroup key={tahun} label={`TA ${tahun}`}>
-                    {rombels.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.nama} — {r.tingkat.nama} — {r._count.anggota} siswa
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
+            <RombelSelect
+              sekolahId={sekolahId}
+              name="rombelLamaId"
+              defaultValue=""
+              emptyLabel="— pilih rombel yang akan dipromosikan —"
+              className={selCls}
+            />
           </div>
 
           {/* Step 2 */}

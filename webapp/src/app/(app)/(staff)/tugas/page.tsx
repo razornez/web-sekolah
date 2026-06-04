@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { createTugas, deleteTugas } from "./actions";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 const fmt = (d: Date | null) => (d ? d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-");
@@ -29,10 +30,7 @@ export default async function TugasPage() {
         <div><label className="block text-xs text-gray-500">Mapel</label><input name="mapel" className={inCls} /></div>
         <div>
           <label className="block text-xs text-gray-500">Rombel</label>
-          <select name="rombelId" defaultValue="" className={inCls}>
-            <option value="">- semua -</option>
-            {rombel.map((r) => <option key={r.id} value={r.id}>{r.nama}</option>)}
-          </select>
+          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" emptyLabel="- semua -" className={inCls} />
         </div>
         <div><label className="block text-xs text-gray-500">Deadline</label><input type="date" name="deadline" className={inCls} /></div>
         <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Tambah</button>

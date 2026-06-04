@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
+import { MapelSelect } from "@/components/filters/MapelSelect";
 import { PageGuide } from "@/components/PageGuide";
 import { saveJadwal, deleteJadwalAction } from "./actions";
 
@@ -20,7 +21,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
   const fRombel = Number(sp.rombelId) || 0;
   const mode = sp.mode ?? "kalender";
 
-  const [jadwal, guruList, hariList, mapelList] = await Promise.all([
+  const [jadwal, guruList, hariList] = await Promise.all([
     prisma.jadwalGuru.findMany({
       where: { sekolahId, ...(fGuru ? { guruId: fGuru } : {}), ...(fRombel ? { rombelId: fRombel } : {}) },
       include: { guru: { select: { id: true, namaGuru: true } }, hari: { select: { id: true, nama: true, urutan: true } }, rombel: { select: { id: true, nama: true } } },
@@ -28,7 +29,6 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
     }),
     prisma.guru.findMany({ where: { sekolahId, deletedAt: null }, orderBy: { namaGuru: "asc" }, select: { id: true, namaGuru: true } }),
     prisma.hari.findMany({ where: { sekolahId }, orderBy: { urutan: "asc" } }),
-    prisma.mapel.findMany({ where: { sekolahId, aktif: true }, orderBy: [{ noUrut: "asc" }, { namaMapel: "asc" }], select: { id: true, namaMapel: true } }),
   ]);
 
   const allMapelNames = [...new Set(jadwal.map(j => j.mapel ?? ""))];
@@ -170,10 +170,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
               {["08:30","10:00","11:45","13:15","15:00"].map((j) => <option key={j} value={j}>{j}</option>)}
             </select></div>
           <div><label className="mb-1 block text-xs font-medium text-gray-500">Mapel</label>
-            <select name="mapelNama" defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[150px]">
-              <option value="">— pilih —</option>
-              {mapelList.map((m) => <option key={m.id} value={m.namaMapel}>{m.namaMapel}</option>)}
-            </select></div>
+            <MapelSelect sekolahId={sekolahId} name="mapel" defaultValue="" emptyLabel="— pilih mapel —" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[150px]" /></div>
           <div><label className="mb-1 block text-xs font-medium text-gray-500">Kelas</label>
             <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm" /></div>
           <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Simpan</button>

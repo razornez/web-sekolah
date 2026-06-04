@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 import { updateUjian, addSoal, deleteSoal } from "../actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
@@ -17,16 +18,13 @@ export default async function UjianDetailPage({
   const sekolahId = await requireModule("ujian");
   const ujianId = Number((await params).id);
 
-  const [ujian, rombel] = await Promise.all([
-    prisma.ujian.findFirst({
-      where: { id: ujianId, sekolahId },
-      include: {
-        soal: { orderBy: { nomor: "asc" } },
-        hasil: { include: { siswa: { select: { namaLengkap: true } } }, orderBy: { skor: "desc" } },
-      },
-    }),
-    prisma.rombel.findMany({ where: { sekolahId }, orderBy: { nama: "asc" }, select: { id: true, nama: true } }),
-  ]);
+  const ujian = await prisma.ujian.findFirst({
+    where: { id: ujianId, sekolahId },
+    include: {
+      soal: { orderBy: { nomor: "asc" } },
+      hasil: { include: { siswa: { select: { namaLengkap: true } } }, orderBy: { skor: "desc" } },
+    },
+  });
   if (!ujian) notFound();
 
   return (
@@ -45,10 +43,7 @@ export default async function UjianDetailPage({
           <div><label className="block text-xs text-gray-500">Mapel</label><input name="mapel" defaultValue={ujian.mapel ?? ""} className={inCls} /></div>
           <div>
             <label className="block text-xs text-gray-500">Rombel</label>
-            <select name="rombelId" defaultValue={ujian.rombelId ?? ""} className={inCls}>
-              <option value="">- semua -</option>
-              {rombel.map((r) => <option key={r.id} value={r.id}>{r.nama}</option>)}
-            </select>
+            <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={ujian.rombelId ?? ""} className={inCls} />
           </div>
           <div><label className="block text-xs text-gray-500">Durasi (menit)</label><input name="durasiMenit" type="number" min={1} defaultValue={ujian.durasiMenit ?? ""} className={`${inCls} w-24`} /></div>
         </div>

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { RombelSelect } from "@/components/filters/RombelSelect";
+import { PeriodeSelect } from "@/components/filters/PeriodeSelect";
 
 const selCls = "rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";
 
@@ -13,11 +15,6 @@ export default async function RaporDetailListPage({
   const sp = await searchParams;
   const rombelId = Number(sp.rombelId) || 0;
   const periodeId = Number(sp.periodeId) || 0;
-
-  const [rombelOpts, periodeOpts] = await Promise.all([
-    prisma.rombel.findMany({ where: { sekolahId }, orderBy: { nama: "asc" }, include: { tahunAjaran: { select: { tahun: true } } } }),
-    prisma.periode.findMany({ where: { tahunAjaran: { sekolahId } }, orderBy: [{ tahunAjaranId: "desc" }, { urutan: "asc" }], include: { tahunAjaran: { select: { tahun: true } } } }),
-  ]);
 
   const anggota = rombelId && periodeId
     ? await prisma.anggotaRombel.findMany({
@@ -40,17 +37,11 @@ export default async function RaporDetailListPage({
       <form className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-white p-4">
         <div>
           <label className="block text-xs text-gray-500">Rombel</label>
-          <select name="rombelId" defaultValue={rombelId || ""} className={selCls}>
-            <option value="">- pilih -</option>
-            {rombelOpts.map((r) => <option key={r.id} value={r.id}>{r.nama} ({r.tahunAjaran.tahun})</option>)}
-          </select>
+          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId || ""} className={selCls} />
         </div>
         <div>
           <label className="block text-xs text-gray-500">Periode</label>
-          <select name="periodeId" defaultValue={periodeId || ""} className={selCls}>
-            <option value="">- pilih -</option>
-            {periodeOpts.map((p) => <option key={p.id} value={p.id}>{p.tahunAjaran.tahun} · {p.nama}</option>)}
-          </select>
+          <PeriodeSelect sekolahId={sekolahId} name="periodeId" defaultValue={periodeId || ""} className={selCls} />
         </div>
         <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Tampilkan</button>
       </form>
