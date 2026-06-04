@@ -26,6 +26,42 @@ a[href], [tabindex]:not([tabindex="-1"]) {
   cursor: pointer;
 }
 
+/* ── Responsif: semua wrapper div yang langsung berisi table → scroll horizontal ── */
+div:has(> table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Tabel minimal 500px supaya tidak terlalu gepeng di mobile */
+table {
+  min-width: 500px;
+}
+/* Tabel di dalam card kecil tidak perlu min-width */
+.table-compact table {
+  min-width: 0;
+}
+
+/* ── Form: stacked on mobile ── */
+@media (max-width: 640px) {
+  /* Input date native lebih kecil di mobile */
+  input[type="date"] {
+    font-size: 14px;
+  }
+  /* Teks truncate lebih agresif di mobile */
+  .truncate-mobile {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* ── Touch targets minimal 44px (WCAG) ── */
+@media (max-width: 768px) {
+  button, [role="button"], a[href] {
+    min-height: 36px;
+  }
+}
+
 /* Better scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }

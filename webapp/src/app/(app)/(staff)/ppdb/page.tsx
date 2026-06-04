@@ -127,13 +127,13 @@ export default async function PpdbPage({
       {/* Header */}
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">PPDB — Pendaftar</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">PPDB — Pendaftar</h1>
           <p className="text-sm text-gray-500">
             {totalAktif} pendaftar aktif ·{" "}
             <Link href={`/daftar/${sekolah?.slug}`} className="underline hover:text-gray-900">/daftar/{sekolah?.slug}</Link>
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link href="/ppdb/new" className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             Tambah Pendaftar
@@ -164,32 +164,32 @@ export default async function PpdbPage({
 
       {/* Search & Filter */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <form className="flex flex-wrap items-end gap-3">
+        <form className="flex flex-wrap items-end gap-2 sm:gap-3">
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="arsip" value={showArsip ? "1" : ""} />
-          <div className="flex-1 min-w-48">
+          <div className="w-full sm:flex-1 sm:min-w-48">
             <label className="block text-xs font-medium text-gray-500 mb-1">Cari Nama</label>
             <input name="q" defaultValue={q} placeholder="Nama pendaftar…"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="block text-xs font-medium text-gray-500 mb-1">Jalur</label>
-            <select name="jalur" defaultValue={jalurFilter} className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900">
+            <select name="jalur" defaultValue={jalurFilter} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
               <option value="">Semua Jalur</option>
               {jalurList.map((j) => <option key={j.id} value={j.id}>{j.nama}</option>)}
             </select>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="block text-xs font-medium text-gray-500 mb-1">Jenis Kelamin</label>
-            <select name="jk" defaultValue={jkFilter} className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900">
+            <select name="jk" defaultValue={jkFilter} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
               <option value="">Semua</option>
               <option value="L">Laki-laki</option>
               <option value="P">Perempuan</option>
             </select>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="block text-xs font-medium text-gray-500 mb-1">Grup per</label>
-            <select name="groupBy" defaultValue={groupBy} className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900">
+            <select name="groupBy" defaultValue={groupBy} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
               <option value="none">— tidak dikelompokkan —</option>
               <option value="jalur">Jalur</option>
               <option value="asalSekolah">Asal Sekolah</option>
@@ -215,7 +215,7 @@ export default async function PpdbPage({
       ) : (
         <div className="space-y-4">
           {groups.map((g) => (
-            <div key={g.key} className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div key={g.key} className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
               {groupBy !== "none" && (
                 <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5 flex items-center gap-2">
                   <span className="font-semibold text-gray-800">{g.label}</span>
@@ -225,11 +225,11 @@ export default async function PpdbPage({
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-left">
                   <tr>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tgl Daftar</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">Tgl Daftar</th>
                     <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nama</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">L/P</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Asal Sekolah</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Jalur</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">L/P</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">Asal Sekolah</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">Jalur</th>
                     <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
                     <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Aksi</th>
                   </tr>
@@ -239,16 +239,16 @@ export default async function PpdbPage({
                     const b = badgeOf(p.status);
                     return (
                       <tr key={p.id} className={`hover:bg-gray-50 ${p.deletedAt ? "opacity-60" : ""}`}>
-                        <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{fmt(p.createdAt)}</td>
+                        <td className="hidden px-4 py-3 text-gray-500 whitespace-nowrap sm:table-cell">{fmt(p.createdAt)}</td>
                         <td className="px-4 py-3">
                           <Link href={`/ppdb/${p.id}`} className="font-medium text-gray-900 hover:text-indigo-700 hover:underline">
                             {p.namaLengkap}
                           </Link>
                           {p.nisn && <div className="text-xs text-gray-400">NISN: {p.nisn}</div>}
                         </td>
-                        <td className="px-4 py-3 text-gray-600">{p.jenisKelamin === "L" ? "L" : "P"}</td>
-                        <td className="px-4 py-3 text-gray-600 max-w-[160px] truncate">{p.asalSekolah ?? "—"}</td>
-                        <td className="px-4 py-3 text-gray-600">{p.jalur?.nama ?? "—"}</td>
+                        <td className="hidden px-4 py-3 text-gray-600 sm:table-cell">{p.jenisKelamin === "L" ? "L" : "P"}</td>
+                        <td className="hidden px-4 py-3 text-gray-600 max-w-[160px] truncate sm:table-cell">{p.asalSekolah ?? "—"}</td>
+                        <td className="hidden px-4 py-3 text-gray-600 sm:table-cell">{p.jalur?.nama ?? "—"}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${b.color}`}>
                             {b.label}

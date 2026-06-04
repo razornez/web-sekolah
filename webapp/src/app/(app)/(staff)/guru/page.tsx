@@ -47,9 +47,9 @@ export default async function GuruPage({
           "Status: PNS (Pegawai Negeri), GTT (Guru Tidak Tetap), GTY (Guru Tetap Yayasan).",
         ]}
       />
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Data Guru / PTK</h1>
+          <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Data Guru / PTK</h1>
           <p className="text-sm text-gray-500">
             {total.toLocaleString("id-ID")} guru {tampil}
             {nonaktifCount > 0 && (
@@ -72,22 +72,22 @@ export default async function GuruPage({
         </div>
         <form className="flex flex-1 gap-2">
           <input type="hidden" name="tampil" value={tampil} />
-          <input name="q" defaultValue={q} placeholder="Cari nama / NIP / NUPTK…" className="w-64 rounded-md border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-gray-900" />
+          <input name="q" defaultValue={q} placeholder="Cari nama / NIP / NUPTK…" className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-gray-900 sm:w-64" />
           <button className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-100">Cari</button>
           {q && <Link href={`/guru?tampil=${tampil}`} className="px-2 py-1.5 text-sm text-gray-500 hover:text-gray-900">Reset</Link>}
         </form>
       </div>
 
       {/* Tabel */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Nama</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">NIP / NPK</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">L/P</th>
+              <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide sm:table-cell">NIP / NPK</th>
+              <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide sm:table-cell">L/P</th>
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Status</th>
-              {tampil === "nonaktif" && <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">Alasan Nonaktif</th>}
+              {tampil === "nonaktif" && <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide sm:table-cell">Alasan Nonaktif</th>}
               <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">Aksi</th>
             </tr>
           </thead>
@@ -99,13 +99,13 @@ export default async function GuruPage({
                   <Link href={`/guru/${g.id}`} className="font-medium text-gray-900 hover:underline">{g.namaGuru}</Link>
                   {g.email && <div className="text-xs text-gray-400">{g.email}</div>}
                 </td>
-                <td className="px-4 py-3 font-mono text-xs text-gray-600">{g.nip ?? g.npk ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600">{g.jenisKelamin}</td>
+                <td className="hidden px-4 py-3 font-mono text-xs text-gray-600 sm:table-cell">{g.nip ?? g.npk ?? "—"}</td>
+                <td className="hidden px-4 py-3 text-gray-600 sm:table-cell">{g.jenisKelamin}</td>
                 <td className="px-4 py-3">
                   {g.statusGuru && <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${STATUS_BADGE[g.statusGuru] ?? "bg-gray-100 text-gray-700"}`}>{g.statusGuru}</span>}
                 </td>
                 {tampil === "nonaktif" && (
-                  <td className="px-4 py-3 max-w-xs text-xs text-gray-500 italic truncate">{g.alasanHapus ?? "—"}</td>
+                  <td className="hidden px-4 py-3 max-w-xs text-xs text-gray-500 italic truncate sm:table-cell">{g.alasanHapus ?? "—"}</td>
                 )}
                 <td className="px-4 py-3 text-right">
                   {tampil === "nonaktif" ? (

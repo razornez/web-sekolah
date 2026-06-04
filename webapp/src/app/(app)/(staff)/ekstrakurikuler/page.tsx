@@ -70,7 +70,7 @@ export default async function EkstrakurikulerPage({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ekstrakurikuler</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Ekstrakurikuler</h1>
           <p className="text-sm text-gray-500">{rows.length} kegiatan {showArsip ? "(arsip)" : "aktif"}</p>
         </div>
         <div className="flex gap-2">
@@ -89,7 +89,7 @@ export default async function EkstrakurikulerPage({
             <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
             <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
           </summary>
-          <form action={createEkstra} className="border-t border-gray-100 px-5 py-4 flex flex-wrap items-end gap-3">
+          <form action={createEkstra} className="border-t border-gray-100 px-5 py-4 flex flex-wrap items-end gap-2 sm:gap-3">
             <div className="flex-1 min-w-48">
               <label className="block text-xs font-medium text-gray-500 mb-1">Nama *</label>
               <input name="nama" required placeholder="Pramuka, Basket, Band…" className={`${inCls} w-full`} />
@@ -108,10 +108,10 @@ export default async function EkstrakurikulerPage({
       )}
 
       {/* Search */}
-      <form className="flex gap-2">
+      <form className="flex flex-wrap gap-2">
         <input type="hidden" name="arsip" value={showArsip ? "1" : ""} />
         <input name="q" defaultValue={q} placeholder="Cari nama ekstrakurikuler…"
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900 max-w-xs" />
+          className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900 sm:max-w-xs" />
         <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
         {q && <Link href={`/ekstrakurikuler?arsip=${showArsip ? "1" : ""}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">✕</Link>}
       </form>

@@ -68,9 +68,9 @@ export default async function SiswaPage({
           "Siswa yang diarsipkan tersimpan di halaman Arsip dan bisa dipulihkan.",
         ]}
       />
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Data Siswa</h1>
+          <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Data Siswa</h1>
           <p className="text-sm text-gray-500">
             {total.toLocaleString("id-ID")} siswa aktif
             {arsipCount > 0 && <Link href="/siswa/arsip" className="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 hover:bg-gray-200">🗑 {arsipCount} arsip</Link>}
@@ -81,9 +81,9 @@ export default async function SiswaPage({
 
       {/* Filter */}
       <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
-        <form className="flex gap-2">
+        <form className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="status" value={status} /><input type="hidden" name="gender" value={gender} /><input type="hidden" name="agama" value={agama} /><input type="hidden" name="rombelId" value={rombelId || ""} /><input type="hidden" name="tahunMasuk" value={tahunMasuk || ""} />
-          <input name="q" defaultValue={q} placeholder="Cari nama, NISN, NIS…" className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
+          <input name="q" defaultValue={q} placeholder="Cari nama, NISN, NIS…" className="flex-1 min-w-0 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
           <button className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
           {(q||status||gender||agama||rombelId||tahunMasuk) && <Link href="/siswa" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">Reset</Link>}
         </form>
@@ -103,7 +103,7 @@ export default async function SiswaPage({
           <input type="hidden" name="q" value={q} /><input type="hidden" name="status" value={status} /><input type="hidden" name="gender" value={gender} />
           <div>
             <label className="block text-xs text-gray-500">Kelas/Rombel</label>
-            <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId || ""} className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[200px]" />
+            <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId || ""} className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-sm sm:min-w-[200px]" />
           </div>
           <div>
             <label className="block text-xs text-gray-500">Agama</label>
@@ -124,16 +124,16 @@ export default async function SiswaPage({
       </div>
 
       {/* Tabel */}
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
               <th className="px-4 py-2 font-medium">Nama</th>
-              <th className="px-4 py-2 font-medium">NISN / NIS</th>
+              <th className="hidden px-4 py-2 font-medium sm:table-cell">NISN / NIS</th>
               <th className="px-4 py-2 font-medium">JK</th>
               <th className="px-4 py-2 font-medium">Kelas</th>
-              <th className="px-4 py-2 font-medium">Agama</th>
-              <th className="px-4 py-2 font-medium">Masuk</th>
+              <th className="hidden px-4 py-2 font-medium sm:table-cell">Agama</th>
+              <th className="hidden px-4 py-2 font-medium sm:table-cell">Masuk</th>
               <th className="px-4 py-2 font-medium">Status</th>
               <th className="px-4 py-2 font-medium text-right">Aksi</th>
             </tr>
@@ -148,11 +148,11 @@ export default async function SiswaPage({
                     <Link href={`/siswa/${s.id}`} className="hover:underline">{s.namaLengkap}</Link>
                   </div>
                 </td>
-                <td className="px-4 py-2"><div className="text-xs text-gray-600">{s.nisn ?? "—"}</div><div className="text-xs text-gray-400">{s.nis ?? ""}</div></td>
+                <td className="hidden px-4 py-2 sm:table-cell"><div className="text-xs text-gray-600">{s.nisn ?? "—"}</div><div className="text-xs text-gray-400">{s.nis ?? ""}</div></td>
                 <td className="px-4 py-2">{s.jenisKelamin==="L"?<span className="text-blue-600">♂</span>:s.jenisKelamin==="P"?<span className="text-pink-600">♀</span>:<span className="text-gray-300">—</span>}</td>
                 <td className="px-4 py-2 text-gray-600">{s.anggotaRombel[0]?.rombel.nama ?? "—"}</td>
-                <td className="px-4 py-2 text-gray-600">{s.agama ?? "—"}</td>
-                <td className="px-4 py-2 text-gray-600">{s.tahunMasuk ?? "—"}</td>
+                <td className="hidden px-4 py-2 text-gray-600 sm:table-cell">{s.agama ?? "—"}</td>
+                <td className="hidden px-4 py-2 text-gray-600 sm:table-cell">{s.tahunMasuk ?? "—"}</td>
                 <td className="px-4 py-2"><span className={`rounded px-1.5 py-0.5 text-xs ${STATUS_BADGE[s.status]??STATUS_BADGE.aktif}`}>{s.status}</span></td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex items-center justify-end gap-2">

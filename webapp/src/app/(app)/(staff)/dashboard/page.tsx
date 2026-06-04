@@ -40,7 +40,7 @@ async function DashboardAdmin({ sekolahId }: { sekolahId: number }) {
   ]);
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard label="Siswa" value={siswa} href="/siswa" />
         <StatCard label="Guru" value={guru} href="/guru" />
         <StatCard label="Rombel" value={rombel} href="/rombel" />
@@ -78,14 +78,14 @@ async function DashboardGuru({ sekolahId, userId }: { sekolahId: number; userId:
   ]);
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Jadwal Mengajar" value={jadwal.length} href="/jadwal" />
         <StatCard label="Tugas Dibuat" value={tugasTotal} href="/tugas" />
         <StatCard label="Belum Dinilai" value={tugasBelumNilai} href="/tugas" colorClass="text-amber-600" />
         <StatCard label="Peserta Ujian" value={hasilUjian} href="/ujian" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between">
             <span>Jadwal Mengajar</span>
             <Link href="/jadwal" className="text-xs text-gray-400 hover:text-gray-700">Kelola →</Link>
@@ -130,11 +130,11 @@ async function DashboardWalikelas({ sekolahId, userId }: { sekolahId: number; us
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-gray-200 bg-white p-4 flex items-center justify-between">
+      <div className="rounded-lg border border-gray-200 bg-white p-4 flex flex-wrap items-center justify-between gap-3">
         <div><div className="text-lg font-semibold text-gray-900">{rombel.nama}</div><div className="text-sm text-gray-500">TA {rombel.tahunAjaran.tahun} · {rombel.anggota.length} siswa</div></div>
         <Link href={`/rombel/${rombel.id}`} className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">Kelola Rombel →</Link>
       </div>
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {Object.entries(hdStats).map(([s, n]) => (
           <div key={s} className="rounded-lg border border-gray-200 bg-white p-3 text-center">
             <div className="text-xl font-semibold text-gray-900">{n}</div>
@@ -142,7 +142,7 @@ async function DashboardWalikelas({ sekolahId, userId }: { sekolahId: number; us
           </div>
         ))}
       </div>
-      <div className="rounded-lg border border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Siswa & Status Hari Ini</div>
         <table className="w-full text-sm">
           <tbody className="divide-y divide-gray-100">
@@ -171,7 +171,7 @@ async function DashboardBk({ sekolahId }: { sekolahId: number }) {
   const nm = new Map(siswaNames.map((s) => [s.id, s.namaLengkap]));
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4"><StatCard label="Total Kasus" value={total} href="/bk" /><StatCard label="Bulan Ini" value={bulanIniCount} href="/bk" colorClass="text-amber-600" /></div>
+      <div className="grid grid-cols-2 gap-3"><StatCard label="Total Kasus" value={total} href="/bk" /><StatCard label="Bulan Ini" value={bulanIniCount} href="/bk" colorClass="text-amber-600" /></div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <BarList title="Poin Tertinggi" data={topSiswa.map((t) => ({ label: nm.get(t.siswaId) ?? "-", value: t._sum.poin ?? 0 }))} barClass="bg-red-500" suffix=" poin" />
         <div className="rounded-lg border border-gray-200 bg-white">
@@ -204,7 +204,7 @@ async function DashboardBendahara({ sekolahId }: { sekolahId: number }) {
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Donut title={`Status SPP ${tahun}`} data={[{ label: "Lunas", value: lunas._count, color: "#22c55e" }, { label: "Belum", value: belum._count, color: "#f59e0b" }, { label: "Cicil", value: cicil._count, color: "#3b82f6" }]} />
-        <div className="rounded-lg border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between"><span>Pembayaran Terbaru</span><Link href="/spp" className="text-xs text-gray-400 hover:text-gray-700">Lihat semua →</Link></div>
           <table className="w-full text-sm"><tbody className="divide-y divide-gray-100">
             {recent.map((p) => <tr key={p.id}><td className="px-4 py-2 text-gray-900">{p.tagihan.siswa.namaLengkap}</td><td className="px-4 py-2 text-gray-500 text-xs">{p.tagihan.jenis.nama}</td><td className="px-4 py-2 text-right font-medium text-green-700">{rupiah(p.jumlah)}</td></tr>)}
@@ -226,8 +226,8 @@ async function DashboardPerpustakaan({ sekolahId }: { sekolahId: number }) {
   ]);
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-4"><StatCard label="Total Judul" value={totalBuku} href="/perpustakaan" /><StatCard label="Dipinjam" value={dipinjam} href="/perpustakaan/pinjam" colorClass="text-amber-600" /><StatCard label="Overdue (>7hr)" value={overdue} colorClass="text-red-600" /></div>
-      <div className="rounded-lg border border-gray-200 bg-white">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3"><StatCard label="Total Judul" value={totalBuku} href="/perpustakaan" /><StatCard label="Dipinjam" value={dipinjam} href="/perpustakaan/pinjam" colorClass="text-amber-600" /><StatCard label="Overdue (>7hr)" value={overdue} colorClass="text-red-600" /></div>
+      <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Pinjaman Aktif</div>
         <table className="w-full text-sm"><thead className="bg-gray-50 text-xs text-gray-500"><tr><th className="px-4 py-2 text-left font-medium">Buku</th><th className="px-4 py-2 text-left font-medium">Peminjam</th><th className="px-4 py-2 text-left font-medium">Tanggal</th></tr></thead>
           <tbody className="divide-y divide-gray-100">
@@ -303,7 +303,7 @@ async function DashboardSarpras({ sekolahId }: { sekolahId: number }) {
   const km = new Map(kats.map((k) => [k.id, k.nama]));
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard label="Total Item" value={total} href="/sarpras" />
         <StatCard label="Kondisi Baik" value={baik} colorClass="text-green-700" />
         <StatCard label="Rusak" value={rusak} colorClass="text-red-600" />
@@ -333,7 +333,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Dashboard</h1>
         <p className="text-sm text-gray-500">
           Selamat datang, <span className="font-medium">{user.name}</span>
           {" · "}<span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">{ROLE_LABELS[role] ?? role}</span>

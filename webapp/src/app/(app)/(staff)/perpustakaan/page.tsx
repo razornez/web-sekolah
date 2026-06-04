@@ -117,10 +117,10 @@ export default async function PerpustakaanPage({
       {/* Header & Stats */}
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Perpustakaan</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Perpustakaan</h1>
           <p className="text-sm text-gray-500">{total.toLocaleString("id-ID")} judul · {(stats._sum.jumlahEksemplar ?? 0).toLocaleString("id-ID")} eksemplar</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {/* Stat chips */}
           {overdueCount > 0 && (
             <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-2">

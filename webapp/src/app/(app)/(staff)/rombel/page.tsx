@@ -92,7 +92,7 @@ export default async function RombelPage({
       {/* Header */}
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Rombel / Kelas</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Rombel / Kelas</h1>
           <p className="text-sm text-gray-500">
             {rows.length} rombel · {totalSiswa.toLocaleString("id-ID")} siswa
             {tanpaWali > 0 && (
@@ -111,36 +111,36 @@ export default async function RombelPage({
 
       {/* Filter bar */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <form className="flex flex-wrap items-end gap-3">
-          <div>
+        <form className="flex flex-wrap items-end gap-2 sm:gap-3">
+          <div className="w-full sm:w-auto">
             <label className="block text-xs font-medium text-gray-500 mb-1">Tahun Ajaran</label>
-            <select name="ta" defaultValue={taFilter || ""} className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900">
+            <select name="ta" defaultValue={taFilter || ""} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
               <option value="">Semua TA</option>
               {tahunAjaranList.map((t) => (
                 <option key={t.id} value={t.id}>{t.tahun}{t.aktif ? " ★" : ""}</option>
               ))}
             </select>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="block text-xs font-medium text-gray-500 mb-1">Tingkat</label>
-            <select name="tingkat" defaultValue={tingkatFilter || ""} className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900">
+            <select name="tingkat" defaultValue={tingkatFilter || ""} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
               <option value="">Semua Tingkat</option>
               {tingkatList.map((t) => (
                 <option key={t.id} value={t.id}>{t.nama}</option>
               ))}
             </select>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="block text-xs font-medium text-gray-500 mb-1">Wali Kelas</label>
-            <select name="wali" defaultValue={waliFilter} className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900">
+            <select name="wali" defaultValue={waliFilter} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
               <option value="">Semua</option>
               <option value="ada">Ada wali kelas</option>
               <option value="kosong">Belum ada wali</option>
             </select>
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             <label className="block text-xs font-medium text-gray-500 mb-1">Kelompokkan</label>
-            <select name="groupBy" defaultValue={groupBy} className="rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900">
+            <select name="groupBy" defaultValue={groupBy} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
               <option value="ta">Per Tahun Ajaran</option>
               <option value="tingkat">Per Tingkat</option>
               <option value="none">Tanpa pengelompokan</option>

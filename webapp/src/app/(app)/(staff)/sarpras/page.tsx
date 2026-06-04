@@ -63,7 +63,7 @@ export default async function SarprasPage({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Sarana &amp; Prasarana</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Sarana &amp; Prasarana</h1>
           <p className="text-sm text-gray-500">{rows.length} dari {await prisma.sarpras.count({ where: { sekolahId } })} item</p>
         </div>
         <div className="flex gap-2">
@@ -78,7 +78,7 @@ export default async function SarprasPage({
           <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
           <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
         </summary>
-        <form action={createSarpras} className="border-t border-gray-100 px-5 py-4 flex flex-wrap items-end gap-3">
+        <form action={createSarpras} className="border-t border-gray-100 px-5 py-4 flex flex-wrap items-end gap-2 sm:gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Nama *</label>
             <input name="nama" required placeholder="Proyektor" className={`${inCls} min-w-[160px]`} />
@@ -175,7 +175,7 @@ export default async function SarprasPage({
           {sortedGroups.map(([kondisi, items]) => {
             const cfg = KONDISI_CONFIG[kondisi];
             return (
-              <div key={kondisi} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <div key={kondisi} className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
                 {/* Group header */}
                 <div className={`flex items-center gap-3 border-b border-gray-100 px-5 py-3 ${cfg ? cfg.bg : "bg-gray-100"}`}>
                   <span className={`text-sm font-bold ${cfg ? cfg.color : "text-gray-600"}`}>{kondisi}</span>
@@ -188,10 +188,10 @@ export default async function SarprasPage({
                   <thead className="bg-gray-50 text-xs text-gray-500">
                     <tr>
                       <th className="px-4 py-2 text-left font-semibold uppercase tracking-wide">Nama</th>
-                      <th className="px-4 py-2 text-left font-semibold uppercase tracking-wide">Kategori</th>
+                      <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">Kategori</th>
                       <th className="px-4 py-2 text-center font-semibold uppercase tracking-wide">Jumlah</th>
-                      <th className="px-4 py-2 text-center font-semibold uppercase tracking-wide">Thn Pengadaan</th>
-                      <th className="px-4 py-2 text-left font-semibold uppercase tracking-wide">Keterangan</th>
+                      <th className="hidden px-4 py-2 text-center font-semibold uppercase tracking-wide sm:table-cell">Thn Pengadaan</th>
+                      <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">Keterangan</th>
                       <th className="px-4 py-2 text-right font-semibold uppercase tracking-wide">Aksi</th>
                     </tr>
                   </thead>
@@ -199,14 +199,14 @@ export default async function SarprasPage({
                     {items.map((s) => (
                       <tr key={s.id} className="hover:bg-gray-50">
                         <td className="px-4 py-2.5 font-medium text-gray-900">{s.nama}</td>
-                        <td className="px-4 py-2.5">
+                        <td className="hidden px-4 py-2.5 sm:table-cell">
                           {s.kategori
                             ? <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{s.kategori.nama}</span>
                             : <span className="text-gray-300">—</span>}
                         </td>
                         <td className="px-4 py-2.5 text-center font-semibold text-gray-700">{s.jumlah}</td>
-                        <td className="px-4 py-2.5 text-center text-gray-500">{s.tahunPengadaan ?? "—"}</td>
-                        <td className="px-4 py-2.5 text-gray-500 max-w-[200px] truncate">{s.keterangan ?? "—"}</td>
+                        <td className="hidden px-4 py-2.5 text-center text-gray-500 sm:table-cell">{s.tahunPengadaan ?? "—"}</td>
+                        <td className="hidden px-4 py-2.5 text-gray-500 max-w-[200px] truncate sm:table-cell">{s.keterangan ?? "—"}</td>
                         <td className="px-4 py-2.5 text-right">
                           <ConfirmDelete action={deleteSarpras} id={s.id} message={`Hapus "${s.nama}"?`} />
                         </td>
