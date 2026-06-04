@@ -70,6 +70,42 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
         {(fGuru||fRombel) && <Link href={`/jadwal?mode=${mode}`} className="text-sm text-gray-500 hover:text-gray-900">Reset</Link>}
       </form>
 
+      {/* Tambah Jadwal — collapsible, di atas kalender */}
+      <details className="group rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white shadow-sm">
+        <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 select-none">
+          <span className="text-sm font-semibold text-gray-800">➕ Tambah Jadwal</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
+        </summary>
+        <div className="border-t border-gray-100 px-5 pb-5 pt-4">
+          <form action={saveJadwal} className="flex flex-wrap items-end gap-3">
+            <div><label className="mb-1 block text-xs font-medium text-gray-500">Guru *</label>
+              <select name="guruId" required defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[180px]">
+                <option value="">— pilih guru —</option>
+                {guruList.map((g) => <option key={g.id} value={g.id}>{g.namaGuru}</option>)}
+              </select></div>
+            <div><label className="mb-1 block text-xs font-medium text-gray-500">Hari *</label>
+              <select name="hariNama" required defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
+                <option value="">— pilih —</option>
+                {HARI_ORDER.map((h) => <option key={h} value={h}>{h}</option>)}
+              </select></div>
+            <div><label className="mb-1 block text-xs font-medium text-gray-500">Jam Mulai</label>
+              <select name="jamMulai" defaultValue="07:00" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
+                {JAM_MULAI.map((j) => <option key={j} value={j}>{j}</option>)}
+              </select></div>
+            <div><label className="mb-1 block text-xs font-medium text-gray-500">Jam Selesai</label>
+              <select name="jamSelesai" defaultValue="08:30" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
+                {["08:30","10:00","11:45","13:15","15:00"].map((j) => <option key={j} value={j}>{j}</option>)}
+              </select></div>
+            <div><label className="mb-1 block text-xs font-medium text-gray-500">Mapel</label>
+              <MapelSelect sekolahId={sekolahId} name="mapel" defaultValue="" emptyLabel="— pilih mapel —" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[150px]" /></div>
+            <div><label className="mb-1 block text-xs font-medium text-gray-500">Kelas</label>
+              <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm" /></div>
+            <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Simpan</button>
+          </form>
+        </div>
+      </details>
+
       {/* KALENDER */}
       {mode === "kalender" && (
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -147,35 +183,6 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
         </div>
       )}
 
-      {/* Tambah */}
-      <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-5 shadow-sm">
-        <h2 className="mb-4 text-sm font-semibold text-gray-800">➕ Tambah Jadwal</h2>
-        <form action={saveJadwal} className="flex flex-wrap items-end gap-3">
-          <div><label className="mb-1 block text-xs font-medium text-gray-500">Guru *</label>
-            <select name="guruId" required defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[180px]">
-              <option value="">— pilih guru —</option>
-              {guruList.map((g) => <option key={g.id} value={g.id}>{g.namaGuru}</option>)}
-            </select></div>
-          <div><label className="mb-1 block text-xs font-medium text-gray-500">Hari *</label>
-            <select name="hariNama" required defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-              <option value="">— pilih —</option>
-              {HARI_ORDER.map((h) => <option key={h} value={h}>{h}</option>)}
-            </select></div>
-          <div><label className="mb-1 block text-xs font-medium text-gray-500">Jam Mulai</label>
-            <select name="jamMulai" defaultValue="07:00" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-              {JAM_MULAI.map((j) => <option key={j} value={j}>{j}</option>)}
-            </select></div>
-          <div><label className="mb-1 block text-xs font-medium text-gray-500">Jam Selesai</label>
-            <select name="jamSelesai" defaultValue="08:30" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-              {["08:30","10:00","11:45","13:15","15:00"].map((j) => <option key={j} value={j}>{j}</option>)}
-            </select></div>
-          <div><label className="mb-1 block text-xs font-medium text-gray-500">Mapel</label>
-            <MapelSelect sekolahId={sekolahId} name="mapel" defaultValue="" emptyLabel="— pilih mapel —" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[150px]" /></div>
-          <div><label className="mb-1 block text-xs font-medium text-gray-500">Kelas</label>
-            <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm" /></div>
-          <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Simpan</button>
-        </form>
-      </div>
     </div>
   );
 }
