@@ -2,26 +2,22 @@
 
 import { StatusPresensi } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 
 const VALID: StatusPresensi[] = [
-  StatusPresensi.hadir,
-  StatusPresensi.izin,
-  StatusPresensi.sakit,
-  StatusPresensi.alpa,
-  StatusPresensi.terlambat,
+  StatusPresensi.hadir, StatusPresensi.izin, StatusPresensi.sakit,
+  StatusPresensi.alpa, StatusPresensi.terlambat,
 ];
 
-/** Simpan presensi satu rombel pada satu tanggal (batch upsert per siswa). */
+/** Batch upsert presensi satu rombel (form lama). */
 export async function savePresensi(formData: FormData) {
   const sekolahId = await requireStaff();
   const rombelId = Number(formData.get("rombelId"));
   const tanggalStr = String(formData.get("tanggal") ?? "");
   if (!rombelId || !tanggalStr) return;
   const tanggal = new Date(tanggalStr);
-  if (Number.isNaN(tanggal.getTime())) return;
+  if (isNaN(tanggal.getTime())) return;
 
   const rombel = await prisma.rombel.findFirst({
     where: { id: rombelId, sekolahId },
@@ -42,7 +38,41 @@ export async function savePresensi(formData: FormData) {
       });
     }),
   );
-
   revalidatePath("/presensi");
-  redirect(`/presensi?rombelId=${rombelId}&tanggal=${tanggalStr}`);
+}
+
+/** Tandai satu siswa hadir pada tanggal tertentu (klik dot kuning). */
+export async function markSiswaHadir(siswaId: number, tanggalStr: string): Promise<void> {
+  const sekolahId = await requireStaff();
+  const tanggal = new Date(tanggalStr);
+  if (isNaN(tanggal.getTime())) return;
+
+  const siswa = await prisma.siswa.findFirst({ where: { id: siswaId, sekolahId }, select: { id: true } });
+  if (!siswa) return;
+
+  await prisma.kehadiranSiswa.upsert({
+    where: { siswaId_tanggal: { siswaId, tanggal } },
+    update: { status: "hadir" },
+    create: { sekolahId, siswaId, tanggal, status: "hadir" },
+  });
+  revalidatePath("/presensi");
+}
+
+/** Set status kehadiran siswa ke nilai tertentu. */
+export async function setSiswaStatus(
+  siswaId: number, tanggalStr: string, status: StatusPresensi,
+): Promise<void> {
+  const sekolahId = await requireStaff();
+  const tanggal = new Date(tanggalStr);
+  if (isNaN(tanggal.getTime()) || !VALID.includes(status)) return;
+
+  const siswa = await prisma.siswa.findFirst({ where: { id: siswaId, sekolahId }, select: { id: true } });
+  if (!siswa) return;
+
+  await prisma.kehadiranSiswa.upsert({
+    where: { siswaId_tanggal: { siswaId, tanggal } },
+    update: { status },
+    create: { sekolahId, siswaId, tanggal, status },
+  });
+  revalidatePath("/presensi");
 }
