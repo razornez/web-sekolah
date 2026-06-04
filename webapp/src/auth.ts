@@ -7,13 +7,10 @@ import { loginSchema } from "@/lib/validations";
 
 const md5 = (s: string) => createHash("md5").update(s).digest("hex");
 
+import { authConfig } from "./auth.config";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: true,
-  session: {
-    strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 hari (default next-auth beta bisa sangat pendek)
-  },
-  pages: { signIn: "/login" },
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -70,23 +67,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-        token.sekolahId = user.sekolahId;
-        token.sekolahSlug = user.sekolahSlug;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.sub as string;
-        session.user.role = token.role;
-        session.user.sekolahId = token.sekolahId;
-        session.user.sekolahSlug = token.sekolahSlug;
-      }
-      return session;
-    },
-  },
 });
