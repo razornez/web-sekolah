@@ -7,6 +7,11 @@ import { AttendanceDot } from "./_components/AttendanceDot";
 
 const HARI_ORDER = ["Senin","Selasa","Rabu","Kamis","Jumat"] as const;
 const HARI_DOW: Record<string, number> = { Minggu:0,Senin:1,Selasa:2,Rabu:3,Kamis:4,Jumat:5,Sabtu:6 };
+const JAM_MULAI = ["07:00","08:30","10:15","11:45","13:30"];
+const JAM_LABEL: Record<string, string> = {
+  "07:00": "07:00–08:30", "08:30": "08:30–10:00",
+  "10:15": "10:15–11:45", "11:45": "11:45–13:15", "13:30": "13:30–15:00",
+};
 
 const MAPEL_COLORS = [
   "bg-blue-50 border-blue-300 text-blue-900",
@@ -102,7 +107,7 @@ export default async function PresensiPage({
     const jadwal = await prisma.jadwalGuru.findFirst({
       where: { id: jadwalId, sekolahId },
       include: {
-        guru: { select: { namaGuru: true } },
+        guru: { select: { id: true, namaGuru: true } },
         hari: { select: { nama: true } },
         rombel: { select: { id: true, nama: true, tahunAjaranId: true } },
       },
@@ -226,7 +231,7 @@ export default async function PresensiPage({
                   <div className="mt-1 flex flex-wrap gap-2">
                     <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80">{jadwal.rombel.nama}</span>
                     <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80">{jadwal.hari.nama} · {jadwal.jamMulai}–{jadwal.jamSelesai}</span>
-                    <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80">{jadwal.guru.namaGuru}</span>
+                    <Link href={`/guru/${jadwal.guru.id}`} className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80 hover:bg-white/25 hover:underline">{jadwal.guru.namaGuru} ↗</Link>
                   </div>
                   {dates[0] && (
                     <p className="mt-1 text-xs text-white/50">
@@ -490,133 +495,94 @@ export default async function PresensiPage({
         </div>
       </div>
 
-      {/* Calendar grid */}
-      <div className="grid grid-cols-5 gap-3">
-        {HARI_ORDER.map((hariNama, idx) => {
-          const date = addDays(monday, idx);
-          const dateStr = isoDate(date);
-          const isToday = dateStr === todayStr;
-          const isPast = date < today;
-          const isFuture = date > today;
-          const slots = byHari[hariNama] ?? [];
-
-          return (
-            <div key={hariNama}
-              className={`flex flex-col rounded-2xl border overflow-hidden transition-all ${
-                isToday
-                  ? "border-indigo-400 shadow-lg shadow-indigo-100 ring-2 ring-indigo-200"
-                  : isFuture
-                  ? "border-gray-100 opacity-70"
-                  : "border-gray-200"
-              }`}
-            >
-              {/* Day header */}
-              <div className={`px-3 py-2.5 text-center ${
-                isToday ? "bg-indigo-600 text-white" : isFuture ? "bg-gray-50 text-gray-400" : "bg-gray-100 text-gray-700"
-              }`}>
-                <div className={`text-xs font-semibold uppercase tracking-wide ${isToday ? "text-indigo-100" : ""}`}>
-                  {hariNama}
-                </div>
-                <div className={`mt-0.5 text-lg font-black leading-none ${isToday ? "text-white" : ""}`}>
-                  {date.getDate()}
-                </div>
-                <div className={`text-[10px] ${isToday ? "text-indigo-200" : "text-gray-400"}`}>
-                  {date.toLocaleDateString("id-ID", { month: "short" })}
-                </div>
-                {isToday && (
-                  <div className="mt-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold text-white">
-                    HARI INI
-                  </div>
-                )}
-              </div>
-
-              {/* Slots */}
-              <div className="flex-1 space-y-2 bg-white p-2">
-                {slots.length === 0 ? (
-                  <div className="flex h-16 items-center justify-center text-xs text-gray-300">
-                    —
-                  </div>
-                ) : (
-                  slots.map((j) => {
-                    const rombelId = j.rombel?.id;
-                    const total = rombelId ? (totalPerRombel.get(rombelId) ?? 0) : 0;
-                    const done = rombelId ? (donePerRombel.get(rombelId) ?? 0) : 0;
-                    const belum = total - done;
-                    const allDone = isToday && total > 0 && belum === 0;
-                    const hasUndone = isToday && belum > 0;
-
-                    return (
-                      <Link key={j.id} href={`/presensi?jadwalId=${j.id}`}
-                        className={`block rounded-xl border p-2.5 transition-all hover:shadow-md hover:-translate-y-0.5 ${
-                          colorMap[j.mapel ?? ""] ?? MAPEL_COLORS[0]
-                        }`}
-                      >
-                        {/* Time */}
-                        <div className="font-mono text-[10px] font-medium opacity-60">
-                          {j.jamMulai ?? "—"}–{j.jamSelesai ?? "—"}
-                        </div>
-                        {/* Mapel */}
-                        <div className="mt-0.5 font-bold text-xs leading-tight line-clamp-2">
-                          {j.mapel ?? "—"}
-                        </div>
-                        {/* Rombel */}
-                        {j.rombel && (
-                          <div className="mt-1 text-[10px] opacity-70 font-medium">
-                            {j.rombel.nama}
-                          </div>
-                        )}
-                        {/* Attendance status badge (only today) */}
-                        {isToday && total > 0 && (
-                          <div className={`mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                            allDone ? "bg-emerald-500 text-white" :
-                            hasUndone ? "bg-amber-400 text-white animate-pulse" :
-                            "bg-white/50 text-current"
-                          }`}>
-                            {allDone ? "✓ Selesai" : `${belum} blm`}
-                          </div>
-                        )}
-                        {/* Guru */}
-                        <div className="mt-1 text-[10px] opacity-50 truncate">
-                          {j.guru.namaGuru.split(" ").slice(-2).join(" ")}
-                        </div>
-                      </Link>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {allJadwal.length === 0 && (
+      {/* Timetable — sama persis dengan jadwal (rows=jam, cols=hari) */}
+      {allJadwal.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 py-16 text-center">
           <div className="text-4xl">📅</div>
-          <p className="mt-3 text-sm text-gray-500">Belum ada jadwal mengajar yang tersedia.</p>
-          <Link href="/jadwal" className="mt-3 inline-block rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800">
-            Buat Jadwal
-          </Link>
+          <p className="mt-3 text-sm text-gray-500">Belum ada jadwal mengajar.</p>
+          <Link href="/jadwal" className="mt-3 inline-block rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800">Buat Jadwal</Link>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <table className="w-full min-w-[640px] border-collapse text-sm">
+            <thead>
+              <tr>
+                {/* Jam sidebar */}
+                <th className="bg-gray-900 text-white px-3 py-3 text-left text-xs font-semibold w-28">Jam</th>
+                {HARI_ORDER.map((hariNama, idx) => {
+                  const date = addDays(monday, idx);
+                  const dateStr = isoDate(date);
+                  const isToday = dateStr === todayStr;
+                  const isFuture = date > today;
+                  return (
+                    <th key={hariNama}
+                      className={`px-3 py-3 text-center text-xs font-semibold min-w-[130px] ${
+                        isToday ? "bg-indigo-600 text-white" : isFuture ? "bg-gray-800 text-gray-400" : "bg-gray-900 text-white"
+                      }`}>
+                      <div>{hariNama}</div>
+                      <div className={`mt-0.5 text-base font-black ${isToday ? "text-white" : "text-gray-300"}`}>
+                        {date.toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                      </div>
+                      {isToday && <div className="mt-0.5 text-[9px] font-bold bg-white/20 rounded-full px-2">HARI INI</div>}
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {/* Istirahat 1 */}
+              <tr><td colSpan={6} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">☕ 10:00 – 10:15 (Istirahat)</td></tr>
+              {JAM_MULAI.map((jam, jIdx) => (
+                <tr key={jam} className={jIdx % 2 === 0 ? "bg-white" : "bg-gray-50/40"}>
+                  {/* Jam label */}
+                  <td className="border border-gray-100 px-3 py-2 text-xs font-mono font-semibold text-gray-500 align-top whitespace-nowrap w-28">
+                    <div>{jam}</div>
+                    <div className="text-[10px] text-gray-400">–{JAM_LABEL[jam]?.split("–")[1] ?? ""}</div>
+                  </td>
+                  {HARI_ORDER.map((hariNama, idx) => {
+                    const date = addDays(monday, idx);
+                    const dateStr = isoDate(date);
+                    const isToday = dateStr === todayStr;
+                    const isFuture = date > today;
+                    const cells = (byHari[hariNama] ?? []).filter(j => j.jamMulai === jam);
+                    return (
+                      <td key={hariNama}
+                        className={`border border-gray-100 px-1.5 py-1.5 align-top ${isToday ? "bg-indigo-50/30" : ""}`}>
+                        {cells.length === 0 ? <div className="h-10" /> : (
+                          <div className="space-y-1">
+                            {cells.map(j => {
+                              const rombelId = j.rombel?.id;
+                              const total = rombelId ? (totalPerRombel.get(rombelId) ?? 0) : 0;
+                              const done = rombelId ? (donePerRombel.get(rombelId) ?? 0) : 0;
+                              const belum = total - done;
+                              const allDone = isToday && total > 0 && belum === 0;
+                              return (
+                                <Link key={j.id} href={`/presensi?jadwalId=${j.id}`}
+                                  className={`block rounded-lg border px-2 py-1.5 text-xs leading-tight transition-all hover:shadow-sm hover:-translate-y-0.5 ${colorMap[j.mapel ?? ""] ?? MAPEL_COLORS[0]}`}>
+                                  <div className="font-bold line-clamp-2">{j.mapel ?? "—"}</div>
+                                  {j.rombel && <div className="opacity-70 text-[10px]">{j.rombel.nama}</div>}
+                                  <div className="opacity-50 text-[10px] truncate">{j.guru.namaGuru.split(" ").slice(-2).join(" ")}</div>
+                                  {isToday && total > 0 && (
+                                    <div className={`mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-bold ${allDone ? "bg-emerald-500 text-white" : "bg-amber-400 text-white animate-pulse"}`}>
+                                      {allDone ? "✓ Selesai" : `${belum} blm`}
+                                    </div>
+                                  )}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+              {/* Istirahat 2 */}
+              <tr><td colSpan={6} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">☕ 13:15 – 13:30 (Istirahat)</td></tr>
+            </tbody>
+          </table>
         </div>
       )}
-
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 rounded-xl bg-gray-50 px-4 py-3 text-xs text-gray-500">
-        <span className="font-medium text-gray-700">Keterangan dot:</span>
-        {[
-          { color: "bg-emerald-500", label: "Hadir" },
-          { color: "bg-amber-400",   label: "Terlambat" },
-          { color: "bg-sky-400",     label: "Izin" },
-          { color: "bg-violet-400",  label: "Sakit" },
-          { color: "bg-red-500",     label: "Alpa" },
-          { color: "border-2 border-amber-400 bg-amber-50 animate-pulse", label: "Belum diisi (klik → Hadir)" },
-          { color: "bg-gray-100 border border-dashed border-gray-300", label: "Belum terjadwal" },
-        ].map((l) => (
-          <div key={l.label} className="flex items-center gap-1.5">
-            <div className={`h-3.5 w-3.5 shrink-0 rounded-full ${l.color}`} />
-            <span>{l.label}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

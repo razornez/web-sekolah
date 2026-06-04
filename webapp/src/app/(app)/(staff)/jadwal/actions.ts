@@ -111,6 +111,7 @@ export async function saveJadwal(
     data: { sekolahId, guruId, hariId: hari.id, rombelId, mapel, jamMulai, jamSelesai },
   });
   revalidatePath("/jadwal");
+  revalidatePath("/presensi");
   return { ok: true };
 }
 
@@ -120,6 +121,7 @@ export async function deleteJadwal(formData: FormData) {
   if (!id) return;
   await prisma.jadwalGuru.deleteMany({ where: { id, sekolahId } });
   revalidatePath("/jadwal");
+  revalidatePath("/presensi");
 }
 
 export const deleteJadwalAction = deleteJadwal;
