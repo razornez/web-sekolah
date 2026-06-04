@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { saveImage } from "@/lib/upload";
 
-export type FotoState = { ok: boolean; message?: string };
+export type FotoState = { ok: boolean; message?: string; url?: string };
 
 async function upload(kind: "guru" | "siswa", formData: FormData): Promise<FotoState> {
   const sekolahId = await requireStaff();
@@ -32,7 +32,7 @@ async function upload(kind: "guru" | "siswa", formData: FormData): Promise<FotoS
     await prisma.siswa.update({ where: { id: ownerId }, data: { foto: url } });
   }
   revalidatePath(`/${kind}/${ownerId}`);
-  return { ok: true, message: "Foto berhasil diperbarui." };
+  return { ok: true, message: "Foto berhasil diperbarui.", url };
 }
 
 export async function uploadFotoGuru(_prev: FotoState, fd: FormData) {

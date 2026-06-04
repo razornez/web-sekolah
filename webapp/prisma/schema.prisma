@@ -235,6 +235,8 @@ model Sekolah {
   tugas            Tugas[]
   ujian            Ujian[]
   auditLog         AuditLog[]
+  prestasiMaster   PrestasiMaster[]
+  beasiswaMaster   BeasiswaMaster[]
 
   @@map("sekolah")
 }
@@ -266,6 +268,7 @@ model User {
   ortu     OrangTuaWali[]
   logLogin         LogLogin[]
   pengumumanDibuat Pengumuman[]     @relation("PengumumanAuthor")
+  mutasiDiinput    MutasiSiswa[]    @relation("MutasiCreatedBy")
 
   @@unique([sekolahId, username])
   @@index([sekolahId, role])
@@ -443,10 +446,12 @@ model Siswa {
   anggotaRombel    AnggotaRombel[]
   anggotaEkstra    AnggotaEkstra[]
   pengumpulanTugas PengumpulanTugas[]
-  hasilUjian       HasilUjian[]
-  orangTuaWali     OrangTuaWali[]
-  beasiswa         BeasiswaSiswa[]
-  prestasi         PrestasiSiswa[]
+  hasilUjian           HasilUjian[]
+  orangTuaWali         OrangTuaWali[]
+  beasiswa             BeasiswaSiswa[]
+  prestasi             PrestasiSiswa[]
+  penerimaPrestasiList PenerimaPrestasi[]
+  penerimaBeasiswaList PenerimaBeasiswa[]
   kasus            KasusSiswa[]
   mutasi           MutasiSiswa[]
   nilaiRapor       NilaiRapor[]
@@ -1010,17 +1015,21 @@ model KasusSiswa {
 }
 
 model MutasiSiswa {
-  id         Int      @id @default(autoincrement())
-  sekolahId  Int      @map("sekolah_id")
-  siswaId    Int?     @map("siswa_id")
-  jenis      String // masuk / keluar
-  asalTujuan String?  @map("asal_tujuan")
-  alasan     String?
-  tanggal    DateTime @db.Date
+  id          Int      @id @default(autoincrement())
+  sekolahId   Int      @map("sekolah_id")
+  siswaId     Int?     @map("siswa_id")
+  jenis       String                          // masuk / keluar
+  asalSekolah String?  @map("asal_sekolah")  // rename dari asalTujuan
+  tujuanSekolah String? @map("tujuan_sekolah")
+  alasan      String?
+  tanggal     DateTime @db.Date
+  createdById String?  @map("created_by") @db.Uuid
 
-  sekolah Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
-  siswa   Siswa?  @relation(fields: [siswaId], references: [id], onDelete: SetNull)
+  sekolah   Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  siswa     Siswa?  @relation(fields: [siswaId], references: [id], onDelete: SetNull)
+  createdBy User?   @relation("MutasiCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
+  @@index([sekolahId])
   @@map("mutasi_siswa")
 }
 
@@ -1649,4 +1658,71 @@ model RefKelurahan {
   kecamatan   RefKecamatan @relation(fields: [kecamatanId], references: [kode])
   @@index([kecamatanId])
   @@map("ref_kelurahan")
+}
+
+// =============================================================================
+// PRESTASI & BEASISWA — Master-detail (group by achievement/scholarship)
+// =============================================================================
+
+model PrestasiMaster {
+  id            Int    @id @default(autoincrement())
+  sekolahId     Int    @map("sekolah_id")
+  nama          String                           // "Juara 1 OSN Matematika"
+  tingkat       String @default("Sekolah")       // Sekolah/Kecamatan/Kabupaten/Provinsi/Nasional
+  kategori      String @default("Akademik")      // Akademik/Non-akademik/Olahraga/Seni/dll
+  penyelenggara String?
+  tahun         String?
+  keterangan    String?
+
+  sekolah  Sekolah            @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  penerima PenerimaPrestasi[]
+
+  @@index([sekolahId])
+  @@map("prestasi_master")
+}
+
+model PenerimaPrestasi {
+  id         Int     @id @default(autoincrement())
+  prestasiId Int     @map("prestasi_id")
+  siswaId    Int     @map("siswa_id")
+  tahun      String?
+  keterangan String?
+
+  prestasi PrestasiMaster @relation(fields: [prestasiId], references: [id], onDelete: Cascade)
+  siswa    Siswa          @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+
+  @@unique([prestasiId, siswaId])
+  @@index([siswaId])
+  @@map("penerima_prestasi")
+}
+
+model BeasiswaMaster {
+  id            Int    @id @default(autoincrement())
+  sekolahId     Int    @map("sekolah_id")
+  nama          String                          // "Beasiswa KIP"
+  penyelenggara String?
+  kategori      String @default("Pemerintah")  // Pemerintah/Swasta/Yayasan/Internal
+  nominal       Int?                           // nominal standar per periode (Rp)
+  keterangan    String?
+
+  sekolah  Sekolah          @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  penerima PenerimaBeasiswa[]
+
+  @@index([sekolahId])
+  @@map("beasiswa_master")
+}
+
+model PenerimaBeasiswa {
+  id         Int     @id @default(autoincrement())
+  beasiswaId Int     @map("beasiswa_id")
+  siswaId    Int     @map("siswa_id")
+  tahun      String?
+  nominal    Int?    // bisa berbeda per penerima
+
+  beasiswa BeasiswaMaster @relation(fields: [beasiswaId], references: [id], onDelete: Cascade)
+  siswa    Siswa          @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+
+  @@unique([beasiswaId, siswaId])
+  @@index([siswaId])
+  @@map("penerima_beasiswa")
 }

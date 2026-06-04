@@ -189,7 +189,7 @@ async function main() {
           sekolahId: sid,
           siswaId: s.id,
           jenis: pick(["masuk", "keluar"]),
-          asalTujuan: pick(["SMA Negeri 2 Kota", "SMA Swasta Harapan", "SMA Negeri 3 Kabupaten"]),
+          asalSekolah: pick(["SMA Negeri 2 Kota", "SMA Swasta Harapan", "SMA Negeri 3 Kabupaten"]),
           alasan: pick(["Pindah domisili", "Ikut orang tua pindah tugas", "Atas permintaan orang tua"]),
           tanggal: daysAgo(Math.floor(Math.random() * 120)),
         },

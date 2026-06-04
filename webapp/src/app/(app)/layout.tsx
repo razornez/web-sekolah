@@ -52,42 +52,57 @@ export default async function AppLayout({
     ? STAFF_NAV.filter((n) => !n.key || canAccess(user.role, n.key))
     : PORTAL_NAV;
 
+  const roleColors: Record<string, string> = {
+    admin: "bg-red-100 text-red-700", operator: "bg-orange-100 text-orange-700",
+    kepsek: "bg-purple-100 text-purple-700", guru: "bg-blue-100 text-blue-700",
+    bendahara: "bg-green-100 text-green-700", bk: "bg-amber-100 text-amber-700",
+    perpustakaan: "bg-teal-100 text-teal-700", siswa: "bg-indigo-100 text-indigo-700",
+    ortu: "bg-pink-100 text-pink-700",
+  };
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <aside className="flex w-56 flex-col border-r border-gray-200 bg-white">
-        <div className="border-b border-gray-200 px-5 py-4 font-semibold text-gray-900">
-          Smart School
+    <div className="flex min-h-screen bg-[#f0f2f5]">
+      <aside className="flex w-60 flex-col bg-white shadow-sm">
+        {/* Logo/Brand */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-700 px-5 py-5">
+          <div className="text-lg font-bold text-white">🏫 Smart School</div>
+          <div className="mt-0.5 text-xs text-gray-400">Sistem Informasi Sekolah</div>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto p-2">
           {nav.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200"
             >
               {n.label}
             </Link>
           ))}
         </nav>
-        <div className="border-t border-gray-200 p-3 text-sm">
-          <div className="px-2 text-gray-900">{user.name}</div>
-          <div className="px-2 text-xs text-gray-500">
-            {user.role}
-            {user.sekolahSlug ? ` · ${user.sekolahSlug}` : ""}
+
+        {/* User info */}
+        <div className="border-t border-gray-100 p-3">
+          <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold text-gray-600">
+              {user.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-medium text-gray-800">{user.name}</div>
+              <div className="flex items-center gap-1">
+                <span className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${roleColors[user.role] ?? "bg-gray-100 text-gray-600"}`}>{user.role}</span>
+              </div>
+            </div>
           </div>
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-          >
-            <button className="mt-2 px-2 text-gray-500 hover:text-gray-900">
-              Keluar
+          <form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}>
+            <button className="mt-2 w-full rounded-lg py-1.5 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+              ↩ Keluar
             </button>
           </form>
         </div>
       </aside>
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 overflow-auto p-6">{children}</main>
     </div>
   );
 }

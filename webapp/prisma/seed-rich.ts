@@ -209,7 +209,7 @@ async function main() {
   for (const s of siswaAll.slice(0, 25)) {
     const ex = await prisma.mutasiSiswa.findFirst({ where: { siswaId: s.id }, select: { id: true } });
     if (!ex) {
-      await prisma.mutasiSiswa.create({ data: { sekolahId: sid, siswaId: s.id, jenis: pick(["masuk", "keluar"]), asalTujuan: pick(SEKOLAH_ASAL), alasan: pick(["Pindah domisili","Ikut orang tua","Melanjutkan ke pesantren","Atas permintaan keluarga"]), tanggal: daysAgo(rnd(1, 180)) } });
+      await prisma.mutasiSiswa.create({ data: { sekolahId: sid, siswaId: s.id, jenis: pick(["masuk", "keluar"]), asalSekolah: pick(SEKOLAH_ASAL), alasan: pick(["Pindah domisili","Ikut orang tua","Melanjutkan ke pesantren","Atas permintaan keluarga"]), tanggal: daysAgo(rnd(1, 180)) } });
       newMutasi++;
     }
   }
