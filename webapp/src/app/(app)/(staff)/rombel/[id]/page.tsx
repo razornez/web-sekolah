@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSekolahId } from "@/lib/session";
 import { addAnggota, removeAnggota } from "../actions";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 export default async function RombelDetailPage({
   params,
@@ -24,7 +25,7 @@ export default async function RombelDetailPage({
       tahunAjaran: { select: { tahun: true } },
       waliGuru: { select: { namaGuru: true } },
       anggota: {
-        include: { siswa: { select: { id: true, namaLengkap: true, nisn: true } } },
+        include: { siswa: { select: { id: true, namaLengkap: true, nisn: true, foto: true } } },
         orderBy: [{ nomorAbsen: "asc" }, { siswa: { namaLengkap: "asc" } }],
       },
     },
@@ -40,7 +41,7 @@ export default async function RombelDetailPage({
         },
         take: 10,
         orderBy: { namaLengkap: "asc" },
-        select: { id: true, namaLengkap: true, nisn: true },
+        select: { id: true, namaLengkap: true, nisn: true, foto: true },
       })
     : [];
 
@@ -86,9 +87,12 @@ export default async function RombelDetailPage({
                   <tr key={a.id} className="hover:bg-gray-50">
                     <td className="px-4 py-2 text-gray-500">{a.nomorAbsen ?? i + 1}</td>
                     <td className="px-4 py-2">
-                      <Link href={`/siswa/${a.siswa.id}`} className="text-gray-900 hover:underline">
-                        {a.siswa.namaLengkap}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <SiswaAvatar namaLengkap={a.siswa.namaLengkap} foto={a.siswa.foto} size="sm" />
+                        <Link href={`/siswa/${a.siswa.id}`} className="text-gray-900 hover:underline">
+                          {a.siswa.namaLengkap}
+                        </Link>
+                      </div>
                     </td>
                     <td className="px-4 py-2 text-gray-600">{a.siswa.nisn ?? "-"}</td>
                     <td className="px-4 py-2 text-right">
@@ -120,10 +124,13 @@ export default async function RombelDetailPage({
             <ul className="divide-y divide-gray-100">
               {kandidat.map((s) => (
                 <li key={s.id} className="flex items-center justify-between py-2 text-sm">
-                  <span>
-                    {s.namaLengkap}
-                    <span className="ml-1 text-xs text-gray-400">{s.nisn ?? ""}</span>
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <SiswaAvatar namaLengkap={s.namaLengkap} foto={s.foto} size="sm" />
+                    <span>
+                      {s.namaLengkap}
+                      <span className="ml-1 text-xs text-gray-400">{s.nisn ?? ""}</span>
+                    </span>
+                  </div>
                   <form action={addAnggota}>
                     <input type="hidden" name="rombelId" value={rombel.id} />
                     <input type="hidden" name="siswaId" value={s.id} />

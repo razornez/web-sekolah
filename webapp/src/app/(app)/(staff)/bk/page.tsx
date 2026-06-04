@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { addKasus, deleteKasus } from "./actions";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 const fmtTgl = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
@@ -68,7 +69,7 @@ export default async function BkPage({
     ? await prisma.siswa.findMany({
         where: { sekolahId, OR: [{ namaLengkap: { contains: q, mode: "insensitive" } }, { nisn: { contains: q } }] },
         take: 10, orderBy: { namaLengkap: "asc" },
-        select: { id: true, namaLengkap: true, nisn: true },
+        select: { id: true, namaLengkap: true, nisn: true, foto: true },
       })
     : [];
 
@@ -120,9 +121,7 @@ export default async function BkPage({
               {kandidat.map((s) => (
                 <Link key={s.id} href={`/bk?siswaId=${s.id}`}
                   className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50">
-                  <div className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600">
-                    {s.namaLengkap.charAt(0)}
-                  </div>
+                  <SiswaAvatar namaLengkap={s.namaLengkap} foto={s.foto} size="sm" />
                   <div>
                     <div className="text-sm font-medium text-gray-900">{s.namaLengkap}</div>
                     {s.nisn && <div className="text-xs text-gray-400">NISN: {s.nisn}</div>}

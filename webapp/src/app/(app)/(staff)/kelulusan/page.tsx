@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { saveKelulusan, saveSettingKelulusan } from "./actions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 const selCls = "rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";
 
@@ -18,12 +19,12 @@ export default async function KelulusanPage({
     prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { slug: true } }),
   ]);
 
-  let anggota: { siswaId: number; nomorAbsen: number | null; siswa: { namaLengkap: string }; status?: string }[] = [];
+  let anggota: { siswaId: number; nomorAbsen: number | null; siswa: { namaLengkap: string; foto: string | null }; status?: string }[] = [];
   if (rombelId) {
     const rows = await prisma.anggotaRombel.findMany({
       where: { rombelId, rombel: { sekolahId } },
       orderBy: [{ nomorAbsen: "asc" }, { siswa: { namaLengkap: "asc" } }],
-      select: { siswaId: true, nomorAbsen: true, siswa: { select: { namaLengkap: true } } },
+      select: { siswaId: true, nomorAbsen: true, siswa: { select: { namaLengkap: true, foto: true } } },
     });
     const lulus = await prisma.kelulusan.findMany({
       where: { siswaId: { in: rows.map((r) => r.siswaId) } },
@@ -79,7 +80,12 @@ export default async function KelulusanPage({
                 {anggota.map((a, i) => (
                   <tr key={a.siswaId}>
                     <td className="px-4 py-2 text-gray-500">{a.nomorAbsen ?? i + 1}</td>
-                    <td className="px-4 py-2 text-gray-900">{a.siswa.namaLengkap}</td>
+                    <td className="px-4 py-2 text-gray-900">
+                      <div className="flex items-center gap-2">
+                        <SiswaAvatar namaLengkap={a.siswa.namaLengkap} foto={a.siswa.foto} size="sm" />
+                        <span>{a.siswa.namaLengkap}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-2">
                       <select name={`status_${a.siswaId}`} defaultValue={a.status ?? ""} className="rounded-md border border-gray-300 px-2 py-1 text-sm">
                         <option value="">-</option>

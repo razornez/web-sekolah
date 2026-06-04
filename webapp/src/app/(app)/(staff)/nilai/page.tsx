@@ -6,6 +6,7 @@ import { PageGuide } from "@/components/PageGuide";
 import { RombelSelect } from "@/components/filters/RombelSelect";
 import { MapelSelect } from "@/components/filters/MapelSelect";
 import { PeriodeSelect } from "@/components/filters/PeriodeSelect";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 const selCls = "rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";
 const inCls = "w-20 rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
@@ -32,7 +33,7 @@ export default async function NilaiPage({
   let anggota: {
     siswaId: number;
     nomorAbsen: number | null;
-    siswa: { id: number; namaLengkap: string };
+    siswa: { id: number; namaLengkap: string; foto: string | null };
     nilai?: { nilaiPengetahuan: number | null; nilaiKeterampilan: number | null; nilaiAkhir: number | null; deskripsiCapaian: string | null };
   }[] = [];
 
@@ -41,7 +42,7 @@ export default async function NilaiPage({
       prisma.anggotaRombel.findMany({
         where: { rombelId, rombel: { sekolahId } },
         orderBy: [{ nomorAbsen: "asc" }, { siswa: { namaLengkap: "asc" } }],
-        select: { siswaId: true, nomorAbsen: true, siswa: { select: { id: true, namaLengkap: true } } },
+        select: { siswaId: true, nomorAbsen: true, siswa: { select: { id: true, namaLengkap: true, foto: true } } },
       }),
       prisma.nilaiRapor.findMany({
         where: { mapelId, periodeId, siswa: { sekolahId } },
@@ -147,10 +148,12 @@ export default async function NilaiPage({
                     <tr key={a.siswaId} className="hover:bg-gray-50">
                       <td className="px-4 py-2 text-gray-400">{a.nomorAbsen ?? i + 1}</td>
                       <td className="px-4 py-2">
-                        {/* Link ke halaman detail siswa */}
-                        <Link href={`/siswa/${a.siswa.id}`} className="font-medium text-gray-900 hover:text-indigo-600 hover:underline">
-                          {a.siswa.namaLengkap}
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <SiswaAvatar namaLengkap={a.siswa.namaLengkap} foto={a.siswa.foto} size="sm" />
+                          <Link href={`/siswa/${a.siswa.id}`} className="font-medium text-gray-900 hover:text-indigo-600 hover:underline">
+                            {a.siswa.namaLengkap}
+                          </Link>
+                        </div>
                         {nilaiVal != null && (
                           <span className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${nilaiVal >= 90 ? "bg-green-100 text-green-700" : nilaiVal >= 80 ? "bg-blue-100 text-blue-700" : nilaiVal >= 70 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
                             {nilaiVal}

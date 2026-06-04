@@ -4,6 +4,7 @@ import { requireModule } from "@/lib/permissions";
 import { naikanKelas } from "./actions";
 import { PageGuide } from "@/components/PageGuide";
 import { RombelSelect } from "@/components/filters/RombelSelect";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 const selCls =
   "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition-colors focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 hover:border-gray-400 appearance-none";
@@ -25,7 +26,7 @@ export default async function KenaikanKelasPage({
         tingkat: { select: { nama: true } },
         _count: { select: { anggota: true } },
         anggota: {
-          include: { siswa: { select: { id: true, namaLengkap: true, nisn: true } } },
+          include: { siswa: { select: { id: true, namaLengkap: true, nisn: true, foto: true } } },
           orderBy: { nomorAbsen: "asc" },
           take: 50,
         },
@@ -214,6 +215,7 @@ export default async function KenaikanKelasPage({
                           {r.anggota.map((a, i) => (
                             <li key={a.siswa.id} className="flex items-center gap-2 rounded py-0.5 text-xs">
                               <span className="w-5 shrink-0 text-gray-400">{i + 1}.</span>
+                              <SiswaAvatar namaLengkap={a.siswa.namaLengkap} foto={a.siswa.foto} size="sm" />
                               <span className="text-gray-800">{a.siswa.namaLengkap}</span>
                               {a.siswa.nisn && <span className="ml-auto text-gray-400">{a.siswa.nisn}</span>}
                             </li>

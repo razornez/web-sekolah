@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
 import { PageGuide } from "@/components/PageGuide";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 const PER = 25;
 const STATUS_BADGE: Record<string, string> = {
@@ -141,7 +142,12 @@ export default async function SiswaPage({
             {rows.length === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">Tidak ada siswa.</td></tr>}
             {rows.map((s) => (
               <tr key={s.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 font-medium text-gray-900"><Link href={`/siswa/${s.id}`} className="hover:underline">{s.namaLengkap}</Link></td>
+                <td className="px-4 py-2 font-medium text-gray-900">
+                  <div className="flex items-center gap-2">
+                    <SiswaAvatar namaLengkap={s.namaLengkap} foto={s.foto} size="sm" />
+                    <Link href={`/siswa/${s.id}`} className="hover:underline">{s.namaLengkap}</Link>
+                  </div>
+                </td>
                 <td className="px-4 py-2"><div className="text-xs text-gray-600">{s.nisn ?? "—"}</div><div className="text-xs text-gray-400">{s.nis ?? ""}</div></td>
                 <td className="px-4 py-2">{s.jenisKelamin==="L"?<span className="text-blue-600">♂</span>:s.jenisKelamin==="P"?<span className="text-pink-600">♀</span>:<span className="text-gray-300">—</span>}</td>
                 <td className="px-4 py-2 text-gray-600">{s.anggotaRombel[0]?.rombel.nama ?? "—"}</td>

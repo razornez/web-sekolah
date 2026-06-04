@@ -7,6 +7,7 @@ import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 import { PageGuide } from "@/components/PageGuide";
 import { saveMutasi, deleteMutasi } from "../prestasi/actions";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1.5 text-sm outline-none focus:border-gray-900";
 const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
@@ -35,7 +36,7 @@ export default async function MutasiPage({ searchParams }: { searchParams: Promi
     prisma.mutasiSiswa.findMany({
       where, orderBy: { tanggal: "desc" }, skip: (page - 1) * PER, take: PER,
       include: {
-        siswa: { select: { id: true, namaLengkap: true, nisn: true, anggotaRombel: { orderBy: { id: "desc" }, take: 1, include: { rombel: { select: { nama: true } } } } } },
+        siswa: { select: { id: true, namaLengkap: true, nisn: true, foto: true, anggotaRombel: { orderBy: { id: "desc" }, take: 1, include: { rombel: { select: { nama: true } } } } } },
         createdBy: { select: { namaLengkap: true, role: true } },
       },
     }),
@@ -151,7 +152,10 @@ export default async function MutasiPage({ searchParams }: { searchParams: Promi
                 <td className="px-4 py-3">
                   {m.siswa ? (
                     <div>
-                      <Link href={`/siswa/${m.siswa.id}`} className="font-medium text-gray-900 hover:text-indigo-700 hover:underline">{m.siswa.namaLengkap}</Link>
+                      <div className="flex items-center gap-2">
+                        <SiswaAvatar namaLengkap={m.siswa.namaLengkap} foto={m.siswa.foto} size="sm" />
+                        <Link href={`/siswa/${m.siswa.id}`} className="font-medium text-gray-900 hover:text-indigo-700 hover:underline">{m.siswa.namaLengkap}</Link>
+                      </div>
                       <div className="text-xs text-gray-400">{m.siswa.nisn ?? "—"}{m.siswa.anggotaRombel[0] ? ` · ${m.siswa.anggotaRombel[0].rombel.nama}` : ""}</div>
                     </div>
                   ) : <span className="text-gray-400">—</span>}

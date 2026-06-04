@@ -5,6 +5,7 @@ import { RombelSelect } from "@/components/filters/RombelSelect";
 import { MapelSelect } from "@/components/filters/MapelSelect";
 import { PeriodeSelect } from "@/components/filters/PeriodeSelect";
 import { saveEntriNilai } from "./actions";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 const TIPE_LABEL: Record<string, { label: string; color: string }> = {
   harian:         { label: "Ulangan Harian", color: "bg-blue-100 text-blue-700" },
@@ -36,7 +37,7 @@ export default async function EntriNilaiPage({
   let anggota: {
     siswaId: number;
     nomorAbsen: number | null;
-    siswa: { id: number; namaLengkap: string };
+    siswa: { id: number; namaLengkap: string; foto: string | null };
   }[] = [];
   let existingEntri: Record<number, { id: bigint; nilai: number; keterangan: string | null }[]> = {};
 
@@ -45,7 +46,7 @@ export default async function EntriNilaiPage({
       prisma.anggotaRombel.findMany({
         where: { rombelId, rombel: { sekolahId } },
         orderBy: [{ nomorAbsen: "asc" }, { siswa: { namaLengkap: "asc" } }],
-        select: { siswaId: true, nomorAbsen: true, siswa: { select: { id: true, namaLengkap: true } } },
+        select: { siswaId: true, nomorAbsen: true, siswa: { select: { id: true, namaLengkap: true, foto: true } } },
       }),
       prisma.entriNilai.findMany({
         where: { mapelId, periodeId, rombelId, sekolahId, tipe: tipe as never },
@@ -135,9 +136,12 @@ export default async function EntriNilaiPage({
                       <tr key={a.siswaId} className="hover:bg-gray-50">
                         <td className="px-4 py-2 text-gray-400">{a.nomorAbsen ?? i + 1}</td>
                         <td className="px-4 py-2">
-                          <Link href={`/siswa/${a.siswa.id}`} className="font-medium text-gray-900 hover:text-indigo-600 hover:underline">
-                            {a.siswa.namaLengkap}
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <SiswaAvatar namaLengkap={a.siswa.namaLengkap} foto={a.siswa.foto} size="sm" />
+                            <Link href={`/siswa/${a.siswa.id}`} className="font-medium text-gray-900 hover:text-indigo-600 hover:underline">
+                              {a.siswa.namaLengkap}
+                            </Link>
+                          </div>
                           {avg != null && (
                             <span className={`ml-2 rounded px-1.5 py-0.5 text-xs ${avg >= 75 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                               rata {avg}

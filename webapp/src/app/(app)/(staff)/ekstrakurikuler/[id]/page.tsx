@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { addAnggotaEkstra, removeAnggotaEkstra } from "../actions";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
+import { SiswaAvatar } from "@/components/SiswaAvatar";
 
 export default async function EkstraDetailPage({
   params,
@@ -21,7 +22,7 @@ export default async function EkstraDetailPage({
     include: {
       pembina: { select: { namaGuru: true } },
       anggota: {
-        include: { siswa: { select: { id: true, namaLengkap: true, nisn: true } } },
+        include: { siswa: { select: { id: true, namaLengkap: true, nisn: true, foto: true } } },
         orderBy: { siswa: { namaLengkap: "asc" } },
       },
     },
@@ -37,7 +38,7 @@ export default async function EkstraDetailPage({
         },
         take: 10,
         orderBy: { namaLengkap: "asc" },
-        select: { id: true, namaLengkap: true, nisn: true },
+        select: { id: true, namaLengkap: true, nisn: true, foto: true },
       })
     : [];
 
@@ -59,7 +60,12 @@ export default async function EkstraDetailPage({
               {ekstra.anggota.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-gray-400">Belum ada anggota.</td></tr>}
               {ekstra.anggota.map((a) => (
                 <tr key={a.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 text-gray-900">{a.siswa.namaLengkap}</td>
+                  <td className="px-4 py-2 text-gray-900">
+                    <div className="flex items-center gap-2">
+                      <SiswaAvatar namaLengkap={a.siswa.namaLengkap} foto={a.siswa.foto} size="sm" />
+                      <span>{a.siswa.namaLengkap}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-2 text-gray-600">{a.siswa.nisn ?? "-"}</td>
                   <td className="px-4 py-2 text-right">
                     <form action={removeAnggotaEkstra} className="inline">
@@ -85,7 +91,10 @@ export default async function EkstraDetailPage({
             <ul className="divide-y divide-gray-100">
               {kandidat.map((s) => (
                 <li key={s.id} className="flex items-center justify-between py-2 text-sm">
-                  <span>{s.namaLengkap} <span className="text-xs text-gray-400">{s.nisn ?? ""}</span></span>
+                  <div className="flex items-center gap-2">
+                    <SiswaAvatar namaLengkap={s.namaLengkap} foto={s.foto} size="sm" />
+                    <span>{s.namaLengkap} <span className="text-xs text-gray-400">{s.nisn ?? ""}</span></span>
+                  </div>
                   <form action={addAnggotaEkstra}>
                     <input type="hidden" name="ekstraId" value={ekstra.id} />
                     <input type="hidden" name="siswaId" value={s.id} />
