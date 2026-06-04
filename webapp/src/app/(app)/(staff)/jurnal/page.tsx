@@ -1,7 +1,10 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { GuruSelect } from "@/components/filters/GuruSelect";
+import { MapelSelect } from "@/components/filters/MapelSelect";
+import { RombelSelect } from "@/components/filters/RombelSelect";
 import { createJurnal, deleteJurnal } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
@@ -13,7 +16,7 @@ export default async function JurnalPage() {
     where: { sekolahId },
     orderBy: { tanggal: "desc" },
     take: 100,
-    include: { guru: { select: { namaGuru: true } } },
+    include: { guru: { select: { id: true, namaGuru: true } } },
   });
   const today = new Date().toISOString().slice(0, 10);
 
@@ -28,7 +31,14 @@ export default async function JurnalPage() {
         </div>
         <div><label className="block text-xs text-gray-500">Tanggal</label><input type="date" name="tanggal" defaultValue={today} className={inCls} /></div>
         <div><label className="block text-xs text-gray-500">Kelas</label><input name="kelas" className={`${inCls} w-24`} /></div>
-        <div><label className="block text-xs text-gray-500">Mapel</label><input name="mapel" className={inCls} /></div>
+        <div>
+          <label className="block text-xs text-gray-500">Mapel</label>
+          <MapelSelect sekolahId={sekolahId} name="mapel" defaultValue="" emptyLabel="— pilih mapel —" className={inCls} />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-500">Kelas</label>
+          <RombelSelect sekolahId={sekolahId} name="kelas" defaultValue="" className={inCls} />
+        </div>
         <div className="flex-1"><label className="block text-xs text-gray-500">Materi</label><input name="materi" className={`${inCls} w-full`} /></div>
         <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Catat</button>
       </form>
@@ -43,7 +53,11 @@ export default async function JurnalPage() {
             {rows.map((j) => (
               <tr key={j.id} className="hover:bg-gray-50">
                 <td className="px-4 py-2 text-gray-600">{fmt(j.tanggal)}</td>
-                <td className="px-4 py-2 text-gray-900">{j.guru.namaGuru}</td>
+                <td className="px-4 py-2">
+                  <Link href={`/guru/${j.guru.id}`} className="font-medium text-gray-900 hover:underline hover:text-indigo-700">
+                    {j.guru.namaGuru}
+                  </Link>
+                </td>
                 <td className="px-4 py-2 text-gray-600">{j.kelas ?? "-"}</td>
                 <td className="px-4 py-2 text-gray-600">{j.mapel ?? "-"}</td>
                 <td className="px-4 py-2 text-gray-600">{j.materi ?? "-"}</td>

@@ -3,6 +3,7 @@ import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import { isStaff } from "@/lib/session";
 import { canAccess, type ModuleKey } from "@/lib/permissions";
+import { NavMenu } from "./NavMenu";
 
 const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
   { href: "/dashboard", label: "Dashboard" }, // selalu tampil utk staf
@@ -71,18 +72,8 @@ export default async function AppLayout({
           <div className="mt-0.5 text-xs text-gray-400">Sistem Informasi Sekolah</div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto p-2">
-          {nav.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200"
-            >
-              {n.label}
-            </Link>
-          ))}
-        </nav>
+        {/* Nav — active state via client component */}
+        <NavMenu nav={nav} />
 
         {/* User info */}
         <div className="border-t border-gray-100 p-3">

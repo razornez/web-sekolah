@@ -1246,13 +1246,14 @@ model KategoriSarpras {
 }
 
 model Sarpras {
-  id         Int     @id @default(autoincrement())
-  sekolahId  Int     @map("sekolah_id")
-  kategoriId Int?    @map("kategori_id")
-  nama       String
-  jumlah     Int     @default(0)
-  kondisi    String?
-  keterangan String?
+  id               Int     @id @default(autoincrement())
+  sekolahId        Int     @map("sekolah_id")
+  kategoriId       Int?    @map("kategori_id")
+  nama             String
+  jumlah           Int     @default(0)
+  kondisi          String?
+  tahunPengadaan   Int?    @map("tahun_pengadaan")
+  keterangan       String?
 
   sekolah  Sekolah          @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   kategori KategoriSarpras? @relation(fields: [kategoriId], references: [id])
@@ -1558,10 +1559,12 @@ model Pengumuman {
 }
 
 model Ekstrakurikuler {
-  id            Int    @id @default(autoincrement())
-  sekolahId     Int    @map("sekolah_id")
+  id            Int       @id @default(autoincrement())
+  sekolahId     Int       @map("sekolah_id")
   nama          String
-  pembinaGuruId Int?   @map("pembina_guru_id")
+  deskripsi     String?
+  pembinaGuruId Int?      @map("pembina_guru_id")
+  deletedAt     DateTime? @map("deleted_at")
 
   sekolah Sekolah         @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   pembina Guru?           @relation("PembinaEkstra", fields: [pembinaGuruId], references: [id])

@@ -20,6 +20,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Semua elemen interaktif pakai cursor pointer */
+button, [role="button"], summary, label[for], select,
+a[href], [tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
 /* Better scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #f1f1f1; }

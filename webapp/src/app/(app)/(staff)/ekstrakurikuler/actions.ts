@@ -30,11 +30,20 @@ export async function updateEkstra(formData: FormData) {
   revalidatePath("/ekstrakurikuler");
 }
 
+/** Soft delete — tidak bisa hard delete karena ada riwayat anggota */
 export async function deleteEkstra(formData: FormData) {
   const sekolahId = await requireModule("ekstrakurikuler");
   const id = Number(formData.get("id"));
   if (!id) return;
-  await prisma.ekstrakurikuler.deleteMany({ where: { id, sekolahId } });
+  await prisma.ekstrakurikuler.updateMany({ where: { id, sekolahId }, data: { deletedAt: new Date() } });
+  revalidatePath("/ekstrakurikuler");
+}
+
+export async function restoreEkstra(formData: FormData) {
+  const sekolahId = await requireModule("ekstrakurikuler");
+  const id = Number(formData.get("id"));
+  if (!id) return;
+  await prisma.ekstrakurikuler.updateMany({ where: { id, sekolahId }, data: { deletedAt: null } });
   revalidatePath("/ekstrakurikuler");
 }
 

@@ -2,66 +2,192 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
-import { createEkstra, updateEkstra, deleteEkstra } from "./actions";
+import { ConfirmForm } from "@/components/ConfirmForm";
+import { GuruSelect } from "@/components/filters/GuruSelect";
+import { createEkstra, deleteEkstra, restoreEkstra } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
-export default async function EkstrakurikulerPage() {
-  const sekolahId = await requireModule("ekstrakurikuler");
-  const [rows, guru] = await Promise.all([
-    prisma.ekstrakurikuler.findMany({
-      where: { sekolahId },
-      orderBy: { nama: "asc" },
-      include: { pembina: { select: { namaGuru: true } }, _count: { select: { anggota: true } } },
-    }),
-    prisma.guru.findMany({ where: { sekolahId }, orderBy: { namaGuru: "asc" }, select: { id: true, namaGuru: true } }),
-  ]);
+// Warna card per ekstra berdasarkan hash nama
+const CARD_COLORS = [
+  "bg-blue-50 border-blue-200",
+  "bg-emerald-50 border-emerald-200",
+  "bg-purple-50 border-purple-200",
+  "bg-amber-50 border-amber-200",
+  "bg-rose-50 border-rose-200",
+  "bg-cyan-50 border-cyan-200",
+  "bg-orange-50 border-orange-200",
+  "bg-teal-50 border-teal-200",
+];
+function cardColor(nama: string) {
+  let h = 0;
+  for (const c of nama) h = (h * 31 + c.charCodeAt(0)) & 0xfffff;
+  return CARD_COLORS[h % CARD_COLORS.length];
+}
 
-  const GuruSelect = ({ value }: { value?: number | null }) => (
-    <select name="pembinaGuruId" defaultValue={value ?? ""} className={inCls}>
-      <option value="">- pembina -</option>
-      {guru.map((g) => <option key={g.id} value={g.id}>{g.namaGuru}</option>)}
-    </select>
-  );
+// Kategori ekskul sederhana dari nama
+const KATEGORI_ICON: [RegExp, string][] = [
+  [/pramuka|scout/i, "⛺"],
+  [/basket|voli|futsal|sepak.*bola|bola/i, "⚽"],
+  [/seni|tari|musik|paduan.*suara|drama|teater/i, "🎭"],
+  [/pmr|kesehatan|medis/i, "🏥"],
+  [/komputer|coding|robotik|tekno/i, "💻"],
+  [/english|debat|speak|jurnali/i, "📢"],
+  [/paskibra|drumband/i, "🥁"],
+  [/karate|silat|pencak|taekwondo|beladiri/i, "🥋"],
+  [/renang|atletik|lari/i, "🏃"],
+];
+function getIcon(nama: string) {
+  for (const [re, icon] of KATEGORI_ICON) if (re.test(nama)) return icon;
+  return "🎯";
+}
+
+export default async function EkstrakurikulerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; arsip?: string }>;
+}) {
+  const sekolahId = await requireModule("ekstrakurikuler");
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+  const showArsip = sp.arsip === "1";
+
+  const rows = await prisma.ekstrakurikuler.findMany({
+    where: {
+      sekolahId,
+      deletedAt: showArsip ? { not: null } : null,
+      ...(q ? { nama: { contains: q, mode: "insensitive" } } : {}),
+    },
+    orderBy: { nama: "asc" },
+    include: {
+      pembina: { select: { id: true, namaGuru: true } },
+      _count: { select: { anggota: true } },
+    },
+  });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">Ekstrakurikuler</h1>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Ekstrakurikuler</h1>
+          <p className="text-sm text-gray-500">{rows.length} kegiatan {showArsip ? "(arsip)" : "aktif"}</p>
+        </div>
+        <div className="flex gap-2">
+          <Link href={showArsip ? "/ekstrakurikuler" : "/ekstrakurikuler?arsip=1"}
+            className={`rounded-lg border px-3 py-2 text-sm ${showArsip ? "border-red-300 bg-red-50 text-red-700" : "border-gray-300 hover:bg-gray-50"}`}>
+            {showArsip ? "← Aktif" : "🗑 Arsip"}
+          </Link>
+        </div>
+      </div>
 
-      <form action={createEkstra} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-white p-4">
-        <div className="flex-1"><label className="block text-xs text-gray-500">Nama</label><input name="nama" required placeholder="Pramuka" className={`${inCls} w-full`} /></div>
-        <div><label className="block text-xs text-gray-500">Pembina</label><GuruSelect /></div>
-        <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Tambah</button>
+      {/* Tambah form */}
+      {!showArsip && (
+        <details className="group rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 select-none">
+            <span className="text-sm font-semibold text-gray-800">+ Tambah Ekstrakurikuler</span>
+            <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
+            <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
+          </summary>
+          <form action={createEkstra} className="border-t border-gray-100 px-5 py-4 flex flex-wrap items-end gap-3">
+            <div className="flex-1 min-w-48">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Nama *</label>
+              <input name="nama" required placeholder="Pramuka, Basket, Band…" className={`${inCls} w-full`} />
+            </div>
+            <div className="flex-1 min-w-48">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Pembina</label>
+              <GuruSelect sekolahId={sekolahId} name="pembinaGuruId" emptyLabel="— pilih pembina —" className={inCls} />
+            </div>
+            <div className="flex-1 min-w-40">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Deskripsi</label>
+              <input name="deskripsi" placeholder="Opsional" className={`${inCls} w-full`} />
+            </div>
+            <button className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Simpan</button>
+          </form>
+        </details>
+      )}
+
+      {/* Search */}
+      <form className="flex gap-2">
+        <input type="hidden" name="arsip" value={showArsip ? "1" : ""} />
+        <input name="q" defaultValue={q} placeholder="Cari nama ekstrakurikuler…"
+          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900 max-w-xs" />
+        <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+        {q && <Link href={`/ekstrakurikuler?arsip=${showArsip ? "1" : ""}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">✕</Link>}
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-500">
-            <tr><th className="px-4 py-2 font-medium">Ekstrakurikuler</th><th className="px-4 py-2 font-medium">Anggota</th><th className="px-4 py-2 font-medium text-right">Aksi</th></tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {rows.length === 0 && <tr><td colSpan={3} className="px-4 py-8 text-center text-gray-400">Belum ada ekstrakurikuler.</td></tr>}
-            {rows.map((e) => (
-              <tr key={e.id}>
-                <td className="px-4 py-2">
-                  <form action={updateEkstra} className="flex flex-wrap items-center gap-2">
+      {/* Grid cards */}
+      {rows.length === 0 ? (
+        <div className="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
+          <div className="text-5xl">{showArsip ? "🗄" : "🎯"}</div>
+          <p className="mt-3 text-sm text-gray-500">{showArsip ? "Tidak ada arsip." : "Belum ada ekstrakurikuler."}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {rows.map((e) => (
+            <div key={e.id}
+              className={`group rounded-2xl border ${cardColor(e.nama)} overflow-hidden transition-all hover:shadow-md ${e.deletedAt ? "opacity-60" : ""}`}>
+              {/* Card header */}
+              <div className="px-4 py-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-3xl">{getIcon(e.nama)}</div>
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/ekstrakurikuler/${e.id}`}
+                      className="font-bold text-gray-900 hover:text-indigo-700 hover:underline leading-tight line-clamp-2 block">
+                      {e.nama}
+                    </Link>
+                    {e.deskripsi && (
+                      <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{e.deskripsi}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 rounded-lg bg-white/60 px-2.5 py-1.5">
+                    <span className="text-base font-black text-gray-900">{e._count.anggota}</span>
+                    <span className="text-xs text-gray-500">anggota</span>
+                  </div>
+                  {e.pembina && (
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <div className="h-5 w-5 flex items-center justify-center rounded-full bg-white/60 text-[9px] font-bold text-gray-700 shrink-0">
+                        {e.pembina.namaGuru.charAt(0)}
+                      </div>
+                      <Link href={`/guru/${e.pembina.id}`}
+                        className="truncate text-xs text-gray-600 hover:underline hover:text-indigo-600">
+                        {e.pembina.namaGuru.split(" ").slice(-2).join(" ")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer actions */}
+              <div className="flex items-center justify-between border-t border-white/50 bg-white/40 px-4 py-2">
+                {e.deletedAt ? (
+                  <form action={restoreEkstra}>
                     <input type="hidden" name="id" value={e.id} />
-                    <input name="nama" defaultValue={e.nama} className={inCls} />
-                    <GuruSelect value={e.pembinaGuruId} />
-                    <button className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100">Simpan</button>
+                    <button className="text-xs text-green-700 hover:underline">↩ Pulihkan</button>
                   </form>
-                </td>
-                <td className="px-4 py-2 text-gray-600">
-                  <Link href={`/ekstrakurikuler/${e.id}`} className="text-gray-700 hover:underline">{e._count.anggota} anggota</Link>
-                </td>
-                <td className="px-4 py-2 text-right">
-                  <ConfirmDelete action={deleteEkstra} id={e.id} message={`Hapus "${e.nama}"?`} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                ) : (
+                  <Link href={`/ekstrakurikuler/${e.id}`} className="text-xs text-gray-600 hover:text-indigo-700 hover:underline font-medium">
+                    Kelola Anggota →
+                  </Link>
+                )}
+                <ConfirmForm
+                  action={deleteEkstra}
+                  message={`Arsipkan "${e.nama}"? Data anggota tersimpan dan bisa dipulihkan kapan saja.`}
+                >
+                  <input type="hidden" name="id" value={e.id} />
+                  <button className="text-xs text-red-500 hover:underline">
+                    {e.deletedAt ? "Hapus" : "🗑 Arsipkan"}
+                  </button>
+                </ConfirmForm>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

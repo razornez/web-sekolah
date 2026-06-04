@@ -294,6 +294,9 @@ export default async function BkPage({
                       <Link href={`/bk?siswaId=${k.siswa?.id}`} className="text-xs font-semibold text-gray-900 hover:underline">
                         {k.siswa?.namaLengkap ?? "—"}
                       </Link>
+                      {k.siswa?.id && (
+                        <Link href={`/siswa/${k.siswa.id}`} className="text-[10px] text-gray-400 hover:text-indigo-600 hover:underline">detail ↗</Link>
+                      )}
                       <div className="text-[10px] text-gray-500">{k.namaKasus} · {fmtTgl(k.tanggal)}</div>
                     </div>
                     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${k.poin >= 25 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>

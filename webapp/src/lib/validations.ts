@@ -137,11 +137,12 @@ export const kategoriSarprasSchema = z.object({
 export const sarprasSchema = z.object({
   nama: z.string().trim().min(1, "Nama wajib diisi"),
   kategoriId: z.preprocess(
-    emptyToNull,
+    (v) => (v === "__lainnya" || v === "" || v === null || v === undefined ? null : v),
     z.coerce.number().int().positive().nullable(),
   ),
   jumlah: z.coerce.number().int().min(0).default(0),
   kondisi: optStr,
+  tahunPengadaan: z.preprocess(emptyToNull, z.coerce.number().int().min(1900).max(2099).nullable()),
   keterangan: optStr,
 });
 
