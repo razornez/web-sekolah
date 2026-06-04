@@ -116,22 +116,18 @@ export default async function PresensiPage({
     let semEnd: Date;
 
     if (periodeAktif?.tanggalMulai && periodeAktif?.tanggalSelesai) {
+      // Gunakan FULL rentang periode — masa depan tampil sebagai lingkaran abu-abu
       semStart = periodeAktif.tanggalMulai;
-      // Tidak melebihi hari ini + 7 hari
-      semEnd = periodeAktif.tanggalSelesai < addDays(today, 7)
-        ? periodeAktif.tanggalSelesai
-        : addDays(today, 7);
+      semEnd = periodeAktif.tanggalSelesai;
     } else {
       // Fallback: Juli 14 tahun aktif + 16 minggu
       const ta = await prisma.tahunAjaran.findFirst({ where: { sekolahId, aktif: true }, select: { tahun: true } });
       const yr = ta ? parseInt(ta.tahun.slice(0, 4)) : today.getFullYear() - (today.getMonth() < 6 ? 1 : 0);
       semStart = new Date(yr, 6, 14);
-      semEnd = addDays(semStart, 16 * 7) < addDays(today, 7)
-        ? addDays(semStart, 16 * 7)
-        : addDays(today, 7);
+      semEnd = addDays(semStart, 16 * 7);
     }
 
-    // Semua tanggal kemunculan jadwal ini dalam 1 semester
+    // Semua kemunculan jadwal dalam semester — jumlah kolom = jumlah pertemuan sesuai kalender akademik
     const dates = occurrenceDates(jadwal.hari.nama, semStart, semEnd);
 
     // Current week's Monday for highlight
@@ -155,11 +151,13 @@ export default async function PresensiPage({
       lookup.set(`${k.siswaId}-${isoDate(k.tanggal)}`, k.status);
     }
 
-    // Attendance stats
-    const totalCells = anggota.length * dates.filter((d) => d <= today).length;
+    // Attendance stats — hanya hitung hari yang sudah lewat (bukan masa depan)
+    const pastDates = dates.filter((d) => d <= today);
+    const totalCells = anggota.length * pastDates.length;
     const hadirCount = kehadiran.filter((k) => k.status === "hadir" || k.status === "terlambat").length;
     const alpaCount = kehadiran.filter((k) => k.status === "alpa").length;
     const belumCount = totalCells - kehadiran.length;
+    const totalPertemuan = dates.length; // seluruh semester termasuk masa depan
 
     return (
       <div className="space-y-4">
@@ -175,7 +173,11 @@ export default async function PresensiPage({
               <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">{jadwal.hari.nama} · {jadwal.jamMulai}–{jadwal.jamSelesai}</span>
               <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">{jadwal.guru.namaGuru}</span>
             </div>
-            <p className="mt-1 text-xs text-gray-500">{anggota.length} siswa · {dates.filter(d => d <= today).length} pertemuan tercatat</p>
+            <p className="mt-1 text-xs text-gray-500">
+              {anggota.length} siswa ·{" "}
+              <span className="font-semibold text-gray-700">{totalPertemuan} pertemuan semester</span>
+              {" "}({pastDates.length} sudah berlalu · {totalPertemuan - pastDates.length} akan datang)
+            </p>
           </div>
         </div>
 
