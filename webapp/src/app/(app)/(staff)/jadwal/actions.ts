@@ -45,6 +45,8 @@ export async function saveJadwal(
 
   if (!guruId) return { ok: false, error: "Guru wajib dipilih." };
   if (!HARI.includes(namaHari)) return { ok: false, error: "Hari tidak valid." };
+  if (!mapel) return { ok: false, error: "Mapel wajib dipilih." };
+  if (!rombelId) return { ok: false, error: "Kelas / Rombel wajib dipilih." };
 
   const guru = await prisma.guru.findFirst({
     where: { id: guruId, sekolahId },

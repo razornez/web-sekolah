@@ -112,18 +112,18 @@ export function TambahJadwalForm({
 
         {/* Mapel */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Mapel</label>
-          <select name="mapel" defaultValue="" className={`${sel} min-w-[150px]`}>
-            <option value="">— pilih mapel —</option>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Mapel <span className="text-red-500">*</span></label>
+          <select name="mapel" required defaultValue="" className={`${sel} min-w-[150px]`}>
+            <option value="" disabled>— pilih mapel —</option>
             {mapelOptions.map((m) => <option key={m.key} value={m.value}>{m.label}</option>)}
           </select>
         </div>
 
         {/* Kelas */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Kelas</label>
-          <select name="rombelId" defaultValue="" className={`${sel} min-w-[130px]`}>
-            <option value="">— pilih kelas —</option>
+          <label className="mb-1 block text-xs font-medium text-gray-500">Kelas <span className="text-red-500">*</span></label>
+          <select name="rombelId" required defaultValue="" className={`${sel} min-w-[130px]`}>
+            <option value="" disabled>— pilih kelas —</option>
             {rombelOptions.map((r) => <option key={r.key} value={r.value}>{r.label}</option>)}
           </select>
         </div>
