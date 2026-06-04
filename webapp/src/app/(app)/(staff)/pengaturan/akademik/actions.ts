@@ -153,16 +153,18 @@ export async function autoIsiKalender(formData: FormData) {
   const [y1, y2] = ta.tahun.split("/").map(Number);
   if (!y1 || !y2) return;
 
+  // Pakai Date.UTC agar tidak ada timezone shift (new Date(y,m,d) = local midnight,
+  // di UTC+7 = Dec 19 17:00 UTC → PostgreSQL simpan sebagai Dec 19, bukan Dec 20)
   const TEMPLATE = [
     {
       nama: "Semester Ganjil", urutan: 1,
-      mulai: new Date(y1, 6, 15),   // 15 Juli
-      selesai: new Date(y1, 11, 20), // 20 Desember
+      mulai: new Date(Date.UTC(y1, 6, 15)),    // 15 Juli
+      selesai: new Date(Date.UTC(y1, 11, 20)), // 20 Desember
     },
     {
       nama: "Semester Genap", urutan: 2,
-      mulai: new Date(y2, 0, 6),    // 6 Januari
-      selesai: new Date(y2, 5, 20), // 20 Juni
+      mulai: new Date(Date.UTC(y2, 0, 6)),     // 6 Januari
+      selesai: new Date(Date.UTC(y2, 5, 20)),  // 20 Juni
     },
   ];
 

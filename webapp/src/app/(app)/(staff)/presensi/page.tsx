@@ -215,8 +215,8 @@ export default async function PresensiPage({
           <span className="text-gray-400">· Klik dot untuk ganti status</span>
         </div>
 
-        {/* Attendance grid — overflow-x-auto scroll horizontal, tabel melebar sesuai kolom */}
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+        {/* Attendance grid — w-fit shrink ke lebar tabel, overflow-x-auto kalau lebih lebar dari layar */}
+        <div className="w-fit max-w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
           <table className="border-collapse text-sm" style={{ minWidth: Math.max(700, 200 + dates.length * 36) }}>
             <thead>
               {/* Week group headers */}
