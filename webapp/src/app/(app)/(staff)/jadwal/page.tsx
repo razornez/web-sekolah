@@ -5,6 +5,7 @@ import { RombelSelect } from "@/components/filters/RombelSelect";
 import { GuruSelect } from "@/components/filters/GuruSelect";
 import { PageGuide } from "@/components/PageGuide";
 import { deleteJadwalAction } from "./actions";
+import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { TambahJadwalForm } from "./_components/TambahJadwalForm";
 
 const HARI_ORDER = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
@@ -149,10 +150,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                   <td className="px-4 py-2.5"><Link href={`/guru/${j.guru.id}`} className="text-gray-700 hover:underline">{j.guru.namaGuru}</Link></td>
                   <td className="px-4 py-2.5 text-gray-600">{j.rombel?.nama??"-"}</td>
                   <td className="px-4 py-2.5 text-right">
-                    <form action={deleteJadwalAction} className="inline">
-                      <input type="hidden" name="id" value={j.id} />
-                      <button className="text-xs text-red-500 hover:underline">Hapus</button>
-                    </form>
+                    <ConfirmDelete action={deleteJadwalAction} id={j.id} message={`Hapus jadwal ${j.mapel ?? ""} — ${j.guru.namaGuru} (${j.hari.nama})?`} />
                   </td>
                 </tr>
               ))}
