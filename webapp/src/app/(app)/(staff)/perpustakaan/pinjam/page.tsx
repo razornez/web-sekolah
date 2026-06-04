@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { pinjamBuku, kembalikanBuku } from "../actions";
+import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 const fmt = (d: Date | null) =>
@@ -49,7 +50,7 @@ export default async function PinjamPage({
       </div>
 
       <form className="flex gap-2">
-        <input name="q" defaultValue={q} placeholder="Cari peminjam (nama / NISN)…" className="w-80 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
+        <SiswaAutocomplete name="q" defaultValue={q} placeholder="Cari peminjam (nama / NISN)…" className="w-80 rounded-md border border-gray-300 py-2 pl-3 pr-8 text-sm outline-none focus:border-gray-900" />
         <button className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
       </form>
 

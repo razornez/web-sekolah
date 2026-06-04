@@ -43,10 +43,6 @@ export default async function MutasiPage({ searchParams }: { searchParams: Promi
   const totalPages = Math.max(1, Math.ceil(total / PER));
   const hp = (p: number) => `/mutasi?${new URLSearchParams({ q, jenis, asal, tujuan, page: String(p) }).toString()}`;
 
-  const siswaOpts = await prisma.siswa.findMany({
-    where: { sekolahId, deletedAt: null }, orderBy: { namaLengkap: "asc" }, take: 400, select: { id: true, namaLengkap: true },
-  });
-
   return (
     <div className="space-y-5">
       <PageGuide
@@ -73,10 +69,13 @@ export default async function MutasiPage({ searchParams }: { searchParams: Promi
         <form action={saveMutasi} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <label className="block text-xs font-medium text-gray-600">Siswa *</label>
-            <select name="siswaId" required defaultValue="" className={`${inCls} w-full`}>
-              <option value="">— pilih siswa —</option>
-              {siswaOpts.map((s) => <option key={s.id} value={s.id}>{s.namaLengkap}</option>)}
-            </select>
+            <SiswaAutocomplete
+              mode="select"
+              name="siswaName"
+              idName="siswaId"
+              placeholder="Ketik nama siswa yang mutasi…"
+              className="w-full rounded-md border border-gray-300 py-1.5 pl-3 pr-8 text-sm outline-none focus:border-gray-900"
+            />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600">Jenis *</label>

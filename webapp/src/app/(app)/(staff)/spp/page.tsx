@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSekolahId } from "@/lib/session";
 import { addTagihan, bayarTagihan, deleteTagihan } from "./actions";
 import { PageGuide } from "@/components/PageGuide";
+import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 
 const BULAN = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 const rupiah = (n: number) => "Rp " + n.toLocaleString("id-ID");
@@ -67,7 +68,7 @@ export default async function SppPage({
 
       {/* cari siswa */}
       <form className="flex gap-2">
-        <input name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" className="w-80 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
+        <SiswaAutocomplete name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" className="w-80 rounded-md border border-gray-300 py-2 pl-3 pr-8 text-sm outline-none focus:border-gray-900" />
         <button className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
       </form>
 

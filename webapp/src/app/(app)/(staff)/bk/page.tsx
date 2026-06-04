@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { addKasus, deleteKasus } from "./actions";
+import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 const fmtTgl = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
@@ -62,7 +63,7 @@ export default async function BkPage({
       </div>
 
       <form className="flex gap-2">
-        <input name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" className="w-80 rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
+        <SiswaAutocomplete name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" />
         <button className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
       </form>
 

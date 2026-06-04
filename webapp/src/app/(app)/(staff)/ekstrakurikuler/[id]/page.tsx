@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { addAnggotaEkstra, removeAnggotaEkstra } from "../actions";
+import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 
 export default async function EkstraDetailPage({
   params,
@@ -77,7 +78,7 @@ export default async function EkstraDetailPage({
           <h2 className="mb-2 text-sm font-medium text-gray-700">Tambah Anggota</h2>
           <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
             <form className="flex gap-2">
-              <input name="add" defaultValue={addQ} placeholder="Cari nama siswa…" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
+              <SiswaAutocomplete name="add" defaultValue={addQ} placeholder="Cari nama siswa…" className="w-full rounded-md border border-gray-300 py-2 pl-3 pr-8 text-sm outline-none focus:border-gray-900" />
               <button className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">Cari</button>
             </form>
             {addQ && kandidat.length === 0 && <p className="text-sm text-gray-400">Tidak ada siswa cocok.</p>}
