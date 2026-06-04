@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { saveJadwal, type JadwalFormState } from "../actions";
+import { AutocompleteSelect } from "@/components/AutocompleteSelect";
 
 const HARI_ORDER = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 const JAM_MULAI  = ["07:00","08:30","10:15","11:45","13:30"];
@@ -74,10 +75,14 @@ export function TambahJadwalForm({
         {/* Guru */}
         <div>
           <label className="mb-1 block text-xs font-medium text-gray-500">Guru <span className="text-red-500">*</span></label>
-          <select name="guruId" required defaultValue="" className={`${sel} min-w-[180px]`}>
-            <option value="">— pilih guru —</option>
-            {guruOptions.map((g) => <option key={g.key} value={g.value}>{g.label}</option>)}
-          </select>
+          <AutocompleteSelect
+            options={guruOptions}
+            name="guruId"
+            placeholder="Cari nama guru…"
+            required
+            emptyLabel="— tidak ada —"
+            className={`${sel} min-w-[220px]`}
+          />
         </div>
 
         {/* Hari */}
