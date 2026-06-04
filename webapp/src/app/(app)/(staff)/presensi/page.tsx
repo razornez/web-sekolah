@@ -107,8 +107,42 @@ export default async function PresensiPage({
         rombel: { select: { id: true, nama: true, tahunAjaranId: true } },
       },
     });
-    if (!jadwal || !jadwal.rombel) {
-      return <div className="p-8 text-center text-gray-500">Jadwal tidak ditemukan.</div>;
+    if (!jadwal) {
+      return (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+          <div className="text-4xl">🔍</div>
+          <p className="mt-3 font-semibold text-red-800">Jadwal tidak ditemukan</p>
+          <p className="mt-1 text-sm text-red-600">jadwalId={jadwalId} tidak ada atau bukan milik sekolah ini.</p>
+          <Link href="/presensi" className="mt-4 inline-block rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-100">← Kembali ke Kalender</Link>
+        </div>
+      );
+    }
+    if (!jadwal.rombel) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Link href="/presensi" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">← Kalender</Link>
+            <h1 className="text-xl font-bold text-gray-900">{jadwal.mapel ?? "—"}</h1>
+          </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
+            <div className="text-5xl">🏫</div>
+            <p className="mt-3 font-semibold text-amber-800">Jadwal belum memiliki kelas / rombel</p>
+            <p className="mt-1 text-sm text-amber-700">
+              Jadwal <strong>{jadwal.mapel}</strong> ({jadwal.hari.nama} · {jadwal.jamMulai}–{jadwal.jamSelesai}){" "}
+              oleh <strong>{jadwal.guru.namaGuru}</strong> belum dikaitkan ke rombel manapun.
+            </p>
+            <p className="mt-2 text-sm text-amber-600">Presensi memerlukan daftar siswa dari rombel.</p>
+            <div className="mt-4 flex justify-center gap-3">
+              <Link href="/jadwal" className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
+                ✏️ Edit Jadwal → Tambahkan Kelas
+              </Link>
+              <Link href="/presensi" className="rounded-lg border border-amber-300 px-4 py-2 text-sm text-amber-700 hover:bg-amber-100">
+                ← Kembali
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
     }
 
     // Students
@@ -171,69 +205,99 @@ export default async function PresensiPage({
     const belumCount = totalCells - kehadiran.length;
     const totalPertemuan = dates.length; // seluruh semester termasuk masa depan
 
+    // Persentase kehadiran
+    const pctHadir = totalCells > 0 ? Math.round((hadirCount / totalCells) * 100) : 0;
+    const izinCount = kehadiran.filter(k => k.status === "izin").length;
+    const sakitCount = kehadiran.filter(k => k.status === "sakit").length;
+    const terlambatCount = kehadiran.filter(k => k.status === "terlambat").length;
+
     return (
       <div className="space-y-4 w-full">
-        {/* Header */}
-        <div className="flex flex-wrap items-start gap-3">
-          <Link href="/presensi" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">
-            ← Kalender
-          </Link>
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-bold text-gray-900">{jadwal.mapel ?? "—"}</h1>
-              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">{jadwal.rombel.nama}</span>
-              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">{jadwal.hari.nama} · {jadwal.jamMulai}–{jadwal.jamSelesai}</span>
-              <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">{jadwal.guru.namaGuru}</span>
+        {/* Hero header card */}
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="bg-gradient-to-r from-gray-900 to-gray-700 px-5 py-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <Link href="/presensi" className="mt-0.5 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20">
+                  ← Kalender
+                </Link>
+                <div>
+                  <h1 className="text-xl font-bold text-white">{jadwal.mapel ?? "—"}</h1>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80">{jadwal.rombel.nama}</span>
+                    <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80">{jadwal.hari.nama} · {jadwal.jamMulai}–{jadwal.jamSelesai}</span>
+                    <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs text-white/80">{jadwal.guru.namaGuru}</span>
+                  </div>
+                  {dates[0] && (
+                    <p className="mt-1 text-xs text-white/50">
+                      {dates[0].toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                      {" "}–{" "}
+                      {dates[dates.length - 1]?.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                      {" "}· {anggota.length} siswa · {totalPertemuan} pertemuan
+                      {totalPertemuan > pastDates.length && ` (${totalPertemuan - pastDates.length} mendatang)`}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Persentase kehadiran */}
+              <div className="text-right">
+                <div className={`text-4xl font-black leading-none ${pctHadir >= 80 ? "text-emerald-400" : pctHadir >= 60 ? "text-amber-400" : "text-red-400"}`}>
+                  {pctHadir}%
+                </div>
+                <div className="text-xs text-white/50 mt-0.5">kehadiran</div>
+                <div className="mt-2 h-2 w-24 rounded-full bg-white/20 overflow-hidden ml-auto">
+                  <div className={`h-2 rounded-full ${pctHadir >= 80 ? "bg-emerald-400" : pctHadir >= 60 ? "bg-amber-400" : "bg-red-400"}`}
+                    style={{ width: `${pctHadir}%` }} />
+                </div>
+              </div>
             </div>
-            <p className="mt-1 text-xs text-gray-500">
-              {anggota.length} siswa ·{" "}
-              <span className="font-semibold text-gray-700">{totalPertemuan} pertemuan</span>
-              {" "}·{" "}
-              {dates[0] && (
-                <span>
-                  {dates[0].toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                  {" "}–{" "}
-                  {dates[dates.length - 1]?.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                </span>
-              )}
-              {" "}({pastDates.length} sudah berlalu · {totalPertemuan - pastDates.length} akan datang)
-            </p>
+          </div>
+
+          {/* Stats bar */}
+          <div className="grid grid-cols-5 divide-x divide-gray-100 border-t border-gray-100">
+            {[
+              { label: "Hadir",     count: hadirCount,     bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+              { label: "Terlambat", count: terlambatCount, bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400" },
+              { label: "Izin",      count: izinCount,      bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-400" },
+              { label: "Sakit",     count: sakitCount,     bg: "bg-violet-50",  text: "text-violet-700",  dot: "bg-violet-400" },
+              { label: "Alpa",      count: alpaCount,      bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500" },
+            ].map((s) => (
+              <div key={s.label} className={`${s.bg} px-3 py-2.5 text-center`}>
+                <div className={`text-xl font-black ${s.text} leading-none`}>{s.count}</div>
+                <div className="flex items-center justify-center gap-1 mt-1">
+                  <div className={`h-2 w-2 rounded-full ${s.dot}`} />
+                  <span className="text-[10px] text-gray-500">{s.label}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Stats chips */}
-        <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-1.5">
-            <div className="h-3 w-3 rounded-full bg-emerald-500" />
-            <span className="text-xs font-medium text-emerald-700">{hadirCount} Hadir</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-1.5">
-            <div className="h-3 w-3 rounded-full bg-red-500" />
-            <span className="text-xs font-medium text-red-700">{alpaCount} Alpa</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-1.5">
-            <div className="h-3 w-3 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-xs font-medium text-amber-700">{belumCount} Belum diisi</span>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+        {/* Legend + hint */}
+        <div className="flex flex-wrap items-center gap-4 rounded-xl bg-gray-50 px-4 py-2.5 text-xs text-gray-500">
           {[
             { color: "bg-emerald-500", label: "Hadir" },
             { color: "bg-amber-400",   label: "Terlambat" },
             { color: "bg-sky-400",     label: "Izin" },
             { color: "bg-violet-400",  label: "Sakit" },
             { color: "bg-red-500",     label: "Alpa" },
-            { color: "border-2 border-amber-400 bg-amber-50", label: "Belum (klik = Hadir)" },
+            { color: "border-2 border-amber-400 bg-amber-50 animate-pulse", label: "Belum → klik = Hadir" },
           ].map((l) => (
             <div key={l.label} className="flex items-center gap-1.5">
-              <div className={`h-3.5 w-3.5 rounded-full ${l.color}`} />
-              {l.label}
+              <div className={`h-3 w-3 shrink-0 rounded-full ${l.color}`} />
+              <span>{l.label}</span>
             </div>
           ))}
-          <span className="text-gray-400">· Klik dot untuk ganti status</span>
+          <span className="text-gray-400 ml-auto">· Klik dot berwarna → ganti status</span>
         </div>
+
+        {belumCount > 0 && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 flex items-center gap-2">
+            <div className="h-3 w-3 rounded-full bg-amber-400 animate-pulse shrink-0" />
+            <span><strong>{belumCount}</strong> sel belum diisi — klik dot kuning untuk tandai hadir, atau klik dot berwarna untuk pilih status lain.</span>
+          </div>
+        )}
 
         {/* Attendance grid — w-fit shrink ke lebar tabel, overflow-x-auto kalau lebih lebar dari layar */}
         <div className="w-fit max-w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
