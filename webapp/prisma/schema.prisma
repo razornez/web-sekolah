@@ -114,9 +114,24 @@ enum StatusPembayaran {
 
 enum StatusPpdb {
   baru
+  verifikasi
+  tes
+  wawancara
   diterima
-  ditolak
   cadangan
+  ditolak
+}
+
+enum JenisDokumenPpdb {
+  ijazah
+  rapor
+  prestasi
+  kwitansi
+  ktp_ortu
+  kartu_keluarga
+  foto
+  surat_keterangan
+  lainnya
 }
 
 enum KelompokMapel {
@@ -216,6 +231,7 @@ model Sekolah {
   jalurPpdb        JalurPpdb[]
   pendaftaranPpdb  PendaftaranPpdb[]
   ketentuanPpdb    KetentuanPpdb[]
+  dokumenPpdb      DokumenPpdb[]
   kelulusan        Kelulusan[]
   settingKelulusan SettingKelulusan[]
   calonOsis        CalonOsis[]
@@ -1272,14 +1288,51 @@ model PendaftaranPpdb {
   tanggalLahir DateTime?    @map("tanggal_lahir") @db.Date
   asalSekolah  String?      @map("asal_sekolah")
   noHp         String?      @map("no_hp")
+  alamat       String?
+  tahunAjaran  String?      @map("tahun_ajaran")
   status       StatusPpdb   @default(baru)
+  catatan      String?
   createdAt    DateTime     @default(now()) @map("created_at")
+  deletedAt    DateTime?    @map("deleted_at")
 
-  sekolah Sekolah    @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
-  jalur   JalurPpdb? @relation(fields: [jalurId], references: [id])
+  sekolah  Sekolah              @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  jalur    JalurPpdb?           @relation(fields: [jalurId], references: [id])
+  riwayat  RiwayatStatusPpdb[]
+  dokumen  DokumenPpdb[]
 
   @@index([sekolahId])
   @@map("pendaftaran_ppdb")
+}
+
+model RiwayatStatusPpdb {
+  id            Int        @id @default(autoincrement())
+  pendaftaranId Int        @map("pendaftaran_id")
+  status        StatusPpdb
+  catatan       String?
+  oleh          String?
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  pendaftaran PendaftaranPpdb @relation(fields: [pendaftaranId], references: [id], onDelete: Cascade)
+
+  @@index([pendaftaranId])
+  @@map("riwayat_status_ppdb")
+}
+
+model DokumenPpdb {
+  id            Int               @id @default(autoincrement())
+  sekolahId     Int               @map("sekolah_id")
+  pendaftaranId Int               @map("pendaftaran_id")
+  jenis         JenisDokumenPpdb  @default(lainnya)
+  nama          String
+  url           String?
+  keterangan    String?
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  sekolah     Sekolah         @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  pendaftaran PendaftaranPpdb @relation(fields: [pendaftaranId], references: [id], onDelete: Cascade)
+
+  @@index([pendaftaranId])
+  @@map("dokumen_ppdb")
 }
 
 model KetentuanPpdb {
