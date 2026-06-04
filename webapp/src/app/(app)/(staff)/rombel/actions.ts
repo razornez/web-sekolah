@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
+import { catchDeleteError } from "@/lib/deleteError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -70,8 +71,13 @@ export async function deleteRombel(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
-  await prisma.rombel.deleteMany({ where: { id, sekolahId } });
-  revalidatePath("/rombel");
+  try {
+    await prisma.rombel.deleteMany({ where: { id, sekolahId } });
+    revalidatePath("/rombel");
+    return { ok: true };
+  } catch (e) {
+    return catchDeleteError(e, "Rombel");
+  }
 }
 
 export async function addAnggota(formData: FormData) {

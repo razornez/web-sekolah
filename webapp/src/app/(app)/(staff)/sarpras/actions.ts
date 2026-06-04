@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { kategoriSarprasSchema, sarprasSchema } from "@/lib/validations";
+import { catchDeleteError } from "@/lib/deleteError";
 
 // ---- Kategori ------------------------------------------------------------
 export async function createKategoriSarpras(formData: FormData) {
@@ -27,8 +28,13 @@ export async function deleteKategoriSarpras(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
-  await prisma.kategoriSarpras.deleteMany({ where: { id, sekolahId } });
-  revalidatePath("/sarpras/kategori");
+  try {
+    await prisma.kategoriSarpras.deleteMany({ where: { id, sekolahId } });
+    revalidatePath("/sarpras/kategori");
+    return { ok: true };
+  } catch (e) {
+    return catchDeleteError(e, "Kategori Sarpras");
+  }
 }
 
 // ---- Sarpras -------------------------------------------------------------

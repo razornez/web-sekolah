@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
+import { catchDeleteError } from "@/lib/deleteError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -99,6 +100,12 @@ export async function deleteGuru(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
-  await prisma.guru.deleteMany({ where: { id, sekolahId } }); await auditLog({ aksi: "delete", entitas: "guru", entitasId: id, detail: "Hapus guru" });
-  revalidatePath("/guru");
+  try {
+    await prisma.guru.deleteMany({ where: { id, sekolahId } });
+    await auditLog({ aksi: "delete", entitas: "guru", entitasId: id, detail: "Hapus guru" });
+    revalidatePath("/guru");
+    return { ok: true };
+  } catch (e) {
+    return catchDeleteError(e, "Guru");
+  }
 }

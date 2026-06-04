@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { catchDeleteError } from "@/lib/deleteError";
 
 // ── Tahun Ajaran ────────────────────────────────────────────────────────────
 
@@ -35,11 +36,17 @@ export async function deleteTahunAjaran(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
-  // Cek apakah ada rombel yang pakai TA ini
-  const count = await prisma.rombel.count({ where: { tahunAjaranId: id, sekolahId } });
-  if (count > 0) return; // jangan hapus kalau sudah dipakai
-  await prisma.tahunAjaran.deleteMany({ where: { id, sekolahId } });
-  revalidatePath("/pengaturan/akademik");
+  const rombelCount = await prisma.rombel.count({ where: { tahunAjaranId: id, sekolahId } });
+  if (rombelCount > 0) {
+    return { ok: false, error: `Tahun ajaran ini memiliki ${rombelCount} rombel. Hapus semua rombel terkait terlebih dahulu.` };
+  }
+  try {
+    await prisma.tahunAjaran.deleteMany({ where: { id, sekolahId } });
+    revalidatePath("/pengaturan/akademik");
+    return { ok: true };
+  } catch (e) {
+    return catchDeleteError(e, "Tahun Ajaran");
+  }
 }
 
 // ── Periode ─────────────────────────────────────────────────────────────────
@@ -103,10 +110,17 @@ export async function deletePeriode(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
-  const count = await prisma.nilaiRapor.count({ where: { periodeId: id } });
-  if (count > 0) return;
-  await prisma.periode.deleteMany({ where: { id, tahunAjaran: { sekolahId } } });
-  revalidatePath("/pengaturan/akademik");
+  const nilaiCount = await prisma.nilaiRapor.count({ where: { periodeId: id } });
+  if (nilaiCount > 0) {
+    return { ok: false, error: `Periode ini memiliki ${nilaiCount.toLocaleString("id-ID")} data nilai rapor. Tidak bisa dihapus selama masih ada nilai terkait.` };
+  }
+  try {
+    await prisma.periode.deleteMany({ where: { id, tahunAjaran: { sekolahId } } });
+    revalidatePath("/pengaturan/akademik");
+    return { ok: true };
+  } catch (e) {
+    return catchDeleteError(e, "Periode");
+  }
 }
 
 /** Update tanggal mulai/selesai periode yang sudah ada */

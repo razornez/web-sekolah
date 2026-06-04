@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
+import { catchDeleteError } from "@/lib/deleteError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -97,6 +98,11 @@ export async function deleteMapel(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));
   if (!id) return;
-  await prisma.mapel.deleteMany({ where: { id, sekolahId } });
-  revalidatePath("/mapel");
+  try {
+    await prisma.mapel.deleteMany({ where: { id, sekolahId } });
+    revalidatePath("/mapel");
+    return { ok: true };
+  } catch (e) {
+    return catchDeleteError(e, "Mata Pelajaran");
+  }
 }
