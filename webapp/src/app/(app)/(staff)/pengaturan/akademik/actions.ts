@@ -108,3 +108,94 @@ export async function deletePeriode(formData: FormData) {
   await prisma.periode.deleteMany({ where: { id, tahunAjaran: { sekolahId } } });
   revalidatePath("/pengaturan/akademik");
 }
+
+/** Update tanggal mulai/selesai periode yang sudah ada */
+export async function updatePeriodeTanggal(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const id = Number(formData.get("id"));
+  const tanggalMulaiStr = (formData.get("tanggalMulai") as string ?? "").trim();
+  const tanggalSelesaiStr = (formData.get("tanggalSelesai") as string ?? "").trim();
+  if (!id) return;
+
+  const existing = await prisma.periode.findFirst({
+    where: { id, tahunAjaran: { sekolahId } }, select: { id: true },
+  });
+  if (!existing) return;
+
+  await prisma.periode.update({
+    where: { id },
+    data: {
+      tanggalMulai: tanggalMulaiStr ? new Date(tanggalMulaiStr) : null,
+      tanggalSelesai: tanggalSelesaiStr ? new Date(tanggalSelesaiStr) : null,
+    },
+  });
+  revalidatePath("/pengaturan/akademik");
+}
+
+/**
+ * Auto-isi kalender tipikal Indonesia per TahunAjaran:
+ * Semester Ganjil: 15 Juli s.d. 20 Desember (tahun pertama)
+ * Semester Genap:  6 Januari s.d. 20 Juni (tahun kedua)
+ * Jika periode sudah ada, hanya update tanggal yang kosong.
+ */
+export async function autoIsiKalender(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const tahunAjaranId = Number(formData.get("tahunAjaranId"));
+  if (!tahunAjaranId) return;
+
+  const ta = await prisma.tahunAjaran.findFirst({
+    where: { id: tahunAjaranId, sekolahId },
+    include: { periode: { orderBy: { urutan: "asc" } } },
+  });
+  if (!ta) return;
+
+  // Parse "2024/2025" → year1=2024, year2=2025
+  const [y1, y2] = ta.tahun.split("/").map(Number);
+  if (!y1 || !y2) return;
+
+  const TEMPLATE = [
+    {
+      nama: "Semester Ganjil", urutan: 1,
+      mulai: new Date(y1, 6, 15),   // 15 Juli
+      selesai: new Date(y1, 11, 20), // 20 Desember
+    },
+    {
+      nama: "Semester Genap", urutan: 2,
+      mulai: new Date(y2, 0, 6),    // 6 Januari
+      selesai: new Date(y2, 5, 20), // 20 Juni
+    },
+  ];
+
+  for (const tmpl of TEMPLATE) {
+    const existing = ta.periode.find((p) =>
+      p.nama.toLowerCase().includes(tmpl.nama.toLowerCase().split(" ")[1]) ||
+      p.urutan === tmpl.urutan,
+    );
+
+    if (existing) {
+      // Update tanggal hanya kalau masih kosong
+      if (!existing.tanggalMulai || !existing.tanggalSelesai) {
+        await prisma.periode.update({
+          where: { id: existing.id },
+          data: {
+            tanggalMulai: existing.tanggalMulai ?? tmpl.mulai,
+            tanggalSelesai: existing.tanggalSelesai ?? tmpl.selesai,
+          },
+        });
+      }
+    } else {
+      // Buat baru
+      await prisma.periode.create({
+        data: {
+          tahunAjaranId,
+          nama: tmpl.nama,
+          urutan: tmpl.urutan,
+          jenis: "semester",
+          tanggalMulai: tmpl.mulai,
+          tanggalSelesai: tmpl.selesai,
+        },
+      });
+    }
+  }
+  revalidatePath("/pengaturan/akademik");
+}

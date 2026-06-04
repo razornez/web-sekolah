@@ -5,6 +5,7 @@ import { ConfirmForm } from "@/components/ConfirmForm";
 import {
   saveTahunAjaran, setTahunAjaranAktif, deleteTahunAjaran,
   savePeriode, setPeriodeAktif, deletePeriode,
+  updatePeriodeTanggal, autoIsiKalender,
 } from "./actions";
 
 const inCls = "rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";
@@ -110,7 +111,17 @@ export default async function AkademikPage() {
                     : <span className="text-xs text-gray-400">{ta._count.rombel} rombel · {ta.periode.length} periode</span>
                   }
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                  {/* Auto-isi kalender */}
+                  <form action={autoIsiKalender}>
+                    <input type="hidden" name="tahunAjaranId" value={ta.id} />
+                    <button
+                      className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+                      title="Buat/lengkapi Semester Ganjil + Genap dengan tanggal tipikal Indonesia"
+                    >
+                      ✨ Auto-isi Kalender
+                    </button>
+                  </form>
                   {!ta.aktif && (
                     <ConfirmForm
                       action={setTahunAjaranAktif}
@@ -184,36 +195,48 @@ export default async function AkademikPage() {
                         </div>
                       </div>
 
-                      {/* Row 2: Tanggal + stats */}
-                      <div className="flex flex-wrap items-center gap-3">
-                        <div className="text-xs text-gray-500">
-                          📅 {fmt(p.tanggalMulai)} — {fmt(p.tanggalSelesai)}
-                          {weeks !== null && (
-                            <span className={`ml-2 font-semibold ${weeks <= 18 && weeks >= 14 ? "text-green-600" : "text-amber-600"}`}>
-                              ({weeks} minggu)
-                            </span>
-                          )}
-                        </div>
+                      {/* Row 2: Edit tanggal inline */}
+                      <form action={updatePeriodeTanggal} className="flex flex-wrap items-center gap-2 mt-1">
+                        <input type="hidden" name="id" value={p.id} />
+                        <span className="text-xs text-gray-400 shrink-0">📅</span>
+                        <input
+                          type="date" name="tanggalMulai"
+                          defaultValue={p.tanggalMulai ? p.tanggalMulai.toISOString().slice(0, 10) : ""}
+                          className="rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-indigo-400 w-36"
+                        />
+                        <span className="text-xs text-gray-400">—</span>
+                        <input
+                          type="date" name="tanggalSelesai"
+                          defaultValue={p.tanggalSelesai ? p.tanggalSelesai.toISOString().slice(0, 10) : ""}
+                          className="rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-indigo-400 w-36"
+                        />
+                        <button className="rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs hover:bg-gray-50">
+                          Simpan
+                        </button>
+                        {weeks !== null && (
+                          <span className={`text-xs font-semibold ${weeks <= 18 && weeks >= 14 ? "text-green-600" : "text-amber-600"}`}>
+                            {weeks} minggu
+                          </span>
+                        )}
 
-                        {hasDates ? (
-                          <div className="flex gap-2 ml-auto">
-                            <div className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-center min-w-[60px]">
-                              <div className="text-base font-black text-gray-900 leading-none">{schoolDays}</div>
-                              <div className="text-[10px] text-gray-400">hari sekolah</div>
+                        {/* Pertemuan chips */}
+                        {hasDates && (
+                          <div className="flex gap-1.5 ml-auto">
+                            <div className="rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-center min-w-[56px]">
+                              <div className="text-sm font-black text-gray-900 leading-none">{schoolDays}</div>
+                              <div className="text-[10px] text-gray-400">hari</div>
                             </div>
-                            <div className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-center min-w-[60px]">
-                              <div className="text-base font-black text-blue-700 leading-none">{meet1x}×</div>
-                              <div className="text-[10px] text-blue-500">1x/minggu</div>
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-center min-w-[56px]">
+                              <div className="text-sm font-black text-blue-700 leading-none">{meet1x}×</div>
+                              <div className="text-[10px] text-blue-500">1x/mgg</div>
                             </div>
-                            <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-center min-w-[60px]">
-                              <div className="text-base font-black text-indigo-700 leading-none">{meet2x}×</div>
-                              <div className="text-[10px] text-indigo-500">2x/minggu</div>
+                            <div className="rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-center min-w-[56px]">
+                              <div className="text-sm font-black text-indigo-700 leading-none">{meet2x}×</div>
+                              <div className="text-[10px] text-indigo-500">2x/mgg</div>
                             </div>
                           </div>
-                        ) : (
-                          <span className="ml-auto text-xs text-amber-600">⚠ Isi tanggal untuk hitung pertemuan</span>
                         )}
-                      </div>
+                      </form>
                     </div>
                   );
                 })}
