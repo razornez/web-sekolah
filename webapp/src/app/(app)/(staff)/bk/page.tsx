@@ -101,6 +101,131 @@ export default async function BkPage({
         <Link href="/bk/kategori" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">Kelola Kategori</Link>
       </div>
 
+      {/* Search siswa — collapsible, di atas overview */}
+      <details className="group rounded-2xl border border-gray-200 bg-white shadow-sm" open={!!siswa || !!q}>
+        <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 select-none">
+          <span className="text-sm font-semibold text-gray-800">🔍 Cari & Catat Pelanggaran Siswa</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
+        </summary>
+        <div className="border-t border-gray-100 p-5 space-y-4">
+          <form className="flex gap-2">
+            <SiswaAutocomplete name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" />
+            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+          </form>
+
+          {q && !siswa && (
+            <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 overflow-hidden">
+              {kandidat.length === 0 && <p className="px-4 py-3 text-sm text-gray-400">Tidak ada siswa cocok.</p>}
+              {kandidat.map((s) => (
+                <Link key={s.id} href={`/bk?siswaId=${s.id}`}
+                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50">
+                  <div className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600">
+                    {s.namaLengkap.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{s.namaLengkap}</div>
+                    {s.nisn && <div className="text-xs text-gray-400">NISN: {s.nisn}</div>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {siswa && (
+            <div className="space-y-4">
+              <div className={`flex items-center gap-4 rounded-2xl border p-4 ${level.color.replace("bg-", "border-").replace("500", "200").replace("400","200").replace("900","200")} ${level.color.replace("bg-", "bg-").replace("500","50").replace("400","50").replace("900","50")}`}>
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl font-black text-white ${level.color}`}>
+                  {siswa.namaLengkap.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <div className="font-bold text-gray-900">{siswa.namaLengkap}</div>
+                  {siswa.nisn && <div className="text-xs text-gray-500">NISN: {siswa.nisn}</div>}
+                </div>
+                <div className="text-right">
+                  <div className={`text-3xl font-black text-white rounded-xl px-4 py-2 ${level.color}`}>{totalPoin}</div>
+                  <div className="text-xs text-gray-500 mt-1">poin akumulasi</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-gray-800">{level.label}</div>
+                  <div className="text-xs text-gray-500">{level.desc}</div>
+                  <Link href="/bk" className="mt-1 block text-xs text-gray-400 hover:text-gray-700">Ganti ↗</Link>
+                </div>
+              </div>
+
+              <form action={addKasus} className="flex flex-wrap items-end gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                <input type="hidden" name="siswaId" value={siswa.id} />
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Kategori</label>
+                  <select name="kategoriId" className={inCls}>
+                    <option value="">- manual -</option>
+                    {kategori.map((k) => (
+                      <option key={k.id} value={k.id}>{k.nama} ({k.poin} poin)</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Pelanggaran</label>
+                  <input name="namaKasus" placeholder="Nama pelanggaran" className={`${inCls} w-44`} />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Poin</label>
+                  <input name="poin" type="number" min={0} defaultValue={0} className={`${inCls} w-20`} />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Tanggal</label>
+                  <input name="tanggal" type="date" defaultValue={today} className={inCls} />
+                </div>
+                <div className="flex-1 min-w-32">
+                  <label className="block text-xs text-gray-500 mb-1">Keterangan</label>
+                  <input name="keterangan" className={`${inCls} w-full`} />
+                </div>
+                <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Catat</button>
+              </form>
+
+              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+                  <span className="text-sm font-semibold text-gray-700">Riwayat Pelanggaran ({kasus.length})</span>
+                </div>
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-left text-gray-500">
+                    <tr>
+                      <th className="px-4 py-2 font-medium">Tanggal</th>
+                      <th className="px-4 py-2 font-medium">Pelanggaran</th>
+                      <th className="px-4 py-2 font-medium text-center">Poin</th>
+                      <th className="px-4 py-2 font-medium">Keterangan</th>
+                      <th className="px-4 py-2 font-medium text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {kasus.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Belum ada catatan pelanggaran.</td></tr>}
+                    {kasus.map((k) => (
+                      <tr key={k.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-gray-600 whitespace-nowrap">{fmtTgl(k.tanggal)}</td>
+                        <td className="px-4 py-2 text-gray-900">{k.namaKasus}</td>
+                        <td className="px-4 py-2 text-center">
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${k.poin >= 25 ? "bg-red-100 text-red-700" : k.poin >= 10 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"}`}>
+                            {k.poin}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-gray-500">{k.keterangan ?? "—"}</td>
+                        <td className="px-4 py-2 text-right">
+                          <form action={deleteKasus}>
+                            <input type="hidden" name="id" value={k.id} />
+                            <input type="hidden" name="siswaId" value={siswa.id} />
+                            <button className="text-xs text-red-600 hover:underline">Hapus</button>
+                          </form>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </details>
+
       {/* Info poin */}
       <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm">
         <p className="font-semibold text-indigo-800 mb-2">💡 Cara kerja sistem poin pelanggaran</p>
@@ -221,130 +346,6 @@ export default async function BkPage({
         </div>
       </div>
 
-      {/* Search siswa */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold text-gray-800">🔍 Cari & Catat Pelanggaran Siswa</h2>
-        <form className="flex gap-2">
-          <SiswaAutocomplete name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" />
-          <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
-        </form>
-
-        {q && !siswa && (
-          <div className="mt-3 divide-y divide-gray-100 rounded-xl border border-gray-200 overflow-hidden">
-            {kandidat.length === 0 && <p className="px-4 py-3 text-sm text-gray-400">Tidak ada siswa cocok.</p>}
-            {kandidat.map((s) => (
-              <Link key={s.id} href={`/bk?siswaId=${s.id}`}
-                className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50">
-                <div className="h-7 w-7 flex items-center justify-center rounded-full bg-gray-100 text-xs font-bold text-gray-600">
-                  {s.namaLengkap.charAt(0)}
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">{s.namaLengkap}</div>
-                  {s.nisn && <div className="text-xs text-gray-400">NISN: {s.nisn}</div>}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Detail siswa */}
-        {siswa && (
-          <div className="mt-4 space-y-4">
-            {/* Siswa header card */}
-            <div className={`flex items-center gap-4 rounded-2xl border p-4 ${level.color.replace("bg-", "border-").replace("500", "200").replace("400","200").replace("900","200")} ${level.color.replace("bg-", "bg-").replace("500","50").replace("400","50").replace("900","50")}`}>
-              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl font-black text-white ${level.color}`}>
-                {siswa.namaLengkap.charAt(0)}
-              </div>
-              <div className="flex-1">
-                <div className="font-bold text-gray-900">{siswa.namaLengkap}</div>
-                {siswa.nisn && <div className="text-xs text-gray-500">NISN: {siswa.nisn}</div>}
-              </div>
-              <div className="text-right">
-                <div className={`text-3xl font-black text-white rounded-xl px-4 py-2 ${level.color}`}>{totalPoin}</div>
-                <div className="text-xs text-gray-500 mt-1">poin akumulasi</div>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-gray-800">{level.label}</div>
-                <div className="text-xs text-gray-500">{level.desc}</div>
-                <Link href="/bk" className="mt-1 block text-xs text-gray-400 hover:text-gray-700">Ganti ↗</Link>
-              </div>
-            </div>
-
-            {/* Form catat */}
-            <form action={addKasus} className="flex flex-wrap items-end gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <input type="hidden" name="siswaId" value={siswa.id} />
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Kategori</label>
-                <select name="kategoriId" className={inCls}>
-                  <option value="">- manual -</option>
-                  {kategori.map((k) => (
-                    <option key={k.id} value={k.id}>{k.nama} ({k.poin} poin)</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Pelanggaran</label>
-                <input name="namaKasus" placeholder="Nama pelanggaran" className={`${inCls} w-44`} />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Poin</label>
-                <input name="poin" type="number" min={0} defaultValue={0} className={`${inCls} w-20`} />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Tanggal</label>
-                <input name="tanggal" type="date" defaultValue={today} className={inCls} />
-              </div>
-              <div className="flex-1 min-w-32">
-                <label className="block text-xs text-gray-500 mb-1">Keterangan</label>
-                <input name="keterangan" className={`${inCls} w-full`} />
-              </div>
-              <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Catat</button>
-            </form>
-
-            {/* Riwayat */}
-            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-              <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-700">Riwayat Pelanggaran ({kasus.length})</span>
-              </div>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-left text-gray-500">
-                  <tr>
-                    <th className="px-4 py-2 font-medium">Tanggal</th>
-                    <th className="px-4 py-2 font-medium">Pelanggaran</th>
-                    <th className="px-4 py-2 font-medium text-center">Poin</th>
-                    <th className="px-4 py-2 font-medium">Keterangan</th>
-                    <th className="px-4 py-2 font-medium text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {kasus.length === 0 && (
-                    <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Belum ada catatan pelanggaran.</td></tr>
-                  )}
-                  {kasus.map((k) => (
-                    <tr key={k.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 text-gray-600 whitespace-nowrap">{fmtTgl(k.tanggal)}</td>
-                      <td className="px-4 py-2 text-gray-900">{k.namaKasus}</td>
-                      <td className="px-4 py-2 text-center">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${k.poin >= 25 ? "bg-red-100 text-red-700" : k.poin >= 10 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600"}`}>
-                          {k.poin}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 text-gray-500">{k.keterangan ?? "—"}</td>
-                      <td className="px-4 py-2 text-right">
-                        <form action={deleteKasus}>
-                          <input type="hidden" name="id" value={k.id} />
-                          <input type="hidden" name="siswaId" value={siswa.id} />
-                          <button className="text-xs text-red-600 hover:underline">Hapus</button>
-                        </form>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
