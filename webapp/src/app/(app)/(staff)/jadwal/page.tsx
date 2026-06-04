@@ -2,9 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
-import { MapelSelect } from "@/components/filters/MapelSelect";
 import { PageGuide } from "@/components/PageGuide";
-import { saveJadwal, deleteJadwalAction } from "./actions";
+import { deleteJadwalAction } from "./actions";
+import { TambahJadwalForm } from "./_components/TambahJadwalForm";
 
 const HARI_ORDER = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 const JAM_MULAI = ["07:00","08:30","10:15","11:45","13:30"];
@@ -21,7 +21,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
   const fRombel = Number(sp.rombelId) || 0;
   const mode = sp.mode ?? "kalender";
 
-  const [jadwal, guruList, hariList] = await Promise.all([
+  const [jadwal, guruList, hariList, mapelList, rombelList] = await Promise.all([
     prisma.jadwalGuru.findMany({
       where: { sekolahId, ...(fGuru ? { guruId: fGuru } : {}), ...(fRombel ? { rombelId: fRombel } : {}) },
       include: { guru: { select: { id: true, namaGuru: true } }, hari: { select: { id: true, nama: true, urutan: true } }, rombel: { select: { id: true, nama: true } } },
@@ -29,6 +29,8 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
     }),
     prisma.guru.findMany({ where: { sekolahId, deletedAt: null }, orderBy: { namaGuru: "asc" }, select: { id: true, namaGuru: true } }),
     prisma.hari.findMany({ where: { sekolahId }, orderBy: { urutan: "asc" } }),
+    prisma.mapel.findMany({ where: { sekolahId, deletedAt: null, aktif: true }, orderBy: { namaMapel: "asc" }, select: { id: true, namaMapel: true } }),
+    prisma.rombel.findMany({ where: { sekolahId }, orderBy: [{ tahunAjaranId: "desc" }, { nama: "asc" }], select: { id: true, nama: true } }),
   ]);
 
   const allMapelNames = [...new Set(jadwal.map(j => j.mapel ?? ""))];
@@ -77,33 +79,11 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
           <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
           <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
         </summary>
-        <div className="border-t border-gray-100 px-5 pb-5 pt-4">
-          <form action={saveJadwal} className="flex flex-wrap items-end gap-3">
-            <div><label className="mb-1 block text-xs font-medium text-gray-500">Guru *</label>
-              <select name="guruId" required defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[180px]">
-                <option value="">— pilih guru —</option>
-                {guruList.map((g) => <option key={g.id} value={g.id}>{g.namaGuru}</option>)}
-              </select></div>
-            <div><label className="mb-1 block text-xs font-medium text-gray-500">Hari *</label>
-              <select name="hariNama" required defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-                <option value="">— pilih —</option>
-                {HARI_ORDER.map((h) => <option key={h} value={h}>{h}</option>)}
-              </select></div>
-            <div><label className="mb-1 block text-xs font-medium text-gray-500">Jam Mulai</label>
-              <select name="jamMulai" defaultValue="07:00" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-                {JAM_MULAI.map((j) => <option key={j} value={j}>{j}</option>)}
-              </select></div>
-            <div><label className="mb-1 block text-xs font-medium text-gray-500">Jam Selesai</label>
-              <select name="jamSelesai" defaultValue="08:30" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-                {["08:30","10:00","11:45","13:15","15:00"].map((j) => <option key={j} value={j}>{j}</option>)}
-              </select></div>
-            <div><label className="mb-1 block text-xs font-medium text-gray-500">Mapel</label>
-              <MapelSelect sekolahId={sekolahId} name="mapel" defaultValue="" emptyLabel="— pilih mapel —" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[150px]" /></div>
-            <div><label className="mb-1 block text-xs font-medium text-gray-500">Kelas</label>
-              <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm" /></div>
-            <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Simpan</button>
-          </form>
-        </div>
+        <TambahJadwalForm
+          guruOptions={guruList.map((g) => ({ value: g.id, label: g.namaGuru }))}
+          mapelOptions={mapelList.map((m) => ({ value: m.namaMapel, label: m.namaMapel }))}
+          rombelOptions={rombelList.map((r) => ({ value: r.id, label: r.nama }))}
+        />
       </details>
 
       {/* KALENDER */}
