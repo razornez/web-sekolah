@@ -33,6 +33,7 @@ const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
   { href: "/kelulusan", label: "Kelulusan", key: "kelulusan" },
   { href: "/osis", label: "Pemilihan OSIS", key: "osis" },
   { href: "/audit", label: "Audit Log", key: "audit" },
+  { href: "/pengaturan", label: "⚙ Pengaturan", key: "pengaturan" },
 ];
 const PORTAL_NAV = [
   { href: "/portal", label: "Portal Saya" },
