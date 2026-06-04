@@ -42,12 +42,21 @@ function addDays(d: Date, n: number) {
   return r;
 }
 
+// Pakai komponen lokal (bukan toISOString yang UTC) agar tidak timezone shift
 function isoDate(d: Date) {
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 function fmtShort(d: Date) {
   return d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+}
+
+// Format dengan tahun untuk navigasi minggu
+function fmtWithYear(d: Date) {
+  return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
 /** All dates for `hariNama` between [from, to] */
@@ -79,7 +88,15 @@ export default async function PresensiPage({
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const weekParam = sp.week;
-  const monday = weekParam ? (() => { const d = new Date(weekParam); d.setHours(0,0,0,0); return d; })() : getMonday(today);
+  // Parse weekParam dengan komponen lokal untuk menghindari UTC shift
+  const monday = weekParam
+    ? (() => {
+        const [y, m, d] = weekParam.split("-").map(Number);
+        const dt = new Date(y, m - 1, d); // local midnight, tidak ada timezone issue
+        dt.setHours(0, 0, 0, 0);
+        return dt;
+      })()
+    : getMonday(today);
   const friday = addDays(monday, 4);
   const prevMonday = isoDate(addDays(monday, -7));
   const nextMonday = isoDate(addDays(monday, 7));
@@ -375,9 +392,11 @@ export default async function PresensiPage({
     }
   }
 
-  const weekLabel = isoDate(monday) === isoDate(getMonday(today))
-    ? "Minggu Ini"
-    : `Minggu ${fmtShort(monday)} – ${fmtShort(friday)}`;
+  const isThisWeek = isoDate(monday) === isoDate(getMonday(today));
+  // Tampilkan rentang minggu dengan tahun — jika span dua tahun tampilkan keduanya
+  const rangeLabel = monday.getFullYear() === friday.getFullYear()
+    ? `${fmtShort(monday)} – ${fmtWithYear(friday)}`
+    : `${fmtWithYear(monday)} – ${fmtWithYear(friday)}`;
 
   return (
     <div className="space-y-5">
@@ -385,12 +404,14 @@ export default async function PresensiPage({
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-900">Presensi Siswa</h1>
-          <p className="text-sm text-gray-500">{weekLabel} · {fmtShort(monday)} – {fmtShort(friday)}</p>
+          <p className="text-sm text-gray-500">
+            {isThisWeek ? "Minggu Ini · " : ""}{rangeLabel}
+          </p>
         </div>
         {/* Week nav */}
         <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
           <Link href={`/presensi?week=${prevMonday}`} className="rounded-lg px-3 py-1.5 text-sm hover:bg-gray-100">←</Link>
-          {!isCurrentWeek && (
+          {!isThisWeek && (
             <Link href="/presensi" className="rounded-lg px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50">Minggu Ini</Link>
           )}
           <Link href={`/presensi?week=${nextMonday}`} className="rounded-lg px-3 py-1.5 text-sm hover:bg-gray-100">→</Link>
