@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
+import { PageGuide } from "@/components/PageGuide";
 import { saveMutasi, deleteMutasi } from "../prestasi/actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1.5 text-sm outline-none focus:border-gray-900";
@@ -47,6 +49,17 @@ export default async function MutasiPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-5">
+      <PageGuide
+        icon="🔄"
+        title="Mutasi Siswa"
+        description="Halaman ini mencatat perpindahan siswa — masuk dari sekolah lain atau keluar ke sekolah lain. Setiap mutasi otomatis menyimpan nama staf yang menginput."
+        tips={[
+          "Mutasi Masuk: siswa baru yang pindah dari sekolah lain ke sekolah ini.",
+          "Mutasi Keluar: siswa yang pindah dari sekolah ini ke sekolah lain.",
+          "Gunakan filter Asal/Tujuan untuk mencari mutasi dari sekolah tertentu.",
+          "Klik nama siswa untuk melihat detail profil dan kelas siswa tersebut.",
+        ]}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Mutasi Siswa</h1>
@@ -105,7 +118,10 @@ export default async function MutasiPage({ searchParams }: { searchParams: Promi
         <form className="grid grid-cols-1 gap-2 sm:grid-cols-4">
           <input type="hidden" name="jenis" value={jenis} />
           <input type="hidden" name="page" value="1" />
-          <input name="q" defaultValue={q} placeholder="🔍 Cari nama siswa…" className={`${inCls} sm:col-span-2`} />
+          {/* Autocomplete nama siswa */}
+          <div className="sm:col-span-2">
+            <SiswaAutocomplete name="q" defaultValue={q} placeholder="🔍 Ketik nama siswa (autocomplete)…" />
+          </div>
           <input name="asal" defaultValue={asal} placeholder="Asal sekolah" className={inCls} />
           <input name="tujuan" defaultValue={tujuan} placeholder="Tujuan sekolah" className={inCls} />
           <div className="flex gap-2 sm:col-span-4">

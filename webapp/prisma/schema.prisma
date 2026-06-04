@@ -546,6 +546,8 @@ model Guru {
   jenisJabatan String?      @map("jenis_jabatan")
   statusGuru   String?      @map("status_guru")
   tmt          DateTime?    @db.Date
+  deletedAt    DateTime?    @map("deleted_at")  // soft delete
+  alasanHapus  String?      @map("alasan_hapus") // wajib diisi saat nonaktif
 
   sekolah     Sekolah          @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)

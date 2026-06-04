@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSekolahId } from "@/lib/session";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { deleteMapel } from "./actions";
+import { PageGuide } from "@/components/PageGuide";
 
 export default async function MapelPage({
   searchParams,

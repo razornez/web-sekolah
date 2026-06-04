@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { naikanKelas } from "./actions";
+import { PageGuide } from "@/components/PageGuide";
 
 const selCls =
   "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 outline-none transition-colors focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 hover:border-gray-400 appearance-none";
@@ -17,11 +18,16 @@ export default async function KenaikanKelasPage({
   const [rombelList, tahunList, tingkatList] = await Promise.all([
     prisma.rombel.findMany({
       where: { sekolahId },
-      orderBy: [{ tahunAjaran: { tahun: "desc" } }, { nama: "asc" }],
+      orderBy: { id: "desc" }, // terbaru di atas
       include: {
         tahunAjaran: { select: { tahun: true, aktif: true } },
         tingkat: { select: { nama: true } },
         _count: { select: { anggota: true } },
+        anggota: {
+          include: { siswa: { select: { id: true, namaLengkap: true, nisn: true } } },
+          orderBy: { nomorAbsen: "asc" },
+          take: 50,
+        },
       },
     }),
     prisma.tahunAjaran.findMany({ where: { sekolahId }, orderBy: { tahun: "desc" } }),
@@ -38,6 +44,17 @@ export default async function KenaikanKelasPage({
 
   return (
     <div className="space-y-6">
+      <PageGuide
+        icon="🎓"
+        title="Kenaikan Kelas"
+        description="Fitur ini memindahkan seluruh siswa dari satu rombel ke rombel baru di tahun ajaran berikutnya. Proses ini aman — tidak menghapus data lama."
+        tips={[
+          "Pilih rombel sumber (mis. X IPA 1 TA 2024/2025), lalu tentukan rombel tujuan (mis. XI IPA 1 TA 2025/2026).",
+          "Jika nama rombel tujuan belum ada, sistem otomatis membuatnya.",
+          "Klik ikon 👥 di tabel untuk melihat daftar siswa dalam setiap rombel.",
+          "Tabel diurutkan dari rombel yang baru dibuat/diperbarui (terbaru di atas).",
+        ]}
+      />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Kenaikan Kelas</h1>
@@ -194,9 +211,27 @@ export default async function KenaikanKelasPage({
                   </td>
                   <td className="px-5 py-3 text-gray-600">{r.tingkat.nama}</td>
                   <td className="px-5 py-3">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-                      👥 {r._count.anggota} siswa
-                    </span>
+                    {/* Popup anggota dengan details/summary */}
+                    <details className="group relative">
+                      <summary className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 hover:bg-gray-200 list-none">
+                        👥 {r._count.anggota} siswa
+                        <svg className="h-3 w-3 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      </summary>
+                      <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-xl">
+                        <div className="mb-2 font-semibold text-xs text-gray-700 uppercase tracking-wide">{r.nama} — {r._count.anggota} siswa</div>
+                        {r.anggota.length === 0 && <p className="text-xs text-gray-400">Belum ada anggota.</p>}
+                        <ul className="max-h-48 overflow-y-auto space-y-0.5">
+                          {r.anggota.map((a, i) => (
+                            <li key={a.siswa.id} className="flex items-center gap-2 rounded py-0.5 text-xs">
+                              <span className="w-5 shrink-0 text-gray-400">{i + 1}.</span>
+                              <span className="text-gray-800">{a.siswa.namaLengkap}</span>
+                              {a.siswa.nisn && <span className="ml-auto text-gray-400">{a.siswa.nisn}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                        {r._count.anggota > 50 && <p className="mt-1 text-xs text-gray-400">+{r._count.anggota - 50} lainnya</p>}
+                      </div>
+                    </details>
                   </td>
                   <td className="px-5 py-3">
                     <Link href={`/rombel/${r.id}`} className="text-xs text-gray-500 hover:text-gray-900 hover:underline">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, getSekolahId } from "@/lib/session";
 import { saveNilai } from "./actions";
+import { PageGuide } from "@/components/PageGuide";
 
 const selCls =
   "rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";

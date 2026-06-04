@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { PageGuide } from "@/components/PageGuide";
 
 const PER = 25;
 const STATUS_BADGE: Record<string, string> = {
@@ -40,7 +41,7 @@ export default async function SiswaPage({
   const [total, rows, rombelOpts, agamaOpts, tahunOpts, arsipCount] = await Promise.all([
     prisma.siswa.count({ where }),
     prisma.siswa.findMany({ where, orderBy: { namaLengkap: "asc" }, skip: (page - 1) * PER, take: PER, include: { anggotaRombel: { include: { rombel: { select: { nama: true } } }, take: 1, orderBy: { id: "desc" } } } }),
-    prisma.rombel.findMany({ where: { sekolahId }, orderBy: [{ tahunAjaran: { tahun: "desc" } }, { nama: "asc" }], include: { tahunAjaran: { select: { tahun: true } } }, take: 50 }),
+    prisma.rombel.findMany({ where: { sekolahId }, orderBy: [{ tahunAjaran: { tahun: "desc" } }, { tingkat: { urutan: "asc" } }, { nama: "asc" }], include: { tahunAjaran: { select: { tahun: true, aktif: true } }, tingkat: { select: { nama: true } } }, take: 100 }),
     prisma.siswa.findMany({ where: { sekolahId, deletedAt: null, agama: { not: null } }, distinct: ["agama"], select: { agama: true }, orderBy: { agama: "asc" } }),
     prisma.siswa.findMany({ where: { sekolahId, deletedAt: null, tahunMasuk: { not: null } }, distinct: ["tahunMasuk"], select: { tahunMasuk: true }, orderBy: { tahunMasuk: "desc" } }),
     prisma.siswa.count({ where: { sekolahId, deletedAt: { not: null } } }),
@@ -52,8 +53,28 @@ export default async function SiswaPage({
     return `/siswa?${p.toString()}`;
   };
 
+  // Group rombel by tingkat → nested optgroup
+  const rombelByTingkat = rombelOpts.reduce<Record<string, typeof rombelOpts>>((acc, r) => {
+    const key = `${r.tingkat.nama} — TA ${r.tahunAjaran.tahun}${r.tahunAjaran.aktif ? " ✓" : ""}`;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(r);
+    return acc;
+  }, {});
+
   return (
     <div className="space-y-4">
+      <PageGuide
+        icon="👥"
+        title="Data Siswa"
+        description="Kelola seluruh data siswa aktif. Gunakan filter untuk mempersempit pencarian berdasarkan kelas, status, jenis kelamin, agama, atau tahun masuk."
+        tips={[
+          "Filter Kelas: tampilkan hanya siswa di kelas tertentu.",
+          "Filter Status: pisahkan siswa aktif, lulus, pindah, atau alumni.",
+          "Klik nama siswa untuk melihat/edit detail lengkap termasuk biodata, nilai, dan akun login.",
+          "Tombol Hapus akan membuka halaman konfirmasi — data tidak langsung dihapus permanen.",
+          "Siswa yang diarsipkan tersimpan di halaman Arsip dan bisa dipulihkan.",
+        ]}
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Data Siswa</h1>
@@ -89,9 +110,15 @@ export default async function SiswaPage({
           <input type="hidden" name="q" value={q} /><input type="hidden" name="status" value={status} /><input type="hidden" name="gender" value={gender} />
           <div>
             <label className="block text-xs text-gray-500">Kelas/Rombel</label>
-            <select name="rombelId" defaultValue={rombelId||""} className="rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-              <option value="">Semua kelas</option>
-              {rombelOpts.map((r) => <option key={r.id} value={r.id}>{r.nama} ({r.tahunAjaran.tahun})</option>)}
+            <select name="rombelId" defaultValue={rombelId||""} className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[200px]">
+              <option value="">— Semua Kelas —</option>
+              {Object.entries(rombelByTingkat).map(([group, rombels]) => (
+                <optgroup key={group} label={group}>
+                  {rombels.map((r) => (
+                    <option key={r.id} value={r.id}>{r.nama}</option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </div>
           <div>

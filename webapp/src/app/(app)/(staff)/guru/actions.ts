@@ -69,6 +69,32 @@ export async function saveGuru(
   return { ok: true, to: "/guru" };
 }
 
+/** Soft delete guru — wajib isi alasan */
+export async function nonaktifkanGuru(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const id = Number(formData.get("id"));
+  const alasan = String(formData.get("alasan") ?? "").trim();
+  if (!id || !alasan) return;
+  const guru = await prisma.guru.findFirst({ where: { id, sekolahId }, select: { id: true, namaGuru: true } });
+  if (!guru) return;
+  await prisma.guru.update({ where: { id }, data: { deletedAt: new Date(), alasanHapus: alasan } });
+  // Juga nonaktifkan akun user-nya jika ada
+  await prisma.guru.update({ where: { id }, data: {} }); // noop
+  await prisma.user.updateMany({ where: { guru: { id } }, data: { isActive: false } });
+  await auditLog({ aksi: "delete", entitas: "guru", entitasId: id, detail: `Nonaktifkan guru: ${guru.namaGuru} — ${alasan}` });
+  revalidatePath("/guru");
+}
+
+export async function aktifkanKembaliGuru(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const id = Number(formData.get("id"));
+  if (!id) return;
+  await prisma.guru.update({ where: { id }, data: { deletedAt: null, alasanHapus: null } });
+  await prisma.user.updateMany({ where: { guru: { id } }, data: { isActive: true } });
+  await auditLog({ aksi: "update", entitas: "guru", entitasId: id, detail: "Aktifkan kembali guru" });
+  revalidatePath("/guru");
+}
+
 export async function deleteGuru(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));

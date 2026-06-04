@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSekolahId } from "@/lib/session";
 import { addTagihan, bayarTagihan, deleteTagihan } from "./actions";
+import { PageGuide } from "@/components/PageGuide";
 
 const BULAN = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 const rupiah = (n: number) => "Rp " + n.toLocaleString("id-ID");
