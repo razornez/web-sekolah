@@ -8,7 +8,7 @@ const JAM_MULAI  = ["07:00","08:30","10:15","11:45","13:30"];
 const JAM_SELESAI = ["08:30","10:00","11:45","13:15","15:00"];
 const init: JadwalFormState = { ok: false };
 
-type SelectOption = { value: string | number; label: string };
+type SelectOption = { key: string | number; value: string | number; label: string };
 
 export function TambahJadwalForm({
   guruOptions,
@@ -76,7 +76,7 @@ export function TambahJadwalForm({
           <label className="mb-1 block text-xs font-medium text-gray-500">Guru <span className="text-red-500">*</span></label>
           <select name="guruId" required defaultValue="" className={`${sel} min-w-[180px]`}>
             <option value="">— pilih guru —</option>
-            {guruOptions.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
+            {guruOptions.map((g) => <option key={g.key} value={g.value}>{g.label}</option>)}
           </select>
         </div>
 
@@ -110,7 +110,7 @@ export function TambahJadwalForm({
           <label className="mb-1 block text-xs font-medium text-gray-500">Mapel</label>
           <select name="mapel" defaultValue="" className={`${sel} min-w-[150px]`}>
             <option value="">— pilih mapel —</option>
-            {mapelOptions.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+            {mapelOptions.map((m) => <option key={m.key} value={m.value}>{m.label}</option>)}
           </select>
         </div>
 
@@ -119,7 +119,7 @@ export function TambahJadwalForm({
           <label className="mb-1 block text-xs font-medium text-gray-500">Kelas</label>
           <select name="rombelId" defaultValue="" className={`${sel} min-w-[130px]`}>
             <option value="">— pilih kelas —</option>
-            {rombelOptions.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+            {rombelOptions.map((r) => <option key={r.key} value={r.value}>{r.label}</option>)}
           </select>
         </div>
 

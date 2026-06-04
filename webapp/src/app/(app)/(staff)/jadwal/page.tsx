@@ -80,9 +80,9 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
           <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
         </summary>
         <TambahJadwalForm
-          guruOptions={guruList.map((g) => ({ value: g.id, label: g.namaGuru }))}
-          mapelOptions={mapelList.map((m) => ({ value: m.namaMapel, label: m.namaMapel }))}
-          rombelOptions={rombelList.map((r) => ({ value: r.id, label: r.nama }))}
+          guruOptions={guruList.map((g) => ({ key: g.id, value: g.id, label: g.namaGuru }))}
+          mapelOptions={mapelList.map((m) => ({ key: m.id, value: m.namaMapel, label: m.namaMapel }))}
+          rombelOptions={rombelList.map((r) => ({ key: r.id, value: r.id, label: r.nama }))}
         />
       </details>
 
