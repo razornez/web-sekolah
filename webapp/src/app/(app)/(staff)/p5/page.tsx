@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { createProjek, deleteProjek } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
 export default async function P5Page() {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("p5");
   const t = await getTranslations("p5");
   const [projek, tahunAjaran] = await Promise.all([
     prisma.projekP5.findMany({

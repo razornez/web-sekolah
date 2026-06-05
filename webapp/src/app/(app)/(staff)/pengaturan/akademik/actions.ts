@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { catchDeleteError } from "@/lib/deleteError";
 import { auditLog } from "@/lib/audit";
 
 // ── Tahun Ajaran ────────────────────────────────────────────────────────────
 
 export async function saveTahunAjaran(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const id = Number(formData.get("id")) || null;
   const tahun = (formData.get("tahun") as string ?? "").trim();
   if (!tahun) return;
@@ -25,7 +25,7 @@ export async function saveTahunAjaran(formData: FormData) {
 }
 
 export async function setTahunAjaranAktif(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.$transaction([
@@ -37,7 +37,7 @@ export async function setTahunAjaranAktif(formData: FormData) {
 }
 
 export async function deleteTahunAjaran(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const id = Number(formData.get("id"));
   if (!id) return;
   const rombelCount = await prisma.rombel.count({ where: { tahunAjaranId: id, sekolahId } });
@@ -57,7 +57,7 @@ export async function deleteTahunAjaran(formData: FormData) {
 // ── Periode ─────────────────────────────────────────────────────────────────
 
 export async function savePeriode(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const id = Number(formData.get("id")) || null;
   const tahunAjaranId = Number(formData.get("tahunAjaranId"));
   const nama = (formData.get("nama") as string ?? "").trim();
@@ -89,7 +89,7 @@ export async function savePeriode(formData: FormData) {
 }
 
 export async function setPeriodeAktif(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const id = Number(formData.get("id"));
   const tahunAjaranId = Number(formData.get("tahunAjaranId"));
   if (!id || !tahunAjaranId) return;
@@ -115,7 +115,7 @@ export async function setPeriodeAktif(formData: FormData) {
 }
 
 export async function deletePeriode(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const id = Number(formData.get("id"));
   if (!id) return;
   const nilaiCount = await prisma.nilaiRapor.count({ where: { periodeId: id } });
@@ -134,7 +134,7 @@ export async function deletePeriode(formData: FormData) {
 
 /** Update tanggal mulai/selesai periode yang sudah ada */
 export async function updatePeriodeTanggal(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const id = Number(formData.get("id"));
   const tanggalMulaiStr = (formData.get("tanggalMulai") as string ?? "").trim();
   const tanggalSelesaiStr = (formData.get("tanggalSelesai") as string ?? "").trim();
@@ -163,7 +163,7 @@ export async function updatePeriodeTanggal(formData: FormData) {
  * Jika periode sudah ada, hanya update tanggal yang kosong.
  */
 export async function autoIsiKalender(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("pengaturan");
   const tahunAjaranId = Number(formData.get("tahunAjaranId"));
   if (!tahunAjaranId) return;
 

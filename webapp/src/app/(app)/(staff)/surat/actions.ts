@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 import { suratSchema } from "@/lib/validations";
 
@@ -17,7 +17,7 @@ export async function saveSurat(
   _prev: SuratFormState,
   formData: FormData,
 ): Promise<SuratFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("surat");
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -49,7 +49,7 @@ export async function saveSurat(
 }
 
 export async function deleteSurat(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("surat");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.surat.deleteMany({ where: { id, sekolahId } });

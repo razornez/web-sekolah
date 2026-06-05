@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
@@ -11,7 +11,7 @@ const str = (v: FormDataEntryValue | null) => {
 };
 
 export async function createElearning(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("elearning");
   const judul = String(formData.get("judul") ?? "").trim();
   if (!judul) return;
   const guruId = Number(formData.get("guruId")) || null;
@@ -35,7 +35,7 @@ export async function createElearning(formData: FormData) {
 }
 
 export async function deleteElearning(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("elearning");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.elearning.deleteMany({ where: { id, sekolahId } });

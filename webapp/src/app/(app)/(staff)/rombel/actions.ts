@@ -5,7 +5,7 @@ import { catchDeleteError } from "@/lib/deleteError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 import { rombelSchema } from "@/lib/validations";
 
@@ -19,7 +19,7 @@ export async function saveRombel(
   _prev: RombelFormState,
   formData: FormData,
 ): Promise<RombelFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("rombel");
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -71,7 +71,7 @@ export async function saveRombel(
 }
 
 export async function deleteRombel(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("rombel");
   const id = Number(formData.get("id"));
   if (!id) return;
   try {
@@ -85,7 +85,7 @@ export async function deleteRombel(formData: FormData) {
 }
 
 export async function addAnggota(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("rombel");
   const rombelId = Number(formData.get("rombelId"));
   const siswaId = Number(formData.get("siswaId"));
   if (!rombelId || !siswaId) return;
@@ -108,7 +108,7 @@ export async function addAnggota(formData: FormData) {
 }
 
 export async function removeAnggota(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("rombel");
   const anggotaId = Number(formData.get("id"));
   const rombelId = Number(formData.get("rombelId"));
   if (!anggotaId) return;

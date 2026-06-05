@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { saveTarget, savePenilaian } from "../actions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
 
@@ -15,7 +15,7 @@ export default async function P5DetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ rombelId?: string }>;
 }) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("p5");
   const t = await getTranslations("p5");
   const projekP5Id = Number((await params).id);
   const rombelId = Number((await searchParams).rombelId) || 0;

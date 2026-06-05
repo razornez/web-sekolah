@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { kategoriSarprasSchema, sarprasSchema } from "@/lib/validations";
 import { catchDeleteError } from "@/lib/deleteError";
 import { auditLog } from "@/lib/audit";
 
 // ---- Kategori ------------------------------------------------------------
 export async function createKategoriSarpras(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const parsed = kategoriSarprasSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const k = await prisma.kategoriSarpras.create({ data: { ...parsed.data, sekolahId } });
@@ -18,7 +18,7 @@ export async function createKategoriSarpras(formData: FormData) {
 }
 
 export async function updateKategoriSarpras(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const id = Number(formData.get("id"));
   const parsed = kategoriSarprasSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
@@ -28,7 +28,7 @@ export async function updateKategoriSarpras(formData: FormData) {
 }
 
 export async function deleteKategoriSarpras(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const id = Number(formData.get("id"));
   if (!id) return;
   try {
@@ -49,7 +49,7 @@ async function validKategori(sekolahId: number, kategoriId: number | null) {
 }
 
 export async function createSarpras(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const parsed = sarprasSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   if (!(await validKategori(sekolahId, parsed.data.kategoriId))) return;
@@ -59,7 +59,7 @@ export async function createSarpras(formData: FormData) {
 }
 
 export async function updateSarpras(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const id = Number(formData.get("id"));
   const parsed = sarprasSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
@@ -70,7 +70,7 @@ export async function updateSarpras(formData: FormData) {
 }
 
 export async function deleteSarpras(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.sarpras.deleteMany({ where: { id, sekolahId } });
@@ -81,7 +81,7 @@ export async function deleteSarpras(formData: FormData) {
 const TINDAK_LANJUT = ["", "Diajukan", "Dalam Perbaikan", "Selesai", "Dihapuskan"];
 /** Set status tindak lanjut untuk item rusak (BUG-SARPRAS-01) */
 export async function setTindakLanjut(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const id = Number(formData.get("id"));
   const status = String(formData.get("tindakLanjut") ?? "");
   if (!id || !TINDAK_LANJUT.includes(status)) return;

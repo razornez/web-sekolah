@@ -4,13 +4,13 @@ import { PredikatP5 } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 
 const PREDIKAT: PredikatP5[] = [PredikatP5.MB, PredikatP5.SB, PredikatP5.BSH, PredikatP5.SAB];
 
 export async function createProjek(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("p5");
   const tahunAjaranId = Number(formData.get("tahunAjaranId"));
   const tema = String(formData.get("tema") ?? "").trim();
   const judul = String(formData.get("judul") ?? "").trim();
@@ -26,7 +26,7 @@ export async function createProjek(formData: FormData) {
 }
 
 export async function deleteProjek(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("p5");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.projekP5.deleteMany({ where: { id, sekolahId } });
@@ -36,7 +36,7 @@ export async function deleteProjek(formData: FormData) {
 
 /** Set elemen yang ditargetkan projek (replace). */
 export async function saveTarget(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("p5");
   const projekP5Id = Number(formData.get("projekP5Id"));
   if (!projekP5Id) return;
   const projek = await prisma.projekP5.findFirst({ where: { id: projekP5Id, sekolahId }, select: { id: true } });
@@ -56,7 +56,7 @@ export async function saveTarget(formData: FormData) {
 
 /** Penilaian batch: siswa (rombel) x elemen target -> predikat. */
 export async function savePenilaian(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("p5");
   const projekP5Id = Number(formData.get("projekP5Id"));
   const rombelId = Number(formData.get("rombelId"));
   if (!projekP5Id || !rombelId) return;

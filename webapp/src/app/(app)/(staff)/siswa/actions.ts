@@ -4,7 +4,6 @@ import { Prisma, JenisKelamin } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
 import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 
@@ -28,7 +27,7 @@ export async function saveSiswa(
   _prev: SiswaFormState,
   formData: FormData,
 ): Promise<SiswaFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("siswa");
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 

@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { GuruSelect } from "@/components/filters/GuruSelect";
 import { createElearning, deleteElearning } from "./actions";
@@ -8,7 +8,7 @@ import { createElearning, deleteElearning } from "./actions";
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
 export default async function ElearningPage() {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("elearning");
   const t = await getTranslations("elearning");
   const rows = await prisma.elearning.findMany({ where: { sekolahId }, orderBy: { createdAt: "desc" }, take: 100 });
 

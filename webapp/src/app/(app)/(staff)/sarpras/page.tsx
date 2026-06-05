@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { createSarpras, deleteSarpras, setTindakLanjut } from "./actions";
 
@@ -31,7 +31,7 @@ export default async function SarprasPage({
 }: {
   searchParams: Promise<{ q?: string; kondisi?: string; kategori?: string }>;
 }) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const t = await getTranslations("sarpras");
   // Map DB kondisi values → translation keys (keys stay as stored DB values).
   const KONDISI_KEY: Record<string, string> = {

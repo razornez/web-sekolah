@@ -3,13 +3,13 @@
 import { Prisma, StatusPembayaran } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 import { jenisPembayaranSchema, tagihanSchema } from "@/lib/validations";
 
 // ---- Jenis Pembayaran ----------------------------------------------------
 export async function createJenis(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("spp");
   const parsed = jenisPembayaranSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const j = await prisma.jenisPembayaran.create({ data: { ...parsed.data, sekolahId } });
@@ -18,7 +18,7 @@ export async function createJenis(formData: FormData) {
 }
 
 export async function updateJenis(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("spp");
   const id = Number(formData.get("id"));
   const parsed = jenisPembayaranSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
@@ -31,7 +31,7 @@ export async function updateJenis(formData: FormData) {
 }
 
 export async function deleteJenis(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("spp");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jenisPembayaran.deleteMany({ where: { id, sekolahId } });
@@ -41,7 +41,7 @@ export async function deleteJenis(formData: FormData) {
 
 // ---- Tagihan & Pembayaran ------------------------------------------------
 export async function addTagihan(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("spp");
   const parsed = tagihanSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const d = parsed.data;
@@ -73,7 +73,7 @@ export async function addTagihan(formData: FormData) {
 }
 
 export async function bayarTagihan(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("spp");
   const tagihanId = Number(formData.get("id"));
   const siswaId = Number(formData.get("siswaId"));
   if (!tagihanId) return;
@@ -100,7 +100,7 @@ export async function bayarTagihan(formData: FormData) {
 }
 
 export async function deleteTagihan(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("spp");
   const tagihanId = Number(formData.get("id"));
   const siswaId = Number(formData.get("siswaId"));
   if (!tagihanId) return;

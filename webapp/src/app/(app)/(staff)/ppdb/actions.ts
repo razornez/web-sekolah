@@ -5,7 +5,7 @@ import { mkdir, writeFile } from "fs/promises";
 import { StatusPpdb, JenisDokumenPpdb } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { auditLog } from "@/lib/audit";
 import { jalurPpdbSchema, pendaftaranPpdbSchema } from "@/lib/validations";
@@ -20,7 +20,7 @@ const ALLOWED_TYPES = [
 
 // ---- Jalur PPDB ----------------------------------------------------------
 export async function createJalur(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const parsed = jalurPpdbSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const j = await prisma.jalurPpdb.create({ data: { ...parsed.data, sekolahId } });
@@ -29,7 +29,7 @@ export async function createJalur(formData: FormData) {
 }
 
 export async function updateJalur(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const id = Number(formData.get("id"));
   const parsed = jalurPpdbSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
@@ -39,7 +39,7 @@ export async function updateJalur(formData: FormData) {
 }
 
 export async function deleteJalur(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jalurPpdb.deleteMany({ where: { id, sekolahId } });
@@ -54,7 +54,7 @@ export async function createPendaftar(
   _prev: PendaftarFormState,
   formData: FormData,
 ): Promise<PendaftarFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const parsed = pendaftaranPpdbSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, errors: parsed.error.flatten().fieldErrors };
 
@@ -88,7 +88,7 @@ const VALID: StatusPpdb[] = [
 ];
 
 export async function updateStatusPendaftar(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const user = await getCurrentUser();
   const id = Number(formData.get("id"));
   const raw = String(formData.get("status") ?? "") as StatusPpdb;
@@ -110,7 +110,7 @@ export async function updateStatusPendaftar(formData: FormData) {
 }
 
 export async function softDeletePendaftar(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.pendaftaranPpdb.updateMany({ where: { id, sekolahId }, data: { deletedAt: new Date() } });
@@ -119,7 +119,7 @@ export async function softDeletePendaftar(formData: FormData) {
 }
 
 export async function restorePendaftar(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.pendaftaranPpdb.updateMany({ where: { id, sekolahId }, data: { deletedAt: null } });
@@ -134,7 +134,7 @@ const VALID_JENIS: JenisDokumenPpdb[] = [
 ];
 
 export async function addDokumen(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const pendaftaranId = Number(formData.get("pendaftaranId"));
   const jenis = (formData.get("jenis") as JenisDokumenPpdb | null) ?? "lainnya";
   const keterangan = (formData.get("keterangan") as string | null)?.trim() || null;
@@ -174,7 +174,7 @@ export async function addDokumen(formData: FormData) {
 }
 
 export async function deleteDokumen(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("ppdb");
   const id = Number(formData.get("id"));
   const pendaftaranId = Number(formData.get("pendaftaranId"));
   if (!id) return;

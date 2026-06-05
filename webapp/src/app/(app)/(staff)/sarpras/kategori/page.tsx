@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { createKategoriSarpras, updateKategoriSarpras, deleteKategoriSarpras } from "../actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
 export default async function KategoriSarprasPage() {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("sarpras");
   const t = await getTranslations("sarpras");
   const rows = await prisma.kategoriSarpras.findMany({ where: { sekolahId }, orderBy: { nama: "asc" } });
 

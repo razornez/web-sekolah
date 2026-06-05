@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { createKategori, updateKategori, deleteKategori } from "../actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
 export default async function KategoriKasusPage() {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("bk");
   const t = await getTranslations("bk");
   const rows = await prisma.kategoriKasus.findMany({
     where: { sekolahId },

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 
 export type JadwalFormState = {
@@ -35,7 +35,7 @@ export async function saveJadwal(
   _prev: JadwalFormState,
   formData: FormData,
 ): Promise<JadwalFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("jadwal");
 
   const guruId = Number(formData.get("guruId"));
   const namaHari = String(formData.get("hariNama") ?? "");
@@ -118,7 +118,7 @@ export async function saveJadwal(
 }
 
 export async function deleteJadwal(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("jadwal");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jadwalGuru.deleteMany({ where: { id, sekolahId } });

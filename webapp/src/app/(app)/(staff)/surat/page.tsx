@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { deleteSurat } from "./actions";
 
@@ -13,7 +13,7 @@ export default async function SuratPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("surat");
   const t = await getTranslations("surat");
   const q = ((await searchParams).q ?? "").trim();
 

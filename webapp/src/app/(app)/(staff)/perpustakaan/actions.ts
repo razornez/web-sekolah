@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 import { bukuSchema } from "@/lib/validations";
 
@@ -17,7 +17,7 @@ export async function saveBuku(
   _prev: BukuFormState,
   formData: FormData,
 ): Promise<BukuFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("perpustakaan");
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -42,7 +42,7 @@ export async function saveBuku(
 }
 
 export async function deleteBuku(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("perpustakaan");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.bukuPerpustakaan.deleteMany({ where: { id, sekolahId } });
@@ -51,7 +51,7 @@ export async function deleteBuku(formData: FormData) {
 }
 
 export async function pinjamBuku(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("perpustakaan");
   const siswaId = Number(formData.get("siswaId"));
   const bukuId = Number(formData.get("bukuId"));
   const durasiHari = Number(formData.get("durasiHari")) || null;
@@ -71,7 +71,7 @@ export async function pinjamBuku(formData: FormData) {
 }
 
 export async function kembalikanBuku(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("perpustakaan");
   const id = Number(formData.get("id"));
   const siswaId = Number(formData.get("siswaId"));
   if (!id) return;

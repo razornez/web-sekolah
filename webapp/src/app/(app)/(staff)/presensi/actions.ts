@@ -3,7 +3,7 @@
 import { StatusPresensi } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 
 const VALID: StatusPresensi[] = [
@@ -13,7 +13,7 @@ const VALID: StatusPresensi[] = [
 
 /** Batch upsert presensi satu rombel (form lama). */
 export async function savePresensi(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("presensi");
   const rombelId = Number(formData.get("rombelId"));
   const tanggalStr = String(formData.get("tanggal") ?? "");
   if (!rombelId || !tanggalStr) return;
@@ -46,7 +46,7 @@ export async function savePresensi(formData: FormData) {
 
 /** Tandai satu siswa hadir pada tanggal tertentu (klik dot kuning). */
 export async function markSiswaHadir(siswaId: number, tanggalStr: string): Promise<void> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("presensi");
   const tanggal = new Date(tanggalStr);
   if (isNaN(tanggal.getTime())) return;
 
@@ -66,7 +66,7 @@ export async function markSiswaHadir(siswaId: number, tanggalStr: string): Promi
 export async function setSiswaStatus(
   siswaId: number, tanggalStr: string, status: StatusPresensi,
 ): Promise<void> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("presensi");
   const tanggal = new Date(tanggalStr);
   if (isNaN(tanggal.getTime()) || !VALID.includes(status)) return;
 

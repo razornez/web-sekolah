@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
@@ -11,7 +11,7 @@ const str = (v: FormDataEntryValue | null) => {
 };
 
 export async function createJurnal(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("jurnal");
   const guruId = Number(formData.get("guruId"));
   const tglRaw = String(formData.get("tanggal") ?? "").trim();
   if (!guruId || !tglRaw) return;
@@ -33,7 +33,7 @@ export async function createJurnal(formData: FormData) {
 }
 
 export async function updateJurnal(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("jurnal");
   const id = Number(formData.get("id"));
   const tglRaw = String(formData.get("tanggal") ?? "").trim();
   if (!id) return;
@@ -51,7 +51,7 @@ export async function updateJurnal(formData: FormData) {
 }
 
 export async function deleteJurnal(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("jurnal");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jurnalGuru.deleteMany({ where: { id, sekolahId } });

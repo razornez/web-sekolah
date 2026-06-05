@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { kategoriKasusSchema, kasusSchema } from "@/lib/validations";
 import { auditLog } from "@/lib/audit";
 
 // ---- Kategori Kasus (master) --------------------------------------------
 export async function createKategori(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("bk");
   const parsed = kategoriKasusSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const k = await prisma.kategoriKasus.create({ data: { ...parsed.data, sekolahId } });
@@ -17,7 +17,7 @@ export async function createKategori(formData: FormData) {
 }
 
 export async function updateKategori(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("bk");
   const id = Number(formData.get("id"));
   const parsed = kategoriKasusSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
@@ -27,7 +27,7 @@ export async function updateKategori(formData: FormData) {
 }
 
 export async function deleteKategori(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("bk");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.kategoriKasus.deleteMany({ where: { id, sekolahId } });
@@ -37,7 +37,7 @@ export async function deleteKategori(formData: FormData) {
 
 // ---- Kasus / Pelanggaran siswa ------------------------------------------
 export async function addKasus(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("bk");
   const parsed = kasusSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const d = parsed.data;
@@ -77,7 +77,7 @@ export async function addKasus(formData: FormData) {
 }
 
 export async function deleteKasus(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("bk");
   const id = Number(formData.get("id"));
   const siswaId = Number(formData.get("siswaId"));
   if (!id) return;

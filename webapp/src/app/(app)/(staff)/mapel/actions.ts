@@ -5,7 +5,7 @@ import { catchDeleteError } from "@/lib/deleteError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 import { mapelSchema } from "@/lib/validations";
 
@@ -19,7 +19,7 @@ export async function saveMapel(
   _prev: MapelFormState,
   formData: FormData,
 ): Promise<MapelFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("mapel");
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -70,7 +70,7 @@ export async function saveMapel(
 
 /** Soft deactivate — tidak hard delete */
 export async function toggleMapelAktif(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("mapel");
   const id = Number(formData.get("id"));
   if (!id) return;
   const m = await prisma.mapel.findFirst({ where: { id, sekolahId }, select: { aktif: true } });
@@ -82,7 +82,7 @@ export async function toggleMapelAktif(formData: FormData) {
 
 /** Tambah guru ke history mapel */
 export async function addGuruMapel(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("mapel");
   const mapelId = Number(formData.get("mapelId"));
   const guruId = Number(formData.get("guruId"));
   const tahunAjaran = String(formData.get("tahunAjaran") ?? "").trim() || null;
@@ -100,7 +100,7 @@ export async function addGuruMapel(formData: FormData) {
 }
 
 export async function deleteMapel(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("mapel");
   const id = Number(formData.get("id"));
   if (!id) return;
   try {

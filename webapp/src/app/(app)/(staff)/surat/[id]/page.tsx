@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import SuratForm from "../_components/SuratForm";
 
 export default async function EditSuratPage({
@@ -9,7 +9,7 @@ export default async function EditSuratPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("surat");
   const t = await getTranslations("surat");
   const { id } = await params;
   const surat = await prisma.surat.findFirst({ where: { id: Number(id), sekolahId } });

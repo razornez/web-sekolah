@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 import { calonOsisSchema } from "@/lib/validations";
 
 export async function createCalon(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("osis");
   const parsed = calonOsisSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   const c = await prisma.calonOsis.create({ data: { ...parsed.data, sekolahId } });
@@ -16,7 +16,7 @@ export async function createCalon(formData: FormData) {
 }
 
 export async function updateCalon(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("osis");
   const id = Number(formData.get("id"));
   const parsed = calonOsisSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
@@ -26,7 +26,7 @@ export async function updateCalon(formData: FormData) {
 }
 
 export async function deleteCalon(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("osis");
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.calonOsis.deleteMany({ where: { id, sekolahId } });

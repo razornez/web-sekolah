@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { addKasus, deleteKasus } from "./actions";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 import { SiswaAvatar } from "@/components/SiswaAvatar";
@@ -26,7 +26,7 @@ export default async function BkPage({
 }: {
   searchParams: Promise<{ q?: string; siswaId?: string }>;
 }) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("bk");
   const t = await getTranslations("bk");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();

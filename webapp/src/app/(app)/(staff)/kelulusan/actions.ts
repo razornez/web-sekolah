@@ -3,14 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 
 const STATUS_VALID = ["LULUS", "TIDAK LULUS"];
 
 /** Set status kelulusan batch utk satu rombel. */
 export async function saveKelulusan(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("kelulusan");
   const rombelId = Number(formData.get("rombelId"));
   if (!rombelId) return;
 
@@ -40,7 +40,7 @@ export async function saveKelulusan(formData: FormData) {
 }
 
 export async function saveSettingKelulusan(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireModule("kelulusan");
   const aktif = formData.get("aktif") === "on";
   const pengumuman = String(formData.get("pengumuman") ?? "").trim() || null;
   const tglRaw = String(formData.get("tanggalRilis") ?? "").trim();
