@@ -12,16 +12,22 @@ const fmt = (d: Date | null) => (d ? d.toLocaleDateString("id-ID", { day: "2-dig
 export default async function TugasPage() {
   const sekolahId = await requireModule("tugas");
   const t = await getTranslations("tugas");
-  const [rows, rombel] = await Promise.all([
+  const [rows, rombel, totalAktif] = await Promise.all([
     prisma.tugas.findMany({
       where: { sekolahId },
       orderBy: { createdAt: "desc" },
       take: 100,
       include: { _count: { select: { pengumpulan: true } } },
     }),
-    prisma.rombel.findMany({ where: { sekolahId }, orderBy: { nama: "asc" }, select: { id: true, nama: true } }),
+    prisma.rombel.findMany({
+      where: { sekolahId },
+      orderBy: { nama: "asc" },
+      select: { id: true, nama: true, _count: { select: { anggota: true } } },
+    }),
+    prisma.siswa.count({ where: { sekolahId, deletedAt: null, status: "aktif" } }),
   ]);
   const rombelMap = new Map(rombel.map((r) => [r.id, r.nama]));
+  const rombelSize = new Map(rombel.map((r) => [r.id, r._count.anggota]));
 
   return (
     <div className="space-y-4">
@@ -51,7 +57,18 @@ export default async function TugasPage() {
                 <td className="px-4 py-2 text-gray-600">{tg.mapel ?? "-"}</td>
                 <td className="px-4 py-2 text-gray-600">{tg.rombelId ? rombelMap.get(tg.rombelId) ?? "-" : t("rombelSemua")}</td>
                 <td className="px-4 py-2 text-gray-600">{fmt(tg.deadline)}</td>
-                <td className="px-4 py-2 text-gray-600">{tg._count.pengumpulan}</td>
+                <td className="px-4 py-2">
+                  {(() => {
+                    const total = tg.rombelId ? (rombelSize.get(tg.rombelId) ?? 0) : totalAktif;
+                    const done = tg._count.pengumpulan;
+                    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                    return (
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${done >= total && total > 0 ? "bg-green-100 text-green-700" : done > 0 ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-500"}`}>
+                        {done} / {total} {total > 0 ? `(${pct}%)` : ""}
+                      </span>
+                    );
+                  })()}
+                </td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex items-center justify-end gap-3">
                     <Link href={`/tugas/${tg.id}`} className="text-gray-600 hover:underline">{t("check")}</Link>
