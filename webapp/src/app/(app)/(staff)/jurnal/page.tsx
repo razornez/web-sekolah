@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { InlineEdit } from "@/components/InlineEdit";
 import { GuruSelect } from "@/components/filters/GuruSelect";
 import { MapelSelect } from "@/components/filters/MapelSelect";
 import { RombelSelect } from "@/components/filters/RombelSelect";
@@ -100,17 +101,13 @@ export default async function JurnalPage({
                 <td className="px-4 py-2 text-gray-600">{j.materi ?? "-"}</td>
                 <td className="px-4 py-2">
                   <div className="flex items-center justify-end gap-2">
-                    <details className="relative">
-                      <summary className="cursor-pointer list-none rounded-md border border-gray-300 px-2 py-1 text-xs hover:bg-gray-100">{t("edit")}</summary>
-                      <form action={updateJurnal} className="absolute right-0 z-20 mt-1 flex w-64 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-xl">
-                        <input type="hidden" name="id" value={j.id} />
-                        <input type="date" name="tanggal" defaultValue={iso(j.tanggal)} className={inCls} />
-                        <input name="kelas" defaultValue={j.kelas ?? ""} placeholder={t("colKelas")} className={inCls} />
-                        <input name="mapel" defaultValue={j.mapel ?? ""} placeholder={t("colMapel")} className={inCls} />
-                        <input name="materi" defaultValue={j.materi ?? ""} placeholder={t("colMateri")} className={inCls} />
-                        <button className="rounded-md bg-gray-900 px-2 py-1 text-xs font-medium text-white hover:bg-gray-800">{t("saveEdit")}</button>
-                      </form>
-                    </details>
+                    <InlineEdit action={updateJurnal} saveLabel={t("saveEdit")} trigger={t("edit")}>
+                      <input type="hidden" name="id" value={j.id} />
+                      <input type="date" name="tanggal" defaultValue={iso(j.tanggal)} className={inCls} />
+                      <input name="kelas" defaultValue={j.kelas ?? ""} placeholder={t("colKelas")} className={inCls} />
+                      <input name="mapel" defaultValue={j.mapel ?? ""} placeholder={t("colMapel")} className={inCls} />
+                      <input name="materi" defaultValue={j.materi ?? ""} placeholder={t("colMateri")} className={inCls} />
+                    </InlineEdit>
                     <ConfirmDelete action={deleteJurnal} id={j.id} message={t("deleteConfirm")} />
                   </div>
                 </td>

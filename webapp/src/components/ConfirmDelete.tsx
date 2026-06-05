@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ConfirmModal } from "./ConfirmModal";
 import { ErrorModal } from "./ErrorModal";
@@ -8,11 +8,6 @@ import { ErrorModal } from "./ErrorModal";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DeleteAction = (formData: FormData) => Promise<any>;
 
-/**
- * Tombol hapus generik dengan:
- * - Modal konfirmasi custom (bukan window.confirm)
- * - Modal error custom saat gagal karena relasi (bukan alert)
- */
 export function ConfirmDelete({
   action,
   id,
@@ -25,6 +20,7 @@ export function ConfirmDelete({
   label?: string;
 }) {
   const t = useTranslations("common");
+  const formRef = useRef<HTMLFormElement>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -51,13 +47,19 @@ export function ConfirmDelete({
 
   function handleConfirm() {
     setShowConfirm(false);
-    const fd = new FormData();
-    fd.append("id", String(id));
-    formAction(fd);
+    // Gunakan requestSubmit() bukan panggil formAction langsung —
+    // Server Actions harus di-invoke lewat form submit agar Next.js
+    // bisa menangani encoding & response dengan benar (E3 fix).
+    formRef.current?.requestSubmit();
   }
 
   return (
     <>
+      {/* Form tersembunyi — Server Action dipanggil lewat submit normal */}
+      <form ref={formRef} action={formAction} className="hidden">
+        <input type="hidden" name="id" value={id} />
+      </form>
+
       <button
         type="button"
         disabled={pending}

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
+import { InlineEdit } from "@/components/InlineEdit";
 import { createTugas, updateTugas, deleteTugas } from "./actions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
 
@@ -73,16 +74,12 @@ export default async function TugasPage() {
                   <div className="flex items-center justify-end gap-2">
                     <Link href={`/tugas/${tg.id}`} className="rounded-md border border-gray-200 px-2 py-1 text-xs hover:bg-gray-50">{t("check")}</Link>
                     {/* Edit inline popover */}
-                    <details className="relative">
-                      <summary className="cursor-pointer list-none rounded-md border border-gray-200 px-2 py-1 text-xs hover:bg-gray-50">✏️</summary>
-                      <form action={updateTugas} className="absolute right-0 z-20 mt-1 flex w-72 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-xl">
-                        <input type="hidden" name="id" value={tg.id} />
-                        <input name="judul" defaultValue={tg.judul} required placeholder={t("fieldJudul")} className="w-full rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-gray-900" />
-                        <input name="mapel" defaultValue={tg.mapel ?? ""} placeholder={t("fieldMapel")} className="w-full rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-gray-900" />
-                        <input type="date" name="deadline" defaultValue={tg.deadline?.toISOString().slice(0, 10) ?? ""} className="rounded-md border border-gray-300 px-2 py-1 text-xs" />
-                        <button className="rounded-md bg-gray-900 py-1 text-xs font-medium text-white hover:bg-gray-800">{t("save")}</button>
-                      </form>
-                    </details>
+                    <InlineEdit action={updateTugas} saveLabel={t("save")}>
+                      <input type="hidden" name="id" value={tg.id} />
+                      <input name="judul" defaultValue={tg.judul} required placeholder={t("fieldJudul")} className="w-full rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-gray-900" />
+                      <input name="mapel" defaultValue={tg.mapel ?? ""} placeholder={t("fieldMapel")} className="w-full rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-gray-900" />
+                      <input type="date" name="deadline" defaultValue={tg.deadline?.toISOString().slice(0, 10) ?? ""} className="rounded-md border border-gray-300 px-2 py-1 text-xs" />
+                    </InlineEdit>
                     <ConfirmDelete action={deleteTugas} id={tg.id} message={t("deleteConfirm", { judul: tg.judul })} />
                   </div>
                 </td>
