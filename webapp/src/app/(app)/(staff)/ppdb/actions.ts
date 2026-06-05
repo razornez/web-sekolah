@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { getCurrentUser } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import { jalurPpdbSchema, pendaftaranPpdbSchema } from "@/lib/validations";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -22,7 +23,8 @@ export async function createJalur(formData: FormData) {
   const sekolahId = await requireStaff();
   const parsed = jalurPpdbSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  await prisma.jalurPpdb.create({ data: { ...parsed.data, sekolahId } });
+  const j = await prisma.jalurPpdb.create({ data: { ...parsed.data, sekolahId } });
+  await auditLog({ aksi: "create", entitas: "ppdb", entitasId: j.id, detail: `Tambah jalur PPDB: ${parsed.data.nama}` });
   revalidatePath("/ppdb/jalur");
 }
 
@@ -32,6 +34,7 @@ export async function updateJalur(formData: FormData) {
   const parsed = jalurPpdbSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
   await prisma.jalurPpdb.updateMany({ where: { id, sekolahId }, data: parsed.data });
+  await auditLog({ aksi: "update", entitas: "ppdb", entitasId: id, detail: `Update jalur PPDB: ${parsed.data.nama}` });
   revalidatePath("/ppdb/jalur");
 }
 
@@ -40,6 +43,7 @@ export async function deleteJalur(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jalurPpdb.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "ppdb", entitasId: id, detail: `Hapus jalur PPDB #${id}` });
   revalidatePath("/ppdb/jalur");
 }
 
@@ -69,6 +73,7 @@ export async function createPendaftar(
     data: { pendaftaranId: pendaftaran.id, status: "baru", catatan: "Pendaftar baru ditambahkan oleh staf" },
   });
 
+  await auditLog({ aksi: "create", entitas: "ppdb", entitasId: pendaftaran.id, detail: `Tambah pendaftar PPDB: ${parsed.data.namaLengkap}` });
   revalidatePath("/ppdb");
   return { ok: true, message: String(pendaftaran.id) };
 }
@@ -99,6 +104,7 @@ export async function updateStatusPendaftar(formData: FormData) {
       data: { pendaftaranId: id, status: raw, catatan, oleh: user?.email ?? null },
     }),
   ]);
+  await auditLog({ aksi: "update", entitas: "ppdb", entitasId: id, detail: `Ubah status pendaftar #${id} → ${raw}` });
   revalidatePath("/ppdb");
   revalidatePath(`/ppdb/${id}`);
 }
@@ -108,6 +114,7 @@ export async function softDeletePendaftar(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.pendaftaranPpdb.updateMany({ where: { id, sekolahId }, data: { deletedAt: new Date() } });
+  await auditLog({ aksi: "delete", entitas: "ppdb", entitasId: id, detail: `Arsipkan pendaftar PPDB #${id}` });
   revalidatePath("/ppdb");
 }
 
@@ -116,6 +123,7 @@ export async function restorePendaftar(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.pendaftaranPpdb.updateMany({ where: { id, sekolahId }, data: { deletedAt: null } });
+  await auditLog({ aksi: "update", entitas: "ppdb", entitasId: id, detail: `Restore pendaftar PPDB #${id}` });
   revalidatePath("/ppdb");
   revalidatePath(`/ppdb/${id}`);
 }
@@ -161,6 +169,7 @@ export async function addDokumen(formData: FormData) {
   if (!nama) return;
 
   await prisma.dokumenPpdb.create({ data: { sekolahId, pendaftaranId, jenis, nama, url, keterangan } });
+  await auditLog({ aksi: "create", entitas: "ppdb", entitasId: pendaftaranId, detail: `Tambah dokumen PPDB (${jenis}) pendaftar #${pendaftaranId}` });
   revalidatePath(`/ppdb/${pendaftaranId}`);
 }
 
@@ -170,5 +179,6 @@ export async function deleteDokumen(formData: FormData) {
   const pendaftaranId = Number(formData.get("pendaftaranId"));
   if (!id) return;
   await prisma.dokumenPpdb.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "ppdb", entitasId: id, detail: `Hapus dokumen PPDB #${id}` });
   revalidatePath(`/ppdb/${pendaftaranId}`);
 }

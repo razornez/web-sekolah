@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim();
@@ -27,6 +28,7 @@ export async function saveRaporCatatan(formData: FormData) {
     update: data,
     create: { sekolahId, siswaId, periodeId, ...data },
   });
+  await auditLog({ aksi: "update", entitas: "nilai", entitasId: siswaId, detail: `Catatan rapor siswa #${siswaId} periode #${periodeId}` });
   revalidatePath(`/nilai/rapor/${siswaId}`);
 }
 
@@ -52,6 +54,7 @@ export async function addEkstra(formData: FormData) {
       deskripsi: str(formData.get("deskripsi")),
     },
   });
+  await auditLog({ aksi: "create", entitas: "nilai", entitasId: siswaId, detail: `Tambah ekstra rapor: ${namaEkstra} (siswa #${siswaId})` });
   revalidatePath(`/nilai/rapor/${siswaId}`);
 }
 
@@ -61,5 +64,6 @@ export async function deleteEkstra(formData: FormData) {
   const siswaId = Number(formData.get("siswaId"));
   if (!id) return;
   await prisma.nilaiRaporEkstra.deleteMany({ where: { id, siswa: { sekolahId } } });
+  await auditLog({ aksi: "delete", entitas: "nilai", entitasId: id, detail: `Hapus ekstra rapor #${id} (siswa #${siswaId})` });
   revalidatePath(`/nilai/rapor/${siswaId}`);
 }

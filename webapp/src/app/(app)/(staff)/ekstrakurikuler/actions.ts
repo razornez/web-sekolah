@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { auditLog } from "@/lib/audit";
 
 const num = (v: FormDataEntryValue | null) => Number(v) || null;
 
@@ -16,7 +17,8 @@ export async function createEkstra(formData: FormData) {
     const g = await prisma.guru.findFirst({ where: { id: pembinaGuruId, sekolahId }, select: { id: true } });
     if (!g) return;
   }
-  await prisma.ekstrakurikuler.create({ data: { sekolahId, nama, pembinaGuruId } });
+  const e = await prisma.ekstrakurikuler.create({ data: { sekolahId, nama, pembinaGuruId } });
+  await auditLog({ aksi: "create", entitas: "ekstrakurikuler", entitasId: e.id, detail: `Tambah ekstrakurikuler: ${nama}` });
   revalidatePath("/ekstrakurikuler");
 }
 
@@ -27,6 +29,7 @@ export async function updateEkstra(formData: FormData) {
   if (!id || !nama) return;
   const pembinaGuruId = num(formData.get("pembinaGuruId"));
   await prisma.ekstrakurikuler.updateMany({ where: { id, sekolahId }, data: { nama, pembinaGuruId } });
+  await auditLog({ aksi: "update", entitas: "ekstrakurikuler", entitasId: id, detail: `Update ekstrakurikuler: ${nama}` });
   revalidatePath("/ekstrakurikuler");
 }
 
@@ -36,6 +39,7 @@ export async function deleteEkstra(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.ekstrakurikuler.updateMany({ where: { id, sekolahId }, data: { deletedAt: new Date() } });
+  await auditLog({ aksi: "delete", entitas: "ekstrakurikuler", entitasId: id, detail: `Hapus ekstrakurikuler #${id}` });
   revalidatePath("/ekstrakurikuler");
 }
 
@@ -44,6 +48,7 @@ export async function restoreEkstra(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.ekstrakurikuler.updateMany({ where: { id, sekolahId }, data: { deletedAt: null } });
+  await auditLog({ aksi: "update", entitas: "ekstrakurikuler", entitasId: id, detail: `Restore ekstrakurikuler #${id}` });
   revalidatePath("/ekstrakurikuler");
 }
 
@@ -59,6 +64,7 @@ export async function addAnggotaEkstra(formData: FormData) {
   if (!ekstra || !siswa) return;
   try {
     await prisma.anggotaEkstra.create({ data: { ekstraId, siswaId } });
+    await auditLog({ aksi: "create", entitas: "ekstrakurikuler", entitasId: ekstraId, detail: `Tambah anggota siswa #${siswaId} ke ekstra #${ekstraId}` });
   } catch (e) {
     if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) throw e;
   }
@@ -71,5 +77,6 @@ export async function removeAnggotaEkstra(formData: FormData) {
   const ekstraId = Number(formData.get("ekstraId"));
   if (!id) return;
   await prisma.anggotaEkstra.deleteMany({ where: { id, ekstra: { sekolahId } } });
+  await auditLog({ aksi: "delete", entitas: "ekstrakurikuler", entitasId: id, detail: `Hapus anggota #${id} dari ekstra #${ekstraId}` });
   revalidatePath(`/ekstrakurikuler/${ekstraId}`);
 }

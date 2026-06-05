@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const STATUS_VALID = ["LULUS", "TIDAK LULUS"];
 
@@ -33,6 +34,7 @@ export async function saveKelulusan(formData: FormData) {
   });
   if (ops.length) await prisma.$transaction(ops);
 
+  if (ops.length) await auditLog({ aksi: "update", entitas: "kelulusan", entitasId: rombelId, detail: `Set status kelulusan ${ops.length} siswa (rombel #${rombelId})` });
   revalidatePath("/kelulusan");
   redirect(`/kelulusan?rombelId=${rombelId}`);
 }
@@ -50,5 +52,6 @@ export async function saveSettingKelulusan(formData: FormData) {
   } else {
     await prisma.settingKelulusan.create({ data: { sekolahId, aktif, pengumuman, tanggalRilis } });
   }
+  await auditLog({ aksi: "update", entitas: "kelulusan", detail: `Ubah setting kelulusan (aktif: ${aktif})` });
   revalidatePath("/kelulusan");
 }

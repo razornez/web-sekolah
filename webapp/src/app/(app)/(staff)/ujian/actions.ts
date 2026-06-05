@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { recomputeSkor } from "@/lib/ujian";
+import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim();
@@ -35,6 +36,7 @@ export async function createUjian(formData: FormData) {
       deskripsi: str(formData.get("deskripsi")),
     },
   });
+  await auditLog({ aksi: "create", entitas: "ujian", entitasId: u.id, detail: `Tambah ujian: ${judul}` });
   redirect(`/ujian/${u.id}`);
 }
 
@@ -57,6 +59,7 @@ export async function updateUjian(formData: FormData) {
       selesai: dt(formData.get("selesai")),
     },
   });
+  await auditLog({ aksi: "update", entitas: "ujian", entitasId: id, detail: `Update ujian #${id}` });
   revalidatePath(`/ujian/${id}`);
 }
 
@@ -65,6 +68,7 @@ export async function deleteUjian(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.ujian.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "ujian", entitasId: id, detail: `Hapus ujian #${id}` });
   revalidatePath("/ujian");
 }
 
@@ -89,7 +93,7 @@ export async function addSoal(formData: FormData) {
     kunci = str(formData.get("kunci"));
   }
   const count = await prisma.soal.count({ where: { ujianId } });
-  await prisma.soal.create({
+  const soal = await prisma.soal.create({
     data: {
       ujianId,
       nomor: count + 1,
@@ -100,6 +104,7 @@ export async function addSoal(formData: FormData) {
       bobot: Number(formData.get("bobot")) || 1,
     },
   });
+  await auditLog({ aksi: "create", entitas: "ujian", entitasId: ujianId, detail: `Tambah soal #${soal.id} ke ujian #${ujianId}` });
   revalidatePath(`/ujian/${ujianId}`);
 }
 
@@ -109,6 +114,7 @@ export async function deleteSoal(formData: FormData) {
   const ujianId = Number(formData.get("ujianId"));
   if (!id) return;
   await prisma.soal.deleteMany({ where: { id, ujian: { sekolahId } } });
+  await auditLog({ aksi: "delete", entitas: "ujian", entitasId: id, detail: `Hapus soal #${id} dari ujian #${ujianId}` });
   revalidatePath(`/ujian/${ujianId}`);
 }
 
@@ -129,5 +135,6 @@ export async function nilaiEsai(formData: FormData) {
     data: { nilai: Number.isNaN(nilai) ? null : nilai },
   });
   await recomputeSkor(hasilId);
+  await auditLog({ aksi: "update", entitas: "ujian", entitasId: jawabanId, detail: `Nilai esai jawaban #${jawabanId}` });
   revalidatePath(`/ujian`);
 }

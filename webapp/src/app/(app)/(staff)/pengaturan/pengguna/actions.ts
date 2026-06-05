@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import type { Role } from "@prisma/client";
 
 const STAFF_ROLES: Role[] = [
@@ -24,6 +25,7 @@ export async function toggleUserActive(formData: FormData) {
   const u = await prisma.user.findFirst({ where: { id, sekolahId }, select: { isActive: true } });
   if (!u) return;
   await prisma.user.update({ where: { id }, data: { isActive: !u.isActive } });
+  await auditLog({ aksi: "update", entitas: "pengguna", entitasId: id, detail: `${u.isActive ? "Nonaktifkan" : "Aktifkan"} akun #${id}` });
   revalidatePath("/pengaturan/pengguna");
 }
 
@@ -36,6 +38,7 @@ export async function changeUserRole(formData: FormData) {
   if (!id || !STAFF_ROLES.includes(role)) return;
   if (id === me.id) return; // jangan ubah role sendiri (cegah lock-out)
   await prisma.user.updateMany({ where: { id, sekolahId }, data: { role } });
+  await auditLog({ aksi: "update", entitas: "pengguna", entitasId: id, detail: `Ubah role akun #${id} → ${role}` });
   revalidatePath("/pengaturan/pengguna");
 }
 
@@ -50,6 +53,7 @@ export async function resetUserPassword(formData: FormData) {
     where: { id, sekolahId },
     data: { passwordHash: hash, passwordLegacyMd5: false },
   });
+  await auditLog({ aksi: "update", entitas: "pengguna", entitasId: id, detail: `Reset password akun #${id}` });
   revalidatePath("/pengaturan/pengguna");
 }
 
@@ -73,9 +77,10 @@ export async function createStaffUser(
   if (existing) return { ok: false, error: `Username "${username}" sudah dipakai.` };
 
   const hash = await bcrypt.hash(password, 10);
-  await prisma.user.create({
+  const u = await prisma.user.create({
     data: { sekolahId, namaLengkap, username, role, passwordHash: hash, isActive: true },
   });
+  await auditLog({ aksi: "create", entitas: "pengguna", entitasId: u.id, detail: `Tambah akun staf: ${username} (${role})` });
   revalidatePath("/pengaturan/pengguna");
   return { ok: true };
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { auditLog } from "@/lib/audit";
 
 /**
  * Promosikan semua anggota rombel lama ke rombel baru (tahun ajaran baru).
@@ -45,6 +46,7 @@ export async function naikanKelas(formData: FormData) {
     } catch { /* sudah ada, lewati */ }
   }
 
+  await auditLog({ aksi: "update", entitas: "rombel", entitasId: rombelBaru.id, detail: `Kenaikan kelas: ${berhasil} siswa dari rombel #${rombelLamaId} → ${rombelBaru.nama}` });
   revalidatePath("/kenaikan-kelas");
   revalidatePath("/rombel");
   redirect(`/kenaikan-kelas?berhasil=${berhasil}&rombel=${encodeURIComponent(rombelBaru.nama)}`);

@@ -4,6 +4,7 @@ import { StatusPresensi } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const VALID: StatusPresensi[] = [
   StatusPresensi.hadir, StatusPresensi.izin, StatusPresensi.sakit,
@@ -38,6 +39,7 @@ export async function savePresensi(formData: FormData) {
       });
     }),
   );
+  await auditLog({ aksi: "update", entitas: "presensi", entitasId: rombelId, detail: `Simpan presensi rombel #${rombelId} (${tanggalStr})` });
   revalidatePath("/presensi");
   revalidatePath("/presensi/input");
 }
@@ -56,6 +58,7 @@ export async function markSiswaHadir(siswaId: number, tanggalStr: string): Promi
     update: { status: "hadir" },
     create: { sekolahId, siswaId, tanggal, status: "hadir" },
   });
+  await auditLog({ aksi: "update", entitas: "presensi", entitasId: siswaId, detail: `Tandai hadir siswa #${siswaId} (${tanggalStr})` });
   revalidatePath("/presensi");
 }
 
@@ -75,5 +78,6 @@ export async function setSiswaStatus(
     update: { status },
     create: { sekolahId, siswaId, tanggal, status },
   });
+  await auditLog({ aksi: "update", entitas: "presensi", entitasId: siswaId, detail: `Set presensi siswa #${siswaId} → ${status} (${tanggalStr})` });
   revalidatePath("/presensi");
 }

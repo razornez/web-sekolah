@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import { suratSchema } from "@/lib/validations";
 
 export type SuratFormState = {
@@ -37,8 +38,10 @@ export async function saveSurat(
     const existing = await prisma.surat.findFirst({ where: { id, sekolahId }, select: { id: true } });
     if (!existing) return { ok: false, message: "Surat tidak ditemukan." };
     await prisma.surat.update({ where: { id }, data });
+    await auditLog({ aksi: "update", entitas: "surat", entitasId: id, detail: `Update surat: ${d.perihal}` });
   } else {
-    await prisma.surat.create({ data: { ...data, sekolahId } });
+    const s = await prisma.surat.create({ data: { ...data, sekolahId } });
+    await auditLog({ aksi: "create", entitas: "surat", entitasId: s.id, detail: `Tambah surat: ${d.perihal}` });
   }
 
   revalidatePath("/surat");
@@ -50,5 +53,6 @@ export async function deleteSurat(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.surat.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "surat", entitasId: id, detail: `Hapus surat #${id}` });
   revalidatePath("/surat");
 }

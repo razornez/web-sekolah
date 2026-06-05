@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 export type JadwalFormState = {
   ok: boolean;
@@ -107,9 +108,10 @@ export async function saveJadwal(
   }
 
   // --- Simpan ---
-  await prisma.jadwalGuru.create({
+  const jadwal = await prisma.jadwalGuru.create({
     data: { sekolahId, guruId, hariId: hari.id, rombelId, mapel, jamMulai, jamSelesai },
   });
+  await auditLog({ aksi: "create", entitas: "jadwal", entitasId: jadwal.id, detail: `Tambah jadwal ${mapel} (${namaHari}) guru ${guru.namaGuru}` });
   revalidatePath("/jadwal");
   revalidatePath("/presensi");
   return { ok: true };
@@ -120,6 +122,7 @@ export async function deleteJadwal(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jadwalGuru.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "jadwal", entitasId: id, detail: `Hapus jadwal #${id}` });
   revalidatePath("/jadwal");
   revalidatePath("/presensi");
 }

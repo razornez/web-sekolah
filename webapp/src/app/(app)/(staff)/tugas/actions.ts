@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim();
@@ -19,7 +20,7 @@ export async function createTugas(formData: FormData) {
     if (!r) return;
   }
   const deadlineRaw = String(formData.get("deadline") ?? "").trim();
-  await prisma.tugas.create({
+  const t = await prisma.tugas.create({
     data: {
       sekolahId,
       judul,
@@ -29,6 +30,7 @@ export async function createTugas(formData: FormData) {
       deadline: deadlineRaw ? new Date(deadlineRaw) : null,
     },
   });
+  await auditLog({ aksi: "create", entitas: "tugas", entitasId: t.id, detail: `Tambah tugas: ${judul}` });
   revalidatePath("/tugas");
 }
 
@@ -37,6 +39,7 @@ export async function deleteTugas(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.tugas.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "tugas", entitasId: id, detail: `Hapus tugas #${id}` });
   revalidatePath("/tugas");
 }
 
@@ -50,5 +53,6 @@ export async function nilaiPengumpulan(formData: FormData) {
     where: { id, tugas: { sekolahId } },
     data: { nilai: Number.isNaN(nilai) ? null : nilai },
   });
+  await auditLog({ aksi: "update", entitas: "tugas", entitasId: tugasId, detail: `Nilai pengumpulan #${id} tugas #${tugasId}` });
   revalidatePath(`/tugas/${tugasId}`);
 }

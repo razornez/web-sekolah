@@ -5,13 +5,15 @@ import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { kategoriSarprasSchema, sarprasSchema } from "@/lib/validations";
 import { catchDeleteError } from "@/lib/deleteError";
+import { auditLog } from "@/lib/audit";
 
 // ---- Kategori ------------------------------------------------------------
 export async function createKategoriSarpras(formData: FormData) {
   const sekolahId = await requireStaff();
   const parsed = kategoriSarprasSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  await prisma.kategoriSarpras.create({ data: { ...parsed.data, sekolahId } });
+  const k = await prisma.kategoriSarpras.create({ data: { ...parsed.data, sekolahId } });
+  await auditLog({ aksi: "create", entitas: "sarpras", entitasId: k.id, detail: `Tambah kategori sarpras: ${parsed.data.nama}` });
   revalidatePath("/sarpras/kategori");
 }
 
@@ -21,6 +23,7 @@ export async function updateKategoriSarpras(formData: FormData) {
   const parsed = kategoriSarprasSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
   await prisma.kategoriSarpras.updateMany({ where: { id, sekolahId }, data: parsed.data });
+  await auditLog({ aksi: "update", entitas: "sarpras", entitasId: id, detail: `Update kategori sarpras: ${parsed.data.nama}` });
   revalidatePath("/sarpras/kategori");
 }
 
@@ -30,6 +33,7 @@ export async function deleteKategoriSarpras(formData: FormData) {
   if (!id) return;
   try {
     await prisma.kategoriSarpras.deleteMany({ where: { id, sekolahId } });
+    await auditLog({ aksi: "delete", entitas: "sarpras", entitasId: id, detail: `Hapus kategori sarpras #${id}` });
     revalidatePath("/sarpras/kategori");
     return { ok: true };
   } catch (e) {
@@ -49,7 +53,8 @@ export async function createSarpras(formData: FormData) {
   const parsed = sarprasSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
   if (!(await validKategori(sekolahId, parsed.data.kategoriId))) return;
-  await prisma.sarpras.create({ data: { ...parsed.data, sekolahId } });
+  const s = await prisma.sarpras.create({ data: { ...parsed.data, sekolahId } });
+  await auditLog({ aksi: "create", entitas: "sarpras", entitasId: s.id, detail: `Tambah sarpras: ${parsed.data.nama}` });
   revalidatePath("/sarpras");
 }
 
@@ -60,6 +65,7 @@ export async function updateSarpras(formData: FormData) {
   if (!id || !parsed.success) return;
   if (!(await validKategori(sekolahId, parsed.data.kategoriId))) return;
   await prisma.sarpras.updateMany({ where: { id, sekolahId }, data: parsed.data });
+  await auditLog({ aksi: "update", entitas: "sarpras", entitasId: id, detail: `Update sarpras: ${parsed.data.nama}` });
   revalidatePath("/sarpras");
 }
 
@@ -68,5 +74,6 @@ export async function deleteSarpras(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.sarpras.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "sarpras", entitasId: id, detail: `Hapus sarpras #${id}` });
   revalidatePath("/sarpras");
 }

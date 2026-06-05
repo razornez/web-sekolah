@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim(); return s === "" ? null : s;
@@ -14,7 +15,7 @@ export async function createPrestasiMaster(formData: FormData) {
   const sekolahId = await requireModule("siswa");
   const nama = String(formData.get("nama") ?? "").trim();
   if (!nama) return;
-  await prisma.prestasiMaster.create({
+  const p = await prisma.prestasiMaster.create({
     data: {
       sekolahId, nama,
       tingkat: str(formData.get("tingkat")) ?? "Sekolah",
@@ -24,6 +25,7 @@ export async function createPrestasiMaster(formData: FormData) {
       keterangan: str(formData.get("keterangan")),
     },
   });
+  await auditLog({ aksi: "create", entitas: "prestasi", entitasId: p.id, detail: `Tambah prestasi: ${nama}` });
   revalidatePath("/prestasi");
 }
 
@@ -42,6 +44,7 @@ export async function updatePrestasiMaster(formData: FormData) {
       keterangan: str(formData.get("keterangan")),
     },
   });
+  await auditLog({ aksi: "update", entitas: "prestasi", entitasId: id, detail: `Update prestasi #${id}` });
   revalidatePath("/prestasi");
   revalidatePath(`/prestasi/${id}`);
 }
@@ -50,6 +53,7 @@ export async function deletePrestasiMaster(formData: FormData) {
   const sekolahId = await requireModule("siswa");
   const id = Number(formData.get("id"));
   await prisma.prestasiMaster.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "prestasi", entitasId: id, detail: `Hapus prestasi #${id}` });
   revalidatePath("/prestasi");
 }
 
@@ -68,6 +72,7 @@ export async function addPenerimaPrestasi(formData: FormData) {
     await prisma.penerimaPrestasi.create({
       data: { prestasiId, siswaId, tahun: str(formData.get("tahun")), keterangan: str(formData.get("keterangan")) },
     });
+    await auditLog({ aksi: "create", entitas: "prestasi", entitasId: prestasiId, detail: `Tambah penerima prestasi: siswa #${siswaId} (prestasi #${prestasiId})` });
   } catch { /* duplikat — abaikan */ }
   revalidatePath(`/prestasi/${prestasiId}`);
 }
@@ -78,6 +83,7 @@ export async function removePenerimaPrestasi(formData: FormData) {
   const prestasiId = Number(formData.get("prestasiId"));
   if (!id) return;
   await prisma.penerimaPrestasi.deleteMany({ where: { id, prestasi: { sekolahId } } });
+  await auditLog({ aksi: "delete", entitas: "prestasi", entitasId: id, detail: `Hapus penerima prestasi #${id}` });
   revalidatePath(`/prestasi/${prestasiId}`);
 }
 
@@ -86,7 +92,7 @@ export async function createBeasiswaMaster(formData: FormData) {
   const sekolahId = await requireModule("siswa");
   const nama = String(formData.get("nama") ?? "").trim();
   if (!nama) return;
-  await prisma.beasiswaMaster.create({
+  const b = await prisma.beasiswaMaster.create({
     data: {
       sekolahId, nama,
       penyelenggara: str(formData.get("penyelenggara")),
@@ -95,6 +101,7 @@ export async function createBeasiswaMaster(formData: FormData) {
       keterangan: str(formData.get("keterangan")),
     },
   });
+  await auditLog({ aksi: "create", entitas: "prestasi", entitasId: b.id, detail: `Tambah beasiswa: ${nama}` });
   revalidatePath("/prestasi?tab=beasiswa");
 }
 
@@ -112,6 +119,7 @@ export async function updateBeasiswaMaster(formData: FormData) {
       keterangan: str(formData.get("keterangan")),
     },
   });
+  await auditLog({ aksi: "update", entitas: "prestasi", entitasId: id, detail: `Update beasiswa #${id}` });
   revalidatePath("/prestasi?tab=beasiswa");
   revalidatePath(`/prestasi/beasiswa/${id}`);
 }
@@ -120,6 +128,7 @@ export async function deleteBeasiswaMaster(formData: FormData) {
   const sekolahId = await requireModule("siswa");
   const id = Number(formData.get("id"));
   await prisma.beasiswaMaster.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "prestasi", entitasId: id, detail: `Hapus beasiswa #${id}` });
   revalidatePath("/prestasi?tab=beasiswa");
 }
 
@@ -134,7 +143,7 @@ export async function saveMutasi(formData: FormData) {
   }
   const tanggalRaw = str(formData.get("tanggal"));
   const jenis = String(formData.get("jenis") ?? "keluar");
-  await prisma.mutasiSiswa.create({
+  const mutasi = await prisma.mutasiSiswa.create({
     data: {
       sekolahId,
       siswaId,
@@ -146,6 +155,7 @@ export async function saveMutasi(formData: FormData) {
       createdById: user.id,
     },
   });
+  await auditLog({ aksi: "create", entitas: "mutasi", entitasId: mutasi.id, detail: `Catat mutasi (${jenis}) siswa #${siswaId ?? "-"}` });
 
   // Update status siswa sesuai jenis mutasi (keluar → pindah, masuk → aktif)
   if (siswaId) {
@@ -165,6 +175,7 @@ export async function deleteMutasi(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.mutasiSiswa.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "mutasi", entitasId: id, detail: `Hapus mutasi #${id}` });
   revalidatePath("/mutasi");
 }
 
@@ -182,6 +193,7 @@ export async function addPenerimaBeasiswa(formData: FormData) {
     await prisma.penerimaBeasiswa.create({
       data: { beasiswaId, siswaId, tahun: str(formData.get("tahun")), nominal: Number(formData.get("nominal")) || null },
     });
+    await auditLog({ aksi: "create", entitas: "prestasi", entitasId: beasiswaId, detail: `Tambah penerima beasiswa: siswa #${siswaId} (beasiswa #${beasiswaId})` });
   } catch { /* duplikat */ }
   revalidatePath(`/prestasi/beasiswa/${beasiswaId}`);
 }
@@ -192,5 +204,6 @@ export async function removePenerimaBeasiswa(formData: FormData) {
   const beasiswaId = Number(formData.get("beasiswaId"));
   if (!id) return;
   await prisma.penerimaBeasiswa.deleteMany({ where: { id, beasiswa: { sekolahId } } });
+  await auditLog({ aksi: "delete", entitas: "prestasi", entitasId: id, detail: `Hapus penerima beasiswa #${id}` });
   revalidatePath(`/prestasi/beasiswa/${beasiswaId}`);
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { catchDeleteError } from "@/lib/deleteError";
+import { auditLog } from "@/lib/audit";
 
 // ── Tahun Ajaran ────────────────────────────────────────────────────────────
 
@@ -15,8 +16,10 @@ export async function saveTahunAjaran(formData: FormData) {
 
   if (id) {
     await prisma.tahunAjaran.updateMany({ where: { id, sekolahId }, data: { tahun } });
+    await auditLog({ aksi: "update", entitas: "tahun_ajaran", entitasId: id, detail: `Update tahun ajaran: ${tahun}` });
   } else {
-    await prisma.tahunAjaran.create({ data: { sekolahId, tahun } });
+    const ta = await prisma.tahunAjaran.create({ data: { sekolahId, tahun } });
+    await auditLog({ aksi: "create", entitas: "tahun_ajaran", entitasId: ta.id, detail: `Tambah tahun ajaran: ${tahun}` });
   }
   revalidatePath("/pengaturan/akademik");
 }
@@ -29,6 +32,7 @@ export async function setTahunAjaranAktif(formData: FormData) {
     prisma.tahunAjaran.updateMany({ where: { sekolahId }, data: { aktif: false } }),
     prisma.tahunAjaran.updateMany({ where: { id, sekolahId }, data: { aktif: true } }),
   ]);
+  await auditLog({ aksi: "update", entitas: "tahun_ajaran", entitasId: id, detail: `Set tahun ajaran aktif #${id}` });
   revalidatePath("/pengaturan/akademik");
 }
 
@@ -42,6 +46,7 @@ export async function deleteTahunAjaran(formData: FormData) {
   }
   try {
     await prisma.tahunAjaran.deleteMany({ where: { id, sekolahId } });
+    await auditLog({ aksi: "delete", entitas: "tahun_ajaran", entitasId: id, detail: `Hapus tahun ajaran #${id}` });
     revalidatePath("/pengaturan/akademik");
     return { ok: true };
   } catch (e) {
@@ -75,8 +80,10 @@ export async function savePeriode(formData: FormData) {
 
   if (id) {
     await prisma.periode.updateMany({ where: { id, tahunAjaranId }, data });
+    await auditLog({ aksi: "update", entitas: "periode", entitasId: id, detail: `Update periode: ${nama}` });
   } else {
-    await prisma.periode.create({ data: { ...data, tahunAjaranId, jenis: "semester" } });
+    const p = await prisma.periode.create({ data: { ...data, tahunAjaranId, jenis: "semester" } });
+    await auditLog({ aksi: "create", entitas: "periode", entitasId: p.id, detail: `Tambah periode: ${nama}` });
   }
   revalidatePath("/pengaturan/akademik");
 }
@@ -103,6 +110,7 @@ export async function setPeriodeAktif(formData: FormData) {
     prisma.tahunAjaran.updateMany({ where: { sekolahId }, data: { aktif: false } }),
     prisma.tahunAjaran.updateMany({ where: { id: tahunAjaranId, sekolahId }, data: { aktif: true } }),
   ]);
+  await auditLog({ aksi: "update", entitas: "periode", entitasId: id, detail: `Set periode aktif #${id}` });
   revalidatePath("/pengaturan/akademik");
 }
 
@@ -116,6 +124,7 @@ export async function deletePeriode(formData: FormData) {
   }
   try {
     await prisma.periode.deleteMany({ where: { id, tahunAjaran: { sekolahId } } });
+    await auditLog({ aksi: "delete", entitas: "periode", entitasId: id, detail: `Hapus periode #${id}` });
     revalidatePath("/pengaturan/akademik");
     return { ok: true };
   } catch (e) {
@@ -143,6 +152,7 @@ export async function updatePeriodeTanggal(formData: FormData) {
       tanggalSelesai: tanggalSelesaiStr ? new Date(tanggalSelesaiStr) : null,
     },
   });
+  await auditLog({ aksi: "update", entitas: "periode", entitasId: id, detail: `Update tanggal periode #${id}` });
   revalidatePath("/pengaturan/akademik");
 }
 
@@ -213,5 +223,6 @@ export async function autoIsiKalender(formData: FormData) {
       });
     }
   }
+  await auditLog({ aksi: "update", entitas: "periode", entitasId: tahunAjaranId, detail: `Auto-isi kalender tahun ajaran #${tahunAjaranId}` });
   revalidatePath("/pengaturan/akademik");
 }

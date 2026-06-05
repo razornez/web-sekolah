@@ -12,7 +12,8 @@ export async function createJenis(formData: FormData) {
   const sekolahId = await requireStaff();
   const parsed = jenisPembayaranSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  await prisma.jenisPembayaran.create({ data: { ...parsed.data, sekolahId } });
+  const j = await prisma.jenisPembayaran.create({ data: { ...parsed.data, sekolahId } });
+  await auditLog({ aksi: "create", entitas: "tagihan_spp", entitasId: j.id, detail: `Tambah jenis pembayaran: ${parsed.data.nama}` });
   revalidatePath("/spp/jenis");
 }
 
@@ -25,6 +26,7 @@ export async function updateJenis(formData: FormData) {
     where: { id, sekolahId },
     data: parsed.data,
   });
+  await auditLog({ aksi: "update", entitas: "tagihan_spp", entitasId: id, detail: `Update jenis pembayaran: ${parsed.data.nama}` });
   revalidatePath("/spp/jenis");
 }
 
@@ -33,6 +35,7 @@ export async function deleteJenis(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jenisPembayaran.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "tagihan_spp", entitasId: id, detail: `Hapus jenis pembayaran #${id}` });
   revalidatePath("/spp/jenis");
 }
 
@@ -50,7 +53,7 @@ export async function addTagihan(formData: FormData) {
   if (!siswa || !jenis) return;
 
   try {
-    await prisma.tagihanSpp.create({
+    const t = await prisma.tagihanSpp.create({
       data: {
         sekolahId,
         siswaId: d.siswaId,
@@ -61,6 +64,7 @@ export async function addTagihan(formData: FormData) {
         status: StatusPembayaran.belum,
       },
     });
+    await auditLog({ aksi: "create", entitas: "tagihan_spp", entitasId: t.id, detail: `Tambah tagihan SPP siswa #${d.siswaId} (${d.bulan}/${d.tahun})` });
   } catch (e) {
     if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) throw e;
     // tagihan bulan tsb sudah ada → abaikan
@@ -101,5 +105,6 @@ export async function deleteTagihan(formData: FormData) {
   const siswaId = Number(formData.get("siswaId"));
   if (!tagihanId) return;
   await prisma.tagihanSpp.deleteMany({ where: { id: tagihanId, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "tagihan_spp", entitasId: tagihanId, detail: `Hapus tagihan SPP #${tagihanId}` });
   revalidatePath(`/spp?siswaId=${siswaId}`);
 }

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim();
@@ -18,7 +19,7 @@ export async function createElearning(formData: FormData) {
     const g = await prisma.guru.findFirst({ where: { id: guruId, sekolahId }, select: { id: true } });
     if (!g) return;
   }
-  await prisma.elearning.create({
+  const e = await prisma.elearning.create({
     data: {
       sekolahId,
       guruId,
@@ -29,6 +30,7 @@ export async function createElearning(formData: FormData) {
       mapel: str(formData.get("mapel")),
     },
   });
+  await auditLog({ aksi: "create", entitas: "elearning", entitasId: e.id, detail: `Tambah elearning: ${judul}` });
   revalidatePath("/elearning");
 }
 
@@ -37,5 +39,6 @@ export async function deleteElearning(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.elearning.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "elearning", entitasId: id, detail: `Hapus elearning #${id}` });
   revalidatePath("/elearning");
 }

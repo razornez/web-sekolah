@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import { rombelSchema } from "@/lib/validations";
 
 export type RombelFormState = {
@@ -53,8 +54,10 @@ export async function saveRombel(
       const existing = await prisma.rombel.findFirst({ where: { id, sekolahId }, select: { id: true } });
       if (!existing) return { ok: false, message: "Rombel tidak ditemukan." };
       await prisma.rombel.update({ where: { id }, data });
+      await auditLog({ aksi: "update", entitas: "rombel", entitasId: id, detail: `Update rombel: ${d.nama}` });
     } else {
-      await prisma.rombel.create({ data: { ...data, sekolahId } });
+      const r = await prisma.rombel.create({ data: { ...data, sekolahId } });
+      await auditLog({ aksi: "create", entitas: "rombel", entitasId: r.id, detail: `Tambah rombel: ${d.nama}` });
     }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
@@ -73,6 +76,7 @@ export async function deleteRombel(formData: FormData) {
   if (!id) return;
   try {
     await prisma.rombel.deleteMany({ where: { id, sekolahId } });
+    await auditLog({ aksi: "delete", entitas: "rombel", entitasId: id, detail: `Hapus rombel #${id}` });
     revalidatePath("/rombel");
     return { ok: true };
   } catch (e) {
@@ -95,6 +99,7 @@ export async function addAnggota(formData: FormData) {
 
   try {
     await prisma.anggotaRombel.create({ data: { rombelId, siswaId } });
+    await auditLog({ aksi: "create", entitas: "rombel", entitasId: rombelId, detail: `Tambah siswa #${siswaId} ke rombel #${rombelId}` });
   } catch (e) {
     if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) throw e;
     // sudah jadi anggota → abaikan
@@ -111,5 +116,6 @@ export async function removeAnggota(formData: FormData) {
   await prisma.anggotaRombel.deleteMany({
     where: { id: anggotaId, rombel: { sekolahId } },
   });
+  await auditLog({ aksi: "delete", entitas: "rombel", entitasId: rombelId || null, detail: `Hapus anggota #${anggotaId} dari rombel` });
   if (rombelId) revalidatePath(`/rombel/${rombelId}`);
 }

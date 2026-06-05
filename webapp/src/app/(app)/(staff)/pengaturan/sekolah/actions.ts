@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { auditLog } from "@/lib/audit";
 import type { Jenjang, Kurikulum } from "@prisma/client";
 
 const JENJANG: Jenjang[] = ["PAUD", "TK", "SD", "MI", "SMP", "MTS", "SMA", "MA", "SMK"];
@@ -38,6 +39,7 @@ export async function saveIdentitasSekolah(
       misi: str(formData.get("misi")),
     },
   });
+  await auditLog({ aksi: "update", entitas: "sekolah", entitasId: sekolahId, detail: `Update identitas sekolah: ${nama}` });
   revalidatePath("/pengaturan/sekolah");
   return { ok: true };
 }

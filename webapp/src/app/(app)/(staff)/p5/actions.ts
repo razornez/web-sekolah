@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const PREDIKAT: PredikatP5[] = [PredikatP5.MB, PredikatP5.SB, PredikatP5.BSH, PredikatP5.SAB];
 
@@ -19,7 +20,8 @@ export async function createProjek(formData: FormData) {
   const ta = await prisma.tahunAjaran.findFirst({ where: { id: tahunAjaranId, sekolahId }, select: { id: true } });
   if (!ta) return;
 
-  await prisma.projekP5.create({ data: { sekolahId, tahunAjaranId, tema, judul, deskripsi } });
+  const p = await prisma.projekP5.create({ data: { sekolahId, tahunAjaranId, tema, judul, deskripsi } });
+  await auditLog({ aksi: "create", entitas: "p5", entitasId: p.id, detail: `Tambah projek P5: ${judul}` });
   revalidatePath("/p5");
 }
 
@@ -28,6 +30,7 @@ export async function deleteProjek(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.projekP5.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "p5", entitasId: id, detail: `Hapus projek P5 #${id}` });
   revalidatePath("/p5");
 }
 
@@ -47,6 +50,7 @@ export async function saveTarget(formData: FormData) {
       ? [prisma.projekP5Target.createMany({ data: elemenIds.map((elemenId) => ({ projekP5Id, elemenId })) })]
       : []),
   ]);
+  await auditLog({ aksi: "update", entitas: "p5", entitasId: projekP5Id, detail: `Set target elemen P5 projek #${projekP5Id} (${elemenIds.length} elemen)` });
   revalidatePath(`/p5/${projekP5Id}`);
 }
 
@@ -82,6 +86,7 @@ export async function savePenilaian(formData: FormData) {
   }
   if (ops.length) await prisma.$transaction(ops);
 
+  if (ops.length) await auditLog({ aksi: "update", entitas: "p5", entitasId: projekP5Id, detail: `Penilaian P5 projek #${projekP5Id} rombel #${rombelId} (${ops.length} entri)` });
   revalidatePath(`/p5/${projekP5Id}`);
   redirect(`/p5/${projekP5Id}?rombelId=${rombelId}`);
 }

@@ -11,7 +11,8 @@ export async function createKategori(formData: FormData) {
   const sekolahId = await requireStaff();
   const parsed = kategoriKasusSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return;
-  await prisma.kategoriKasus.create({ data: { ...parsed.data, sekolahId } });
+  const k = await prisma.kategoriKasus.create({ data: { ...parsed.data, sekolahId } });
+  await auditLog({ aksi: "create", entitas: "kasus", entitasId: k.id, detail: `Tambah kategori kasus: ${parsed.data.nama}` });
   revalidatePath("/bk/kategori");
 }
 
@@ -21,6 +22,7 @@ export async function updateKategori(formData: FormData) {
   const parsed = kategoriKasusSchema.safeParse(Object.fromEntries(formData));
   if (!id || !parsed.success) return;
   await prisma.kategoriKasus.updateMany({ where: { id, sekolahId }, data: parsed.data });
+  await auditLog({ aksi: "update", entitas: "kasus", entitasId: id, detail: `Update kategori kasus: ${parsed.data.nama}` });
   revalidatePath("/bk/kategori");
 }
 
@@ -29,6 +31,7 @@ export async function deleteKategori(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.kategoriKasus.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "kasus", entitasId: id, detail: `Hapus kategori kasus #${id}` });
   revalidatePath("/bk/kategori");
 }
 
@@ -58,7 +61,7 @@ export async function addKasus(formData: FormData) {
   }
   if (!namaKasus) return; // wajib ada nama (manual atau dari kategori)
 
-  await prisma.kasusSiswa.create({
+  const kasus = await prisma.kasusSiswa.create({
     data: {
       sekolahId,
       siswaId: d.siswaId,
@@ -69,6 +72,7 @@ export async function addKasus(formData: FormData) {
       keterangan: d.keterangan,
     },
   });
+  await auditLog({ aksi: "create", entitas: "kasus", entitasId: kasus.id, detail: `Catat kasus siswa #${d.siswaId}: ${namaKasus}` });
   revalidatePath(`/bk?siswaId=${d.siswaId}`);
 }
 
@@ -78,5 +82,6 @@ export async function deleteKasus(formData: FormData) {
   const siswaId = Number(formData.get("siswaId"));
   if (!id) return;
   await prisma.kasusSiswa.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "kasus", entitasId: id, detail: `Hapus kasus #${id}` });
   revalidatePath(`/bk?siswaId=${siswaId}`);
 }

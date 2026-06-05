@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 export async function saveEntriNilai(formData: FormData) {
   const sekolahId = await requireModule("nilai");
@@ -49,5 +50,6 @@ export async function saveEntriNilai(formData: FormData) {
     });
     saved++;
   }
+  if (saved > 0) await auditLog({ aksi: "create", entitas: "nilai", detail: `Entri ${saved} nilai (mapel #${mapelId}, periode #${periodeId})` });
   revalidatePath("/nilai/entri");
 }

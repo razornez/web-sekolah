@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 import { mapelSchema } from "@/lib/validations";
 
 export type MapelFormState = {
@@ -51,8 +52,10 @@ export async function saveMapel(
       const existing = await prisma.mapel.findFirst({ where: { id, sekolahId }, select: { id: true } });
       if (!existing) return { ok: false, message: "Mapel tidak ditemukan." };
       await prisma.mapel.update({ where: { id }, data });
+      await auditLog({ aksi: "update", entitas: "mapel", entitasId: id, detail: `Update mapel: ${d.namaMapel}` });
     } else {
-      await prisma.mapel.create({ data: { ...data, sekolahId } });
+      const m = await prisma.mapel.create({ data: { ...data, sekolahId } });
+      await auditLog({ aksi: "create", entitas: "mapel", entitasId: m.id, detail: `Tambah mapel: ${d.namaMapel}` });
     }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
@@ -73,6 +76,7 @@ export async function toggleMapelAktif(formData: FormData) {
   const m = await prisma.mapel.findFirst({ where: { id, sekolahId }, select: { aktif: true } });
   if (!m) return;
   await prisma.mapel.update({ where: { id }, data: { aktif: !m.aktif } });
+  await auditLog({ aksi: "update", entitas: "mapel", entitasId: id, detail: `${m.aktif ? "Nonaktifkan" : "Aktifkan"} mapel #${id}` });
   revalidatePath("/mapel");
 }
 
@@ -90,6 +94,7 @@ export async function addGuruMapel(formData: FormData) {
   if (!mapel || !guru) return;
   try {
     await prisma.mapelGuru.create({ data: { mapelId, guruId, tahunAjaran, aktif: true } });
+    await auditLog({ aksi: "create", entitas: "mapel", entitasId: mapelId, detail: `Tambah guru #${guruId} ke mapel #${mapelId}` });
   } catch { /* duplikat ok */ }
   revalidatePath(`/mapel/${mapelId}`);
 }
@@ -100,6 +105,7 @@ export async function deleteMapel(formData: FormData) {
   if (!id) return;
   try {
     await prisma.mapel.deleteMany({ where: { id, sekolahId } });
+    await auditLog({ aksi: "delete", entitas: "mapel", entitasId: id, detail: `Hapus mapel #${id}` });
     revalidatePath("/mapel");
     return { ok: true };
   } catch (e) {

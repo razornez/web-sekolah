@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const TARGETS: PengumumanTarget[] = ["semua", "staf", "siswa", "ortu"];
 const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting"];
@@ -29,9 +30,10 @@ export async function createPengumuman(
   const kategori = KATEGORIS.includes(kategoriRaw) ? kategoriRaw : "umum";
   const pinned = formData.get("pinned") === "on";
 
-  await prisma.pengumuman.create({
+  const p = await prisma.pengumuman.create({
     data: { sekolahId, judul, isi, target, kategori, pinned, createdById: user.id },
   });
+  await auditLog({ aksi: "create", entitas: "pengumuman", entitasId: p.id, detail: `Tambah pengumuman: ${judul}` });
   revalidatePath("/pengumuman");
   redirect("/pengumuman");
 }
@@ -58,6 +60,7 @@ export async function updatePengumuman(
   const pinned = formData.get("pinned") === "on";
 
   await prisma.pengumuman.update({ where: { id }, data: { judul, isi, target, kategori, pinned } });
+  await auditLog({ aksi: "update", entitas: "pengumuman", entitasId: id, detail: `Update pengumuman: ${judul}` });
   revalidatePath("/pengumuman");
   revalidatePath(`/pengumuman/${id}`);
   redirect(`/pengumuman/${id}`);
@@ -68,6 +71,7 @@ export async function deletePengumuman(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.pengumuman.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "pengumuman", entitasId: id, detail: `Hapus pengumuman #${id}` });
   revalidatePath("/pengumuman");
 }
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
+import { auditLog } from "@/lib/audit";
 
 const str = (v: FormDataEntryValue | null) => {
   const s = String(v ?? "").trim();
@@ -16,7 +17,7 @@ export async function createJurnal(formData: FormData) {
   if (!guruId || !tglRaw) return;
   const guru = await prisma.guru.findFirst({ where: { id: guruId, sekolahId }, select: { id: true } });
   if (!guru) return;
-  await prisma.jurnalGuru.create({
+  const j = await prisma.jurnalGuru.create({
     data: {
       sekolahId,
       guruId,
@@ -27,6 +28,7 @@ export async function createJurnal(formData: FormData) {
       deskripsi: str(formData.get("deskripsi")),
     },
   });
+  await auditLog({ aksi: "create", entitas: "jurnal", entitasId: j.id, detail: `Tambah jurnal guru #${guruId} (${tglRaw})` });
   revalidatePath("/jurnal");
 }
 
@@ -44,6 +46,7 @@ export async function updateJurnal(formData: FormData) {
       materi: str(formData.get("materi")),
     },
   });
+  await auditLog({ aksi: "update", entitas: "jurnal", entitasId: id, detail: `Update jurnal #${id}` });
   revalidatePath("/jurnal");
 }
 
@@ -52,5 +55,6 @@ export async function deleteJurnal(formData: FormData) {
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.jurnalGuru.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "jurnal", entitasId: id, detail: `Hapus jurnal #${id}` });
   revalidatePath("/jurnal");
 }
