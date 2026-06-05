@@ -1,0 +1,14 @@
+# Smart School — robots.txt
+# Semua halaman back-office tidak untuk diindex oleh search engine.
+User-agent: *
+Disallow: /dashboard
+Disallow: /siswa
+Disallow: /guru
+Disallow: /rombel
+Disallow: /nilai
+Disallow: /presensi
+Disallow: /audit
+Disallow: /pengaturan
+Disallow: /portal
+Disallow: /api/
+Allow: /daftar/

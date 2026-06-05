@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 
 type Opt = { kode: string; nama: string; kodePos?: string | null };
+
+// Pindahkan ke modul-level agar tidak di-recreate setiap render (lint: static-components)
+function LoadingOption() { return <option disabled>Memuat…</option>; }
 type State = { items: Opt[]; loading: boolean };
 
 const inCls = "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-gray-900 disabled:bg-gray-50 disabled:text-gray-400";
@@ -95,7 +98,7 @@ export function WilayahSelect({
     }
   };
 
-  const Loading = () => <option disabled>Memuat…</option>;
+  // LoadingOption dideclare di luar komponen (atas file)
 
   return (
     <div className="space-y-3">
@@ -120,7 +123,7 @@ export function WilayahSelect({
           <label className="block text-sm font-medium text-gray-700">Kabupaten/Kota</label>
           <select value={kabupaten} onChange={(e) => { setKabupaten(e.target.value); setKecamatan(""); setKelurahan(""); }} disabled={!provinsi || kabState.loading} className={inCls}>
             <option value="">— pilih kabupaten —</option>
-            {kabState.loading && <Loading />}
+            {kabState.loading && <LoadingOption />}
             {kabState.items.map((k) => <option key={k.kode} value={k.kode}>{k.nama}</option>)}
           </select>
         </div>
@@ -130,7 +133,7 @@ export function WilayahSelect({
           <label className="block text-sm font-medium text-gray-700">Kecamatan</label>
           <select value={kecamatan} onChange={(e) => { setKecamatan(e.target.value); setKelurahan(""); setKodePos(""); }} disabled={!kabupaten || kecState.loading} className={inCls}>
             <option value="">— pilih kecamatan —</option>
-            {kecState.loading && <Loading />}
+            {kecState.loading && <LoadingOption />}
             {kecState.items.map((k) => <option key={k.kode} value={k.kode}>{k.nama}</option>)}
           </select>
         </div>
@@ -140,7 +143,7 @@ export function WilayahSelect({
           <label className="block text-sm font-medium text-gray-700">Desa / Kelurahan</label>
           <select value={kelurahan} onChange={(e) => handleKelurahan(e.target.value)} disabled={!kecamatan || kelState.loading} className={inCls}>
             <option value="">— pilih desa/kelurahan —</option>
-            {kelState.loading && <Loading />}
+            {kelState.loading && <LoadingOption />}
             {kelState.items.map((k) => <option key={k.kode} value={k.kode}>{k.nama}</option>)}
           </select>
         </div>
