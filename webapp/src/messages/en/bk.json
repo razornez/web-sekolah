@@ -50,7 +50,6 @@
     "levelBerbahayaDesc": "Suspension + case conference",
     "levelKritis": "Critical",
     "levelKritisDesc": "Potential expulsion",
-
     "kategoriTitle": "Violation Categories",
     "backToBk": "← Counseling Records",
     "fieldNamaPelanggaran": "Violation Name",
@@ -62,6 +61,8 @@
     "kColAksi": "Actions",
     "emptyKategori": "No categories yet.",
     "simpan": "Save",
-    "deleteConfirm": "Delete \"{nama}\"?"
+    "deleteConfirm": "Delete \"{nama}\"?",
+    "escalationTitle": "{n} students need escalation (points ≥76)",
+    "escalationDesc": "These students have reached the Dangerous/Critical level. Click to follow up & record counseling."
   }
 }

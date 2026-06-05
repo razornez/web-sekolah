@@ -244,6 +244,38 @@ export default async function BkPage({
         </div>
       </div>
 
+      {/* Banner eskalasi — siswa poin tinggi perlu tindak lanjut (BUG-BK-01) */}
+      {(() => {
+        const eskalasi = siswaKritis
+          .map((s) => ({ id: s.siswaId as number, poin: s._sum.poin ?? 0, nama: siswaNameMap.get(s.siswaId as number) ?? "—" }))
+          .filter((s) => s.poin >= 76);
+        if (eskalasi.length === 0) return null;
+        return (
+          <div className="rounded-2xl border border-red-300 bg-red-50 p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🚨</span>
+              <h2 className="text-sm font-bold text-red-800">{t("escalationTitle", { n: eskalasi.length })}</h2>
+            </div>
+            <p className="mt-1 text-xs text-red-600">{t("escalationDesc")}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {eskalasi.map((s) => {
+                const lv = getLevel(s.poin);
+                return (
+                  <Link key={s.id} href={`/bk?siswaId=${s.id}`}
+                    className="flex items-center gap-2 rounded-xl border border-red-200 bg-white px-3 py-2 hover:border-red-400 hover:shadow-sm transition-all">
+                    <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black text-white ${lv.color}`}>{s.poin}</span>
+                    <div className="text-left">
+                      <div className="text-sm font-medium text-gray-900 leading-tight">{s.nama}</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "rgb(153 27 27)" }}>{t(lv.labelKey)}</div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         {/* Kolom kiri: Overview stats */}
         <div className="space-y-4 lg:col-span-2">

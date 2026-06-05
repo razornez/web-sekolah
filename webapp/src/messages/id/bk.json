@@ -50,7 +50,6 @@
     "levelBerbahayaDesc": "Skorsing + konferensi kasus",
     "levelKritis": "Kritis",
     "levelKritisDesc": "Potensi dikeluarkan",
-
     "kategoriTitle": "Kategori Pelanggaran",
     "backToBk": "← Pencatatan BK",
     "fieldNamaPelanggaran": "Nama Pelanggaran",
@@ -62,6 +61,8 @@
     "kColAksi": "Aksi",
     "emptyKategori": "Belum ada kategori.",
     "simpan": "Simpan",
-    "deleteConfirm": "Hapus \"{nama}\"?"
+    "deleteConfirm": "Hapus \"{nama}\"?",
+    "escalationTitle": "{n} siswa perlu eskalasi (poin ≥76)",
+    "escalationDesc": "Siswa berikut sudah masuk kategori Berbahaya/Kritis. Klik untuk tindak lanjut & catat pembinaan."
   }
 }
