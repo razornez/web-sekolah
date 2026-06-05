@@ -204,16 +204,11 @@ export default async function RombelPage({
                   const pct = r._count.anggota > 0 ? Math.min(100, Math.round(r._count.anggota / 40 * 100)) : 0;
                   return (
                     <div key={r.id} className="group rounded-xl border border-gray-200 bg-white p-4 hover:border-gray-400 hover:shadow-sm transition-all">
-                      {/* Top: nama + badge */}
+                      {/* Top: nama kelas (nama ramah, slug internal disembunyikan) */}
                       <div className="flex items-start justify-between gap-2">
                         <Link href={`/rombel/${r.id}`} className="font-bold text-gray-900 hover:text-indigo-700 hover:underline leading-tight">
                           {r.nama}
                         </Link>
-                        {r.kodeKelas && (
-                          <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-500">
-                            {r.kodeKelas}
-                          </span>
-                        )}
                       </div>
 
                       {/* Tingkat + TA (shown when groupBy=none) */}

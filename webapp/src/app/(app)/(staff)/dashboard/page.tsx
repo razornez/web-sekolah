@@ -31,7 +31,7 @@ async function DashboardAdmin({ sekolahId }: { sekolahId: number }) {
     prisma.siswa.count({ where: { sekolahId } }),
     prisma.guru.count({ where: { sekolahId } }),
     prisma.rombel.count({ where: { sekolahId } }),
-    prisma.tagihanSpp.count({ where: { sekolahId, status: "belum" } }),
+    prisma.tagihanSpp.count({ where: { sekolahId, status: { not: "lunas" } } }),
     prisma.kasusSiswa.count({ where: { sekolahId } }),
     prisma.ujian.count({ where: { sekolahId } }),
     prisma.siswa.groupBy({ by: ["jenisKelamin"], where: { sekolahId }, _count: true }),

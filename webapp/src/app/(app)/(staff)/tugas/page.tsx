@@ -59,7 +59,7 @@ export default async function TugasPage() {
                 <td className="px-4 py-2 text-gray-600">{fmt(tg.deadline)}</td>
                 <td className="px-4 py-2">
                   {(() => {
-                    const total = tg.rombelId ? (rombelSize.get(tg.rombelId) ?? 0) : totalAktif;
+                    const total = tg.rombelId ? (rombelSize.get(tg.rombelId) || totalAktif) : totalAktif;
                     const done = tg._count.pengumpulan;
                     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                     return (
