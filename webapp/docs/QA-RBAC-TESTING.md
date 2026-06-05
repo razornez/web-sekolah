@@ -58,6 +58,13 @@ ditegakkan di **server**, bukan sekadar menyembunyikan menu.
 | guru, walikelas, bk, bendahara, perpustakaan, sarpras | Sudah ada di seed (cek /pengaturan/pengguna) |
 | kurikulum, kesiswaan, humas, resepsionis | Buat via Manajemen Pengguna bila belum ada |
 
+## Kasus khusus /guru (role `guru` = read-only direktori)
+- guru → `/guru` → **200** (lihat daftar guru), TANPA tombol "Tambah Guru" / aksi kelola.
+- guru → `/guru/new` → redirect `/guru` (tidak boleh tambah).
+- guru → `/guru/123` (detail/edit) → redirect `/guru` (tidak boleh edit).
+- Sidebar guru kini **menampilkan** "Data Guru" (👁️) — ini benar.
+- walikelas/bk/bendahara/dll (tanpa izin `guru`) → `/guru` → tetap redirect `akses-ditolak`.
+
 ## Kriteria LULUS
 - ✅ Semua akses positif tampil; semua akses negatif tertolak (redirect), TANPA kebocoran.
 - ✅ Sidebar tiap role = persis modul di matrix.

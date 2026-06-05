@@ -22,7 +22,7 @@ sinkron dengan file tersebut.
 
 ## Matrix Staf (modul × role)
 
-Legenda: ✅ = boleh · — = ditolak (redirect ke dashboard)
+Legenda: ✅ = akses penuh · 👁️ = lihat saja (read-only) · — = ditolak (redirect ke dashboard)
 Singkatan role: **AD** admin · **OP** operator · **KS** kepsek · **KU** kurikulum ·
 **KSW** kesiswaan · **HM** humas · **GR** guru · **WK** walikelas · **BK** bk ·
 **BN** bendahara · **PP** perpustakaan · **SP** sarpras · **RS** resepsionis
@@ -33,7 +33,7 @@ Singkatan role: **AD** admin · **OP** operator · **KS** kepsek · **KU** kurik
 | Prestasi & Beasiswa | /prestasi | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | — | — | — | — |
 | Mutasi Siswa | /mutasi | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | — | — | — | — |
 | Kenaikan Kelas | /kenaikan-kelas | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | — | — | — | — | — |
-| Data Guru | /guru | ✅ | ✅ | ✅ | ✅ | — | — | — | — | — | — | — | — | — |
+| Data Guru | /guru | ✅ | ✅ | ✅ | ✅ | — | — | 👁️ | — | — | — | — | — | — |
 | Rombel/Kelas | /rombel | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | — | — | — | — | — |
 | Mata Pelajaran | /mapel | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | — | — | — |
 | Nilai/Rapor | /nilai | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | — | — | — | — | — |
@@ -73,5 +73,12 @@ Beberapa halaman berbagi izin modul induk (tidak punya key sendiri):
 - **/presensi/input** → izin **`presensi`**
 - **/pengaturan/sekolah**, **/akademik**, **/pengguna** → izin **`pengaturan`**
 
-> **/guru** = halaman manajemen guru (CRUD), HANYA admin/operator/kepsek/kurikulum.
-> Role `guru` **tidak** punya akses ke /guru (tidak mengelola data guru).
+> **/guru**: role `guru` boleh **melihat direktori** guru (👁️ list nama/NIP/status),
+> tetapi **tidak** bisa tambah/edit/hapus. Halaman detail/edit (`/guru/[id]`,
+> `/guru/new`) & semua aksi mutasi (`saveGuru`, `nonaktifkanGuru`, `deleteGuru`)
+> di-guard `requireManageGuru()` → hanya admin/operator/kepsek/kurikulum.
+
+### Catatan sidebar
+Role dengan izin `siswa` (guru, walikelas, bk, kesiswaan, kurikulum) WAJAR melihat
+menu **Prestasi & Beasiswa** + **Mutasi Siswa** (sub-fitur `siswa`); role dengan
+izin `rombel` melihat **Kenaikan Kelas**. Ini sesuai matrix, bukan kebocoran.

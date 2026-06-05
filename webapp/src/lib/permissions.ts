@@ -19,7 +19,7 @@ export const ROLE_MODULES: Record<string, ModuleKey[]> = {
   kurikulum: ["siswa", "guru", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal", "elearning", "presensi", "kelulusan", "tugas", "ujian"],
   kesiswaan: ["siswa", "rombel", "presensi", "bk", "osis", "ppdb", "kelulusan", "pengumuman", "ekstrakurikuler"],
   humas: ["ppdb", "surat", "pengumuman"],
-  guru: ["siswa", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal", "elearning", "presensi", "ekstrakurikuler", "tugas", "ujian"],
+  guru: ["siswa", "guru", "rombel", "mapel", "nilai", "p5", "jurnal", "jadwal", "elearning", "presensi", "ekstrakurikuler", "tugas", "ujian"],
   walikelas: ["siswa", "rombel", "nilai", "p5", "presensi", "kelulusan"],
   bk: ["siswa", "bk"],
   bendahara: ["spp"],
@@ -30,6 +30,24 @@ export const ROLE_MODULES: Record<string, ModuleKey[]> = {
 
 export function canAccess(role: string, key: ModuleKey): boolean {
   return ROLE_MODULES[role]?.includes(key) ?? false;
+}
+
+/** Role yang boleh MENGELOLA (CRUD) data master, bukan sekadar melihat. */
+const MANAGER_ROLES = new Set(["admin", "operator", "kepsek", "kurikulum"]);
+/** Apakah role boleh mengelola data master guru (tambah/edit/hapus). */
+export function canManageGuru(role: string): boolean {
+  return MANAGER_ROLES.has(role);
+}
+
+/**
+ * Guard untuk AKSI kelola guru (server action). Role 'guru' hanya boleh lihat
+ * direktori, tidak boleh tambah/edit/hapus. Mengembalikan sekolahId.
+ */
+export async function requireManageGuru(): Promise<number> {
+  const sekolahId = await requireModule("guru");
+  const user = await getCurrentUser();
+  if (!canManageGuru(user.role)) redirect("/guru?error=akses-ditolak");
+  return sekolahId;
 }
 
 /**

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireModule } from "@/lib/permissions";
+import { requireModule, canManageGuru } from "@/lib/permissions";
+import { getCurrentUser } from "@/lib/session";
 import { AccountPanel } from "@/components/AccountPanel";
 import { FotoUpload } from "@/components/FotoUpload";
 import GuruForm from "../_components/GuruForm";
@@ -13,6 +15,10 @@ const fmt = (d: Date | null) => d ? d.toLocaleDateString("id-ID", { day: "2-digi
 
 export default async function EditGuruPage({ params }: { params: Promise<{ id: string }> }) {
   const sekolahId = await requireModule("guru");
+  // Halaman detail/edit guru = manajemen → hanya manager (admin/operator/kepsek/kurikulum).
+  // Role 'guru' boleh lihat direktori (list) tapi tidak halaman edit ini.
+  const me = await getCurrentUser();
+  if (!canManageGuru(me.role)) redirect("/guru");
   const t = await getTranslations("guru");
   const { id } = await params;
 

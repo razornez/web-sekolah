@@ -5,7 +5,7 @@ import { catchDeleteError } from "@/lib/deleteError";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireStaff } from "@/lib/session";
+import { requireManageGuru } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
 import { guruSchema } from "@/lib/validations";
 
@@ -20,7 +20,7 @@ export async function saveGuru(
   _prev: GuruFormState,
   formData: FormData,
 ): Promise<GuruFormState> {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireManageGuru();
   const idRaw = formData.get("id");
   const id = idRaw ? Number(idRaw) : null;
 
@@ -72,7 +72,7 @@ export async function saveGuru(
 
 /** Soft delete guru — wajib isi alasan */
 export async function nonaktifkanGuru(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireManageGuru();
   const id = Number(formData.get("id"));
   const alasan = String(formData.get("alasan") ?? "").trim();
   if (!id || !alasan) return;
@@ -87,7 +87,7 @@ export async function nonaktifkanGuru(formData: FormData) {
 }
 
 export async function aktifkanKembaliGuru(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireManageGuru();
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.guru.update({ where: { id }, data: { deletedAt: null, alasanHapus: null } });
@@ -97,7 +97,7 @@ export async function aktifkanKembaliGuru(formData: FormData) {
 }
 
 export async function deleteGuru(formData: FormData) {
-  const sekolahId = await requireStaff();
+  const sekolahId = await requireManageGuru();
   const id = Number(formData.get("id"));
   if (!id) return;
   try {

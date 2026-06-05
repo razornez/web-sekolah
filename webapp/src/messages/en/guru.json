@@ -74,6 +74,7 @@
     "formAlamat": "Address",
     "saving": "Saving…",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "detail": "Detail"
   }
 }

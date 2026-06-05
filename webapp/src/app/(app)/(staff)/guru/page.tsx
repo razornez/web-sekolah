@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireModule } from "@/lib/permissions";
+import { requireModule, canManageGuru } from "@/lib/permissions";
+import { getCurrentUser } from "@/lib/session";
 import { PageGuide } from "@/components/PageGuide";
 import { aktifkanKembaliGuru } from "./actions";
 
@@ -15,6 +16,8 @@ export default async function GuruPage({
   searchParams: Promise<{ q?: string; page?: string; tampil?: string }>;
 }) {
   const sekolahId = await requireModule("guru");
+  const me = await getCurrentUser();
+  const canManage = canManageGuru(me.role);
   const t = await getTranslations("guru");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
@@ -61,9 +64,11 @@ export default async function GuruPage({
             )}
           </p>
         </div>
-        <Link href="/guru/new" className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
-          {t("addGuru")}
-        </Link>
+        {canManage && (
+          <Link href="/guru/new" className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+            {t("addGuru")}
+          </Link>
+        )}
       </div>
 
       {/* Tab aktif/nonaktif + search */}
@@ -111,13 +116,15 @@ export default async function GuruPage({
                 )}
                 <td className="px-4 py-3 text-right">
                   {tampil === "nonaktif" ? (
-                    <form action={aktifkanKembaliGuru} className="inline">
-                      <input type="hidden" name="id" value={g.id} />
-                      <button className="rounded-md border border-green-300 px-3 py-1 text-xs text-green-700 hover:bg-green-50">{t("aktifkan")}</button>
-                    </form>
-                  ) : (
+                    canManage ? (
+                      <form action={aktifkanKembaliGuru} className="inline">
+                        <input type="hidden" name="id" value={g.id} />
+                        <button className="rounded-md border border-green-300 px-3 py-1 text-xs text-green-700 hover:bg-green-50">{t("aktifkan")}</button>
+                      </form>
+                    ) : <span className="text-xs text-gray-300">—</span>
+                  ) : canManage ? (
                     <Link href={`/guru/${g.id}`} className="text-gray-600 hover:underline">{t("detailEdit")}</Link>
-                  )}
+                  ) : <span className="text-xs text-gray-300">—</span>}
                 </td>
               </tr>
             ))}
