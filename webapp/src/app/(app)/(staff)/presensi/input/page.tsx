@@ -21,7 +21,6 @@ export default async function InputPresensiPage({
 }) {
   const sekolahId = await requireModule("presensi");
   const t = await getTranslations("presensi");
-  const tc = await getTranslations("common");
   const sp = await searchParams;
   const rombelId = Number(sp.rombelId) || 0;
   const today = new Date();

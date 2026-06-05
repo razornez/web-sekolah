@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/session";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
@@ -17,7 +16,6 @@ const PER = 30;
 export default async function MutasiPage({ searchParams }: { searchParams: Promise<{ q?: string; jenis?: string; asal?: string; tujuan?: string; page?: string }> }) {
   const sekolahId = await requireModule("siswa");
   const t = await getTranslations("mutasi");
-  const user = await getCurrentUser();
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const jenis = sp.jenis ?? "";

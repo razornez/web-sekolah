@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
@@ -19,7 +18,7 @@ export default async function RombelPage({
   const waliFilter = sp.wali ?? "";
   const groupBy = sp.groupBy ?? "ta"; // ta | tingkat | none
 
-  const [rows, tahunAjaranList, tingkatList, taAktif] = await Promise.all([
+  const [rows, tahunAjaranList, tingkatList] = await Promise.all([
     prisma.rombel.findMany({
       where: {
         sekolahId,
@@ -38,7 +37,6 @@ export default async function RombelPage({
     }),
     prisma.tahunAjaran.findMany({ where: { sekolahId }, orderBy: { tahun: "desc" }, select: { id: true, tahun: true, aktif: true } }),
     prisma.tingkat.findMany({ where: { sekolahId }, orderBy: { urutan: "asc" }, select: { id: true, nama: true } }),
-    prisma.tahunAjaran.findFirst({ where: { sekolahId, aktif: true }, select: { id: true } }),
   ]);
 
   // Stats

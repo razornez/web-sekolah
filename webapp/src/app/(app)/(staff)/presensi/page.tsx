@@ -27,11 +27,7 @@ const MAPEL_COLORS = [
   "bg-pink-50 border-pink-300 text-pink-900",
 ];
 
-function hashColor(s: string) {
-  let h = 0;
-  for (const c of s) h = (h * 31 + c.charCodeAt(0)) & 0xfffff;
-  return MAPEL_COLORS[h % MAPEL_COLORS.length];
-}
+
 
 // ─── UTC-safe date helpers ────────────────────────────────────────────────────
 // Semua operasi tanggal pakai UTC agar konsisten dengan data DB (Prisma @db.Date
@@ -102,7 +98,6 @@ export default async function PresensiPage({
   const friday = addDays(monday, 4);
   const prevMonday = isoDate(addDays(monday, -7));
   const nextMonday = isoDate(addDays(monday, 7));
-  const isCurrentWeek = isoDate(monday) === isoDate(getMonday(today));
 
   // ── Detail view ──────────────────────────────────────────────────────────
   if (jadwalId > 0) {
@@ -453,7 +448,6 @@ export default async function PresensiPage({
 
   // Today's attendance counts per rombel (for today's date)
   const todayStr = isoDate(today);
-  const todayJadwal = byHari[HARI_ORDER.find((h) => getMonday(today) && true) ?? ""];
   const todayHariName = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"][today.getDay()];
   const todaySlots = byHari[todayHariName] ?? [];
   const todayRombelIds = [...new Set(todaySlots.map((j) => j.rombel?.id).filter(Boolean) as number[])];

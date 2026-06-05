@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
-import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { RombelSelect } from "@/components/filters/RombelSelect";
 import { updateUjian, addSoal, deleteSoal } from "../actions";
 

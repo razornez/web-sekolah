@@ -3,7 +3,6 @@
 import { Prisma } from "@prisma/client";
 import { catchDeleteError } from "@/lib/deleteError";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireManageGuru } from "@/lib/permissions";
 import { auditLog } from "@/lib/audit";
@@ -87,7 +86,7 @@ export async function nonaktifkanGuru(formData: FormData) {
 }
 
 export async function aktifkanKembaliGuru(formData: FormData) {
-  const sekolahId = await requireManageGuru();
+  await requireManageGuru();
   const id = Number(formData.get("id"));
   if (!id) return;
   await prisma.guru.update({ where: { id }, data: { deletedAt: null, alasanHapus: null } });

@@ -38,15 +38,6 @@ export default async function KenaikanKelasPage({
     prisma.tingkat.findMany({ where: { sekolahId }, orderBy: { urutan: "asc" } }),
   ]);
 
-  // rombelByTahun tidak lagi dipakai — digantikan oleh RombelSelect reusable
-  // Tetap ambil rombelList untuk tabel ringkasan di bawah
-  const rombelByTahun = rombelList.reduce<Record<string, typeof rombelList>>((acc, r) => {
-    const key = r.tahunAjaran.tahun;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(r);
-    return acc;
-  }, {});
-
   return (
     <div className="space-y-6">
       <PageGuide

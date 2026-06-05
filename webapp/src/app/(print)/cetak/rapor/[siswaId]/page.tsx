@@ -4,10 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isStaff } from "@/lib/session";
 import { PrintButton } from "@/components/PrintButton";
 
-const BULAN_ID = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-const fmtDate = (d: Date | null) =>
-  d ? `${d.getDate()} ${BULAN_ID[d.getMonth() + 1]} ${d.getFullYear()}` : "";
-
 export default async function CetakRaporPage({
   params,
   searchParams,

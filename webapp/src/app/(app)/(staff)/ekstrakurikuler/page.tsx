@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
-import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { ConfirmForm } from "@/components/ConfirmForm";
 import { GuruSelect } from "@/components/filters/GuruSelect";
 import { createEkstra, deleteEkstra, restoreEkstra } from "./actions";

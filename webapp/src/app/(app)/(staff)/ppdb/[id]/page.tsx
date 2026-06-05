@@ -59,11 +59,6 @@ export default async function PpdbDetailPage({
   });
   if (!p) notFound();
 
-  const jalurList = await prisma.jalurPpdb.findMany({ where: { sekolahId }, orderBy: { nama: "asc" } });
-
-  const currentStep = STATUS_STEPS.findIndex((s) => s.key === p.status);
-  const isTerminal = p.status === "diterima" || p.status === "ditolak";
-
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}

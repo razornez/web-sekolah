@@ -10,8 +10,6 @@ import {
 } from "./actions";
 
 const inCls = "rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900";
-const fmt = (d: Date | null) =>
-  d ? d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
 function weeksBetween(a: Date | null, b: Date | null): number | null {
   if (!a || !b) return null;
@@ -151,7 +149,6 @@ export default async function AkademikPage() {
                   const weeks = weeksBetween(p.tanggalMulai, p.tanggalSelesai);
                   const schoolDays = countSchoolDays(p.tanggalMulai, p.tanggalSelesai);
                   const meet1x = meetingCount(schoolDays, 1);
-                  const meet2x = meetingCount(schoolDays, 2);
                   const hasDates = p.tanggalMulai && p.tanggalSelesai;
                   const dataCount = p._count.nilaiRapor + p._count.raporCatatan;
                   const bisa_hapus = dataCount === 0;

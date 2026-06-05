@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import type { DeleteResult } from "@/lib/deleteError";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DeleteAction = (formData: FormData) => Promise<any>;
