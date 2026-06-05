@@ -39,6 +39,7 @@ export async function savePresensi(formData: FormData) {
     }),
   );
   revalidatePath("/presensi");
+  revalidatePath("/presensi/input");
 }
 
 /** Tandai satu siswa hadir pada tanggal tertentu (klik dot kuning). */

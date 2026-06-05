@@ -37,6 +37,18 @@
     "remaining": "{count} blm",
     "dotFutureTooltip": "Belum terjadwal",
     "dotBelumTooltip": "Belum diisi — klik tandai Hadir",
-    "dotChangeTooltip": "{status} — klik untuk ganti"
+    "dotChangeTooltip": "{status} — klik untuk ganti",
+    "inputTitle": "Input Presensi Harian",
+    "inputSubtitle": "Pilih kelas & tanggal, lalu tandai kehadiran tiap siswa.",
+    "inputPilihKelas": "Pilih kelas dan tanggal untuk mulai input presensi.",
+    "inputTampilkan": "Tampilkan",
+    "inputSimpan": "Simpan Presensi",
+    "inputTersimpan": "Presensi tersimpan",
+    "inputKolomNo": "No",
+    "inputKolomNama": "Nama Siswa",
+    "inputKolomStatus": "Status Kehadiran",
+    "inputKosong": "Kelas ini belum punya anggota.",
+    "inputModeLink": "📝 Input Harian",
+    "inputCalendarLink": "🗓 Kalender"
   }
 }

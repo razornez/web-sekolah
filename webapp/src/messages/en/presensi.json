@@ -37,6 +37,18 @@
     "remaining": "{count} left",
     "dotFutureTooltip": "Not scheduled yet",
     "dotBelumTooltip": "Not filled — click to mark Present",
-    "dotChangeTooltip": "{status} — click to change"
+    "dotChangeTooltip": "{status} — click to change",
+    "inputTitle": "Daily Attendance Input",
+    "inputSubtitle": "Pick a class & date, then mark each student.",
+    "inputPilihKelas": "Select a class and date to start marking attendance.",
+    "inputTampilkan": "Show",
+    "inputSimpan": "Save Attendance",
+    "inputTersimpan": "Attendance saved",
+    "inputKolomNo": "No",
+    "inputKolomNama": "Student Name",
+    "inputKolomStatus": "Attendance Status",
+    "inputKosong": "This class has no members yet.",
+    "inputModeLink": "📝 Daily Input",
+    "inputCalendarLink": "🗓 Calendar"
   }
 }

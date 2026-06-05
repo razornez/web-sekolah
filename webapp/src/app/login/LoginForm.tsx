@@ -40,17 +40,17 @@ export function LoginForm({
   const t = useTranslations("auth");
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(false);
-  const [defaults, setDefaults] = useState<{ username: string; sekolah: string }>({ username: "", sekolah: "" });
+  // Keamanan (BUG-034): "Ingat saya" HANYA menyimpan kode sekolah (tenant),
+  // BUKAN username/identitas akun — tidak ada kredensial yang di-prefill.
+  const [defaults, setDefaults] = useState<{ sekolah: string }>({ sekolah: "" });
   const [loaded, setLoaded] = useState(false);
 
-  // Muat data tersimpan dari "ingat saya"
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const data = JSON.parse(raw) as { username?: string; sekolah?: string };
-        setDefaults({ username: data.username ?? "", sekolah: data.sekolah ?? "" });
-        setRemember(true);
+        const data = JSON.parse(raw) as { sekolah?: string };
+        if (data.sekolah) { setDefaults({ sekolah: data.sekolah }); setRemember(true); }
       }
     } catch {
       /* ignore */
@@ -61,14 +61,11 @@ export function LoginForm({
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     const fd = new FormData(e.currentTarget);
     if (remember) {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ username: fd.get("username"), sekolah: fd.get("sekolah") }),
-      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ sekolah: fd.get("sekolah") }));
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-    // Form tetap lanjut submit ke server action
+    // Username & password tidak pernah disimpan.
   }
 
   // Hindari flash: tunggu localStorage termuat untuk set defaultValue
@@ -110,7 +107,6 @@ export function LoginForm({
           name="username"
           required
           autoComplete="username"
-          defaultValue={defaults.username}
           placeholder={t("usernamePlaceholder")}
           className={inputCls}
         />
