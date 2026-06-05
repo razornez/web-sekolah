@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 export default async function PengaturanPage() {
   const t = await getTranslations("pengaturan");
   const MENU = [
+    { href: "/pengaturan/sekolah", icon: "🏫", title: t("menuSekolahTitle"), desc: t("menuSekolahDesc") },
     { href: "/pengaturan/akademik", icon: "📅", title: t("menuAkademikTitle"), desc: t("menuAkademikDesc") },
     { href: "/pengaturan/pengguna", icon: "👥", title: t("menuPenggunaTitle"), desc: t("menuPenggunaDesc") },
   ];

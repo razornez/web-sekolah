@@ -78,6 +78,25 @@
     "createBtn": "Create Account",
     "self": "(You)",
     "totalStaff": "staff accounts",
-    "statusActive": "Active"
+    "statusActive": "Active",
+    "menuSekolahTitle": "School Identity",
+    "menuSekolahDesc": "Name, NPSN, principal, contact, vision & mission.",
+    "schoolTitle": "School Identity",
+    "schoolSubtitle": "School data shown on report cards, letterheads, and official documents.",
+    "schoolSectionIdentity": "Identity",
+    "schoolSectionContact": "Contact & Address",
+    "schoolSectionVision": "Vision & Mission",
+    "schoolName": "School Name",
+    "schoolJenjang": "Level",
+    "schoolKurikulum": "Default Curriculum",
+    "schoolKepala": "Principal",
+    "schoolNipKepala": "Principal ID (NIP)",
+    "schoolAlamat": "Address",
+    "schoolTelepon": "Phone",
+    "schoolVisi": "Vision",
+    "schoolMisi": "Mission",
+    "schoolSave": "Save Identity",
+    "schoolBack": "Cancel",
+    "schoolSaved": "School identity saved"
   }
 }

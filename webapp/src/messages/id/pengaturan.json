@@ -78,6 +78,25 @@
     "createBtn": "Buat Akun",
     "self": "(Anda)",
     "totalStaff": "akun staf",
-    "statusActive": "Aktif"
+    "statusActive": "Aktif",
+    "menuSekolahTitle": "Identitas Sekolah",
+    "menuSekolahDesc": "Nama, NPSN, kepala sekolah, kontak, visi & misi.",
+    "schoolTitle": "Identitas Sekolah",
+    "schoolSubtitle": "Data sekolah yang tampil di rapor, kop surat, dan dokumen resmi.",
+    "schoolSectionIdentity": "Identitas",
+    "schoolSectionContact": "Kontak & Alamat",
+    "schoolSectionVision": "Visi & Misi",
+    "schoolName": "Nama Sekolah",
+    "schoolJenjang": "Jenjang",
+    "schoolKurikulum": "Kurikulum Default",
+    "schoolKepala": "Kepala Sekolah",
+    "schoolNipKepala": "NIP Kepala Sekolah",
+    "schoolAlamat": "Alamat",
+    "schoolTelepon": "Telepon",
+    "schoolVisi": "Visi",
+    "schoolMisi": "Misi",
+    "schoolSave": "Simpan Identitas",
+    "schoolBack": "Batal",
+    "schoolSaved": "Identitas sekolah tersimpan"
   }
 }
