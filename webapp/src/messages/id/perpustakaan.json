@@ -28,7 +28,6 @@
     "pageInfo": "Halaman {page} dari {total} ({judul} judul)",
     "prev": "← Sebelumnya",
     "next": "Selanjutnya →",
-
     "detailBreadcrumb": "Perpustakaan",
     "statEksemplar": "Eksemplar",
     "statTersedia": "Tersedia",
@@ -53,7 +52,6 @@
     "colDurasiAktual": "Durasi Aktual",
     "durationDays": "{n} hari",
     "durationDaysLate": "{n} hari (terlambat)",
-
     "lendingTitle": "Peminjaman Buku",
     "lendingSubtitle": "Pilih siswa untuk melihat dan mengelola peminjaman.",
     "backToCatalog": "← Katalog Buku",
@@ -84,7 +82,6 @@
     "durationDaysShort": "{n}h",
     "durationDaysShortLate": "{n}h ⚠",
     "neverBorrowed": "Siswa ini belum pernah meminjam buku.",
-
     "addBookTitle": "Tambah Buku",
     "formJudul": "Judul *",
     "formPengarang": "Pengarang",
@@ -95,6 +92,12 @@
     "formJumlahEksemplar": "Jumlah Eksemplar",
     "saving": "Menyimpan…",
     "save": "Simpan",
-    "cancel": "Batal"
+    "cancel": "Batal",
+    "overdueListTitle": "{n} buku terlambat",
+    "overdueEmpty": "Tidak ada keterlambatan 🎉",
+    "colTelat": "Telat",
+    "remindWa": "Ingatkan via WA",
+    "noPhone": "No. HP kosong",
+    "colAksi": "Aksi"
   }
 }

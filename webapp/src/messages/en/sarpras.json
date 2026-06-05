@@ -39,7 +39,6 @@
     "kondisiRusakRingan": "Minor Damage",
     "kondisiRusakBerat": "Major Damage",
     "kondisiTidakLayak": "Unusable",
-
     "kategoriTitle": "Facility Categories",
     "backToSarpras": "← Facilities",
     "fieldNamaKategori": "Category Name",
@@ -48,6 +47,9 @@
     "kColNama": "Name",
     "kColAksi": "Actions",
     "emptyKategori": "No categories yet.",
-    "simpan": "Save"
+    "simpan": "Save",
+    "colTindakLanjut": "Follow-up",
+    "tindakBelum": "— none —",
+    "tindakSimpan": "Set"
   }
 }

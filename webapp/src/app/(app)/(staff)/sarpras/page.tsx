@@ -4,7 +4,16 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
-import { createSarpras, deleteSarpras } from "./actions";
+import { createSarpras, deleteSarpras, setTindakLanjut } from "./actions";
+
+const DAMAGED = new Set(["Rusak Ringan", "Rusak Berat", "Tidak Layak"]);
+const TINDAK_OPTS = ["", "Diajukan", "Dalam Perbaikan", "Selesai", "Dihapuskan"];
+const TINDAK_BADGE: Record<string, string> = {
+  "Diajukan": "bg-amber-100 text-amber-700",
+  "Dalam Perbaikan": "bg-blue-100 text-blue-700",
+  "Selesai": "bg-emerald-100 text-emerald-700",
+  "Dihapuskan": "bg-gray-200 text-gray-600",
+};
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
@@ -203,7 +212,9 @@ export default async function SarprasPage({
                       <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">{t("colKategori")}</th>
                       <th className="px-4 py-2 text-center font-semibold uppercase tracking-wide">{t("colJumlah")}</th>
                       <th className="hidden px-4 py-2 text-center font-semibold uppercase tracking-wide sm:table-cell">{t("colTahun")}</th>
-                      <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">{t("colKeterangan")}</th>
+                      {DAMAGED.has(kondisi)
+                        ? <th className="px-4 py-2 text-left font-semibold uppercase tracking-wide">{t("colTindakLanjut")}</th>
+                        : <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">{t("colKeterangan")}</th>}
                       <th className="px-4 py-2 text-right font-semibold uppercase tracking-wide">{t("colAksi")}</th>
                     </tr>
                   </thead>
@@ -218,7 +229,21 @@ export default async function SarprasPage({
                         </td>
                         <td className="px-4 py-2.5 text-center font-semibold text-gray-700">{s.jumlah}</td>
                         <td className="hidden px-4 py-2.5 text-center text-gray-500 sm:table-cell">{s.tahunPengadaan ?? "—"}</td>
-                        <td className="hidden px-4 py-2.5 text-gray-500 max-w-[200px] truncate sm:table-cell">{s.keterangan ?? "—"}</td>
+                        {DAMAGED.has(kondisi) ? (
+                          <td className="px-4 py-2">
+                            <form action={setTindakLanjut} className="flex items-center gap-1.5">
+                              <input type="hidden" name="id" value={s.id} />
+                              <select name="tindakLanjut" defaultValue={s.tindakLanjut ?? ""}
+                                className={`rounded-md border border-gray-300 px-2 py-1 text-xs ${s.tindakLanjut ? TINDAK_BADGE[s.tindakLanjut] ?? "" : ""}`}>
+                                <option value="">{t("tindakBelum")}</option>
+                                {TINDAK_OPTS.filter(Boolean).map((o) => <option key={o} value={o}>{o}</option>)}
+                              </select>
+                              <button className="rounded-md border border-gray-300 px-2 py-1 text-xs hover:bg-gray-100">{t("tindakSimpan")}</button>
+                            </form>
+                          </td>
+                        ) : (
+                          <td className="hidden px-4 py-2.5 text-gray-500 max-w-[200px] truncate sm:table-cell">{s.keterangan ?? "—"}</td>
+                        )}
                         <td className="px-4 py-2.5 text-right">
                           <ConfirmDelete action={deleteSarpras} id={s.id} message={t("deleteConfirm", { nama: s.nama })} />
                         </td>

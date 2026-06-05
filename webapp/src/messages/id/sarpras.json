@@ -39,7 +39,6 @@
     "kondisiRusakRingan": "Rusak Ringan",
     "kondisiRusakBerat": "Rusak Berat",
     "kondisiTidakLayak": "Tidak Layak",
-
     "kategoriTitle": "Kategori Sarpras",
     "backToSarpras": "← Sarpras",
     "fieldNamaKategori": "Nama Kategori",
@@ -48,6 +47,9 @@
     "kColNama": "Nama",
     "kColAksi": "Aksi",
     "emptyKategori": "Belum ada kategori.",
-    "simpan": "Simpan"
+    "simpan": "Simpan",
+    "colTindakLanjut": "Tindak Lanjut",
+    "tindakBelum": "— belum —",
+    "tindakSimpan": "Set"
   }
 }

@@ -92,6 +92,12 @@
     "formJumlahEksemplar": "Number of Copies",
     "saving": "Saving…",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "overdueListTitle": "{n} overdue books",
+    "overdueEmpty": "No overdue items 🎉",
+    "colTelat": "Late",
+    "remindWa": "Remind via WA",
+    "noPhone": "No phone",
+    "colAksi": "Action"
   }
 }

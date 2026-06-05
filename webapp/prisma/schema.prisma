@@ -1254,6 +1254,8 @@ model Sarpras {
   kondisi          String?
   tahunPengadaan   Int?    @map("tahun_pengadaan")
   keterangan       String?
+  // Status tindak lanjut item rusak: null | "Diajukan" | "Dalam Perbaikan" | "Selesai" | "Dihapuskan"
+  tindakLanjut     String? @map("tindak_lanjut")
 
   sekolah  Sekolah          @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   kategori KategoriSarpras? @relation(fields: [kategoriId], references: [id])

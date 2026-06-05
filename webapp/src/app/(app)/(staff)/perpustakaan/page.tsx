@@ -93,9 +93,29 @@ export default async function PerpustakaanPage({
     prisma.bukuPerpustakaan.aggregate({ where: { sekolahId }, _sum: { jumlahEksemplar: true, jumlahBuku: true } }),
   ]);
 
-  const overdueCount = await prisma.pinjamanBuku.count({
-    where: { sekolahId, tanggalKembali: null, tanggalPinjam: { lt: new Date(Date.now() - 7 * 86400000) } },
-  });
+  const overdueWhere = { sekolahId, tanggalKembali: null, tanggalPinjam: { lt: new Date(Date.now() - 7 * 86400000) } };
+  const overdueCount = await prisma.pinjamanBuku.count({ where: overdueWhere });
+
+  // Daftar overdue lengkap (untuk mode reminder)
+  const overdueList = filter === "overdue"
+    ? await prisma.pinjamanBuku.findMany({
+        where: overdueWhere,
+        orderBy: { tanggalPinjam: "asc" },
+        include: {
+          buku: { select: { judul: true } },
+          siswa: { select: { id: true, namaLengkap: true, noHp: true } },
+        },
+      })
+    : [];
+
+  // wa.me link: normalisasi 08xx → 628xx; pesan pengingat ter-isi
+  const waLink = (noHp: string | null, nama: string, judul: string, hari: number) => {
+    const digits = (noHp ?? "").replace(/\D/g, "");
+    if (!digits) return null;
+    const intl = digits.startsWith("0") ? "62" + digits.slice(1) : digits.startsWith("62") ? digits : "62" + digits;
+    const pesan = `Halo ${nama}, ini pengingat dari Perpustakaan Sekolah. Buku "${judul}" yang Anda pinjam sudah terlambat ${hari} hari. Mohon segera dikembalikan. Terima kasih.`;
+    return `https://wa.me/${intl}?text=${encodeURIComponent(pesan)}`;
+  };
 
   const totalPages = Math.max(1, Math.ceil(total / PER));
   const hp = (p: number) => `/perpustakaan?${new URLSearchParams({ q, page: String(p), filter }).toString()}`;
@@ -125,10 +145,10 @@ export default async function PerpustakaanPage({
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {/* Stat chips */}
           {overdueCount > 0 && (
-            <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-2">
+            <Link href="/perpustakaan?filter=overdue" className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-2 hover:bg-red-100 transition-colors">
               <span className="text-lg">⚠️</span>
               <div><div className="text-lg font-bold text-red-700 leading-none">{overdueCount}</div><div className="text-xs text-red-500">{t("overdue")}</div></div>
-            </div>
+            </Link>
           )}
           <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">
             <span className="text-lg">📖</span>
@@ -167,8 +187,54 @@ export default async function PerpustakaanPage({
         </div>
       </div>
 
-      {/* Book Grid */}
-      {rows.length === 0 ? (
+      {/* Mode Overdue — daftar peminjam telat + reminder WhatsApp */}
+      {filter === "overdue" ? (
+        <div className="overflow-x-auto rounded-2xl border border-red-200 bg-white shadow-sm">
+          <div className="flex items-center gap-2 border-b border-red-100 bg-red-50 px-5 py-3">
+            <span className="text-sm font-bold text-red-700">⚠️ {t("overdueListTitle", { n: overdueList.length })}</span>
+            <Link href="/perpustakaan" className="ml-auto text-xs text-gray-500 hover:text-gray-900">← {t("backToCatalog")}</Link>
+          </div>
+          {overdueList.length === 0 ? (
+            <p className="px-5 py-10 text-center text-sm text-gray-400">{t("overdueEmpty")}</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+                <tr>
+                  <th className="px-4 py-2 text-left font-semibold">{t("colBuku")}</th>
+                  <th className="px-4 py-2 text-left font-semibold">{t("colPeminjam")}</th>
+                  <th className="px-4 py-2 text-center font-semibold">{t("colTelat")}</th>
+                  <th className="px-4 py-2 text-right font-semibold">{t("colAksi")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {overdueList.map((p) => {
+                  const telat = Math.floor((Date.now() - p.tanggalPinjam.getTime()) / 86400000) - 7;
+                  const link = p.siswa ? waLink(p.siswa.noHp, p.siswa.namaLengkap, p.buku.judul, telat) : null;
+                  return (
+                    <tr key={p.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2.5 font-medium text-gray-900">{p.buku.judul}</td>
+                      <td className="px-4 py-2.5">
+                        {p.siswa ? <Link href={`/siswa/${p.siswa.id}`} className="text-gray-700 hover:underline">{p.siswa.namaLengkap}</Link> : "—"}
+                      </td>
+                      <td className="px-4 py-2.5 text-center">
+                        <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">{t("daysOverdue", { n: telat })}</span>
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        {link ? (
+                          <a href={link} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700">
+                            💬 {t("remindWa")}
+                          </a>
+                        ) : <span className="text-xs text-gray-400">{t("noPhone")}</span>}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      ) : rows.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
           <div className="text-5xl">📚</div>
           <p className="mt-3 text-sm text-gray-500">{t("empty")}</p>
@@ -257,7 +323,7 @@ export default async function PerpustakaanPage({
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {filter !== "overdue" && totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-gray-600">
           <span>{t("pageInfo", { page, total: totalPages, judul: total.toLocaleString("id-ID") })}</span>
           <div className="flex gap-2">

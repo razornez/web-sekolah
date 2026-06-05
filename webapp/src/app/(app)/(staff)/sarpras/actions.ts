@@ -77,3 +77,15 @@ export async function deleteSarpras(formData: FormData) {
   await auditLog({ aksi: "delete", entitas: "sarpras", entitasId: id, detail: `Hapus sarpras #${id}` });
   revalidatePath("/sarpras");
 }
+
+const TINDAK_LANJUT = ["", "Diajukan", "Dalam Perbaikan", "Selesai", "Dihapuskan"];
+/** Set status tindak lanjut untuk item rusak (BUG-SARPRAS-01) */
+export async function setTindakLanjut(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const id = Number(formData.get("id"));
+  const status = String(formData.get("tindakLanjut") ?? "");
+  if (!id || !TINDAK_LANJUT.includes(status)) return;
+  await prisma.sarpras.updateMany({ where: { id, sekolahId }, data: { tindakLanjut: status || null } });
+  await auditLog({ aksi: "update", entitas: "sarpras", entitasId: id, detail: `Tindak lanjut: ${status || "—"}` });
+  revalidatePath("/sarpras");
+}
