@@ -18,6 +18,14 @@
     "empty": "No journal entries yet.",
     "deleteConfirm": "Delete this journal entry?",
     "edit": "Edit",
-    "saveEdit": "Save"
+    "saveEdit": "Save",
+    "totalLabel": "entries",
+    "allGuru": "All Teachers",
+    "filterMapelPlaceholder": "Filter subject...",
+    "filter": "Filter",
+    "reset": "Reset",
+    "pageInfo": "Page {page}/{total}",
+    "prev": "← Previous",
+    "next": "Next →"
   }
 }

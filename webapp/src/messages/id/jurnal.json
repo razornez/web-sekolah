@@ -18,6 +18,14 @@
     "empty": "Belum ada jurnal.",
     "deleteConfirm": "Hapus jurnal ini?",
     "edit": "Edit",
-    "saveEdit": "Simpan"
+    "saveEdit": "Simpan",
+    "totalLabel": "entri",
+    "allGuru": "Semua Guru",
+    "filterMapelPlaceholder": "Filter mapel...",
+    "filter": "Filter",
+    "reset": "Reset",
+    "pageInfo": "Hal {page}/{total}",
+    "prev": "← Sebelumnya",
+    "next": "Selanjutnya →"
   }
 }

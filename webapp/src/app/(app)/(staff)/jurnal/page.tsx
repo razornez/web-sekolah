@@ -12,20 +12,54 @@ const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none 
 const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
-export default async function JurnalPage() {
+const PER_PAGE = 30;
+
+export default async function JurnalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; guruId?: string; mapel?: string }>;
+}) {
   const sekolahId = await requireModule("jurnal");
   const t = await getTranslations("jurnal");
-  const rows = await prisma.jurnalGuru.findMany({
-    where: { sekolahId },
-    orderBy: { tanggal: "desc" },
-    take: 100,
-    include: { guru: { select: { id: true, namaGuru: true } } },
-  });
+  const sp = await searchParams;
+  const page = Math.max(1, Number(sp.page) || 1);
+  const fGuru = Number(sp.guruId) || 0;
+  const fMapel = (sp.mapel ?? "").trim();
+
+  const where = {
+    sekolahId,
+    ...(fGuru ? { guruId: fGuru } : {}),
+    ...(fMapel ? { mapel: { contains: fMapel, mode: "insensitive" as const } } : {}),
+  };
+
+  const [total, rows] = await Promise.all([
+    prisma.jurnalGuru.count({ where }),
+    prisma.jurnalGuru.findMany({
+      where,
+      orderBy: { tanggal: "desc" },
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
+      include: { guru: { select: { id: true, namaGuru: true } } },
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
   const today = new Date().toISOString().slice(0, 10);
+  const hp = (p: number) => `/jurnal?${new URLSearchParams({ page: String(p), ...(fGuru ? { guruId: String(fGuru) } : {}), ...(fMapel ? { mapel: fMapel } : {}) }).toString()}`;
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">{t("title")}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-gray-900">{t("title")}</h1>
+        <span className="text-sm text-gray-500">{total} {t("totalLabel")}</span>
+      </div>
+
+      {/* Filter */}
+      <form className="flex flex-wrap gap-2 rounded-lg border border-gray-200 bg-white p-3">
+        <GuruSelect sekolahId={sekolahId} name="guruId" defaultValue={fGuru || ""} emptyLabel={t("allGuru")} className={`${inCls} min-w-48`} />
+        <input name="mapel" defaultValue={fMapel} placeholder={t("filterMapelPlaceholder")} className={`${inCls} min-w-36`} />
+        <button className="rounded-md bg-gray-900 px-3 py-1 text-xs font-medium text-white hover:bg-gray-800">{t("filter")}</button>
+        {(fGuru || fMapel) && <Link href="/jurnal" className="rounded-md border border-gray-200 px-3 py-1 text-xs hover:bg-gray-50">{t("reset")}</Link>}
+      </form>
 
       <form action={createJurnal} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-white p-4">
         <div>
@@ -85,6 +119,16 @@ export default async function JurnalPage() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm text-gray-500">
+          <span>{t("pageInfo", { page, total: totalPages })}</span>
+          <div className="flex gap-1">
+            {page > 1 && <Link href={hp(page - 1)} className="rounded-lg border border-gray-200 px-3 py-1.5 hover:bg-gray-50">{t("prev")}</Link>}
+            {page < totalPages && <Link href={hp(page + 1)} className="rounded-lg border border-gray-200 px-3 py-1.5 hover:bg-gray-50">{t("next")}</Link>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
