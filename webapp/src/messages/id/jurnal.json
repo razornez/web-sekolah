@@ -16,6 +16,8 @@
     "colMateri": "Materi",
     "colAksi": "Aksi",
     "empty": "Belum ada jurnal.",
-    "deleteConfirm": "Hapus jurnal ini?"
+    "deleteConfirm": "Hapus jurnal ini?",
+    "edit": "Edit",
+    "saveEdit": "Simpan"
   }
 }

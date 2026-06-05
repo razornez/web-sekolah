@@ -30,6 +30,23 @@ export async function createJurnal(formData: FormData) {
   revalidatePath("/jurnal");
 }
 
+export async function updateJurnal(formData: FormData) {
+  const sekolahId = await requireStaff();
+  const id = Number(formData.get("id"));
+  const tglRaw = String(formData.get("tanggal") ?? "").trim();
+  if (!id) return;
+  await prisma.jurnalGuru.updateMany({
+    where: { id, sekolahId },
+    data: {
+      ...(tglRaw ? { tanggal: new Date(tglRaw) } : {}),
+      kelas: str(formData.get("kelas")),
+      mapel: str(formData.get("mapel")),
+      materi: str(formData.get("materi")),
+    },
+  });
+  revalidatePath("/jurnal");
+}
+
 export async function deleteJurnal(formData: FormData) {
   const sekolahId = await requireStaff();
   const id = Number(formData.get("id"));

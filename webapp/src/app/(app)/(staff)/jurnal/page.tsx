@@ -6,10 +6,11 @@ import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { GuruSelect } from "@/components/filters/GuruSelect";
 import { MapelSelect } from "@/components/filters/MapelSelect";
 import { RombelSelect } from "@/components/filters/RombelSelect";
-import { createJurnal, deleteJurnal } from "./actions";
+import { createJurnal, updateJurnal, deleteJurnal } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 export default async function JurnalPage() {
   const sekolahId = await requireStaff();
@@ -63,7 +64,22 @@ export default async function JurnalPage() {
                 <td className="px-4 py-2 text-gray-600">{j.kelas ?? "-"}</td>
                 <td className="px-4 py-2 text-gray-600">{j.mapel ?? "-"}</td>
                 <td className="px-4 py-2 text-gray-600">{j.materi ?? "-"}</td>
-                <td className="px-4 py-2 text-right"><ConfirmDelete action={deleteJurnal} id={j.id} message={t("deleteConfirm")} /></td>
+                <td className="px-4 py-2">
+                  <div className="flex items-center justify-end gap-2">
+                    <details className="relative">
+                      <summary className="cursor-pointer list-none rounded-md border border-gray-300 px-2 py-1 text-xs hover:bg-gray-100">{t("edit")}</summary>
+                      <form action={updateJurnal} className="absolute right-0 z-20 mt-1 flex w-64 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-xl">
+                        <input type="hidden" name="id" value={j.id} />
+                        <input type="date" name="tanggal" defaultValue={iso(j.tanggal)} className={inCls} />
+                        <input name="kelas" defaultValue={j.kelas ?? ""} placeholder={t("colKelas")} className={inCls} />
+                        <input name="mapel" defaultValue={j.mapel ?? ""} placeholder={t("colMapel")} className={inCls} />
+                        <input name="materi" defaultValue={j.materi ?? ""} placeholder={t("colMateri")} className={inCls} />
+                        <button className="rounded-md bg-gray-900 px-2 py-1 text-xs font-medium text-white hover:bg-gray-800">{t("saveEdit")}</button>
+                      </form>
+                    </details>
+                    <ConfirmDelete action={deleteJurnal} id={j.id} message={t("deleteConfirm")} />
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

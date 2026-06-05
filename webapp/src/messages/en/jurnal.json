@@ -16,6 +16,8 @@
     "colMateri": "Topic",
     "colAksi": "Actions",
     "empty": "No journal entries yet.",
-    "deleteConfirm": "Delete this journal entry?"
+    "deleteConfirm": "Delete this journal entry?",
+    "edit": "Edit",
+    "saveEdit": "Save"
   }
 }
