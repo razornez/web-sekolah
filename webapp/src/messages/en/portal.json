@@ -24,7 +24,6 @@
     "statusSakit": "sick",
     "statusAlpa": "absent",
     "statusTerlambat": "late",
-
     "tugasTitle": "My Assignments",
     "tugasOnlyStudent": "Only students can view assignments.",
     "tugasEmpty": "No assignments yet.",
@@ -35,7 +34,6 @@
     "tugasUpdate": "Update",
     "tugasSubmit": "Submit",
     "tugasSubmitted": "Submitted {date}",
-
     "ujianTitle": "My Exams",
     "ujianOnlyStudent": "Only students can take exams.",
     "ujianEmpty": "No exams available yet.",
@@ -45,7 +43,6 @@
     "ujianViewResult": "View Result",
     "ujianContinue": "Continue",
     "ujianSkor": "Score: {skor}",
-
     "ujianBack": "← My Exams",
     "ujianYourScore": "Your score:",
     "ujianAnswer": "Answer:",
@@ -55,11 +52,9 @@
     "ujianTimedAutoSubmit": "Once started, the timer runs and answers are submitted automatically when time runs out.",
     "ujianStartExam": "Start Exam",
     "ujianAnswerAll": "{count} questions · answer all then submit.",
-
     "ujianTimeRemaining": "⏱ Time remaining:",
     "ujianConfirmSubmit": "Submit answers? This cannot be changed.",
     "ujianSubmitAnswers": "Submit Answers",
-
     "voteTitle": "Student Council Election",
     "voteOnlyStudent": "Only students can cast a vote.",
     "voteDone": "✓ You have already cast your vote. Thank you.",
@@ -67,6 +62,11 @@
     "voteEmpty": "No candidates yet.",
     "voteNoUrut": "Number {no}",
     "voteSelect": "Select",
-    "voteYourChoice": "Your Choice"
+    "voteYourChoice": "Your Choice",
+    "rataRataNilai": "Average Grade",
+    "kehadiranPct": "Attendance",
+    "sppBelum": "Unpaid Bills",
+    "sppLunas": "Tuition Paid",
+    "wali": "Homeroom"
   }
 }

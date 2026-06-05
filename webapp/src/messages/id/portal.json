@@ -24,7 +24,6 @@
     "statusSakit": "sakit",
     "statusAlpa": "alpa",
     "statusTerlambat": "terlambat",
-
     "tugasTitle": "Tugas Saya",
     "tugasOnlyStudent": "Hanya siswa yang dapat melihat tugas.",
     "tugasEmpty": "Belum ada tugas.",
@@ -35,7 +34,6 @@
     "tugasUpdate": "Perbarui",
     "tugasSubmit": "Kumpulkan",
     "tugasSubmitted": "Terkumpul {date}",
-
     "ujianTitle": "Ujian Saya",
     "ujianOnlyStudent": "Hanya siswa yang dapat mengikuti ujian.",
     "ujianEmpty": "Belum ada ujian tersedia.",
@@ -45,7 +43,6 @@
     "ujianViewResult": "Lihat Hasil",
     "ujianContinue": "Lanjutkan",
     "ujianSkor": "Skor: {skor}",
-
     "ujianBack": "← Ujian Saya",
     "ujianYourScore": "Skor Anda:",
     "ujianAnswer": "Jawaban:",
@@ -55,11 +52,9 @@
     "ujianTimedAutoSubmit": "Setelah mulai, waktu berjalan dan jawaban dikumpulkan otomatis saat waktu habis.",
     "ujianStartExam": "Mulai Ujian",
     "ujianAnswerAll": "{count} soal · jawab semua lalu kumpulkan.",
-
     "ujianTimeRemaining": "⏱ Sisa waktu:",
     "ujianConfirmSubmit": "Kumpulkan jawaban? Tidak bisa diubah lagi.",
     "ujianSubmitAnswers": "Kumpulkan Jawaban",
-
     "voteTitle": "Pemilihan OSIS",
     "voteOnlyStudent": "Hanya siswa yang dapat memberikan suara.",
     "voteDone": "✓ Anda sudah memberikan suara. Terima kasih.",
@@ -67,6 +62,11 @@
     "voteEmpty": "Belum ada kandidat.",
     "voteNoUrut": "No. Urut {no}",
     "voteSelect": "Pilih",
-    "voteYourChoice": "Pilihan Anda"
+    "voteYourChoice": "Pilihan Anda",
+    "rataRataNilai": "Rata-rata Nilai",
+    "kehadiranPct": "Kehadiran",
+    "sppBelum": "Tagihan Belum Lunas",
+    "sppLunas": "SPP Lunas",
+    "wali": "Wali Kelas"
   }
 }

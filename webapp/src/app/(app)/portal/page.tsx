@@ -69,7 +69,7 @@ export default async function PortalPage() {
     where: { userId: user.id, sekolahId },
     include: {
       anggotaRombel: {
-        include: { rombel: { include: { tingkat: true, tahunAjaran: true } } },
+        include: { rombel: { include: { tingkat: true, tahunAjaran: true }, select: undefined } },
         orderBy: { id: "desc" },
         take: 1,
       },
@@ -108,20 +108,63 @@ export default async function PortalPage() {
     return acc;
   }, {});
 
+  // Wali kelas dari rombel aktif
+  const waliKelas = kelas?.waliGuruId
+    ? await prisma.guru.findFirst({ where: { id: kelas.waliGuruId }, select: { namaGuru: true } })
+    : null;
+
+  // Summary stats
+  const totalHadir = siswa.kehadiran.length;
+  const hadirCount = rekapHadir["hadir"] ?? 0;
+  const pctHadir = totalHadir > 0 ? Math.round((hadirCount / totalHadir) * 100) : null;
+  const nilaiList = siswa.nilaiRapor.map((n) => n.nilaiAkhir ?? n.nilaiPengetahuan).filter((v): v is number => v !== null);
+  const rataRata = nilaiList.length > 0 ? Math.round(nilaiList.reduce((a, b) => a + b, 0) / nilaiList.length) : null;
+  const sppBelum = siswa.tagihanSpp.filter((s) => s.status !== "lunas").length;
+
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">{t("siswaTitle")}</h1>
-          <p className="text-gray-600">
-            {siswa.namaLengkap}
-            {siswa.nisn ? ` · NISN ${siswa.nisn}` : ""}
-            {kelas ? ` · ${kelas.nama} (${kelas.tahunAjaran.tahun})` : ""}
-          </p>
+      {/* Hero card siswa */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl font-bold text-indigo-700">
+              {siswa.namaLengkap.charAt(0)}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">{siswa.namaLengkap}</h1>
+              <p className="text-sm text-gray-500">
+                {siswa.nisn ? `NISN: ${siswa.nisn}` : ""}
+                {kelas ? ` · ${kelas.nama} ${kelas.tahunAjaran.tahun}` : ""}
+                {waliKelas ? ` · ${t("wali")}: ${waliKelas.namaGuru}` : ""}
+              </p>
+            </div>
+          </div>
+          <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer"
+            className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">
+            🖨 {t("cetakRapor")}
+          </a>
         </div>
-        <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
-          {t("cetakRapor")}
-        </a>
+        {/* Quick stats */}
+        <div className="mt-4 grid grid-cols-3 gap-3 border-t border-gray-100 pt-4">
+          <div className="text-center">
+            <div className={`text-2xl font-black ${rataRata !== null ? (rataRata >= 75 ? "text-emerald-600" : rataRata >= 60 ? "text-amber-600" : "text-red-600") : "text-gray-300"}`}>
+              {rataRata !== null ? rataRata : "—"}
+            </div>
+            <div className="text-xs text-gray-500">{t("rataRataNilai")}</div>
+          </div>
+          <div className="text-center">
+            <div className={`text-2xl font-black ${pctHadir !== null ? (pctHadir >= 85 ? "text-emerald-600" : pctHadir >= 75 ? "text-amber-600" : "text-red-600") : "text-gray-300"}`}>
+              {pctHadir !== null ? `${pctHadir}%` : "—"}
+            </div>
+            <div className="text-xs text-gray-500">{t("kehadiranPct")}</div>
+          </div>
+          <div className="text-center">
+            <div className={`text-2xl font-black ${sppBelum > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+              {sppBelum > 0 ? sppBelum : "✓"}
+            </div>
+            <div className="text-xs text-gray-500">{sppBelum > 0 ? t("sppBelum") : t("sppLunas")}</div>
+          </div>
+        </div>
       </div>
 
       {user.sekolahId != null && <PengumumanFeed sekolahId={user.sekolahId} audience="siswa" />}
