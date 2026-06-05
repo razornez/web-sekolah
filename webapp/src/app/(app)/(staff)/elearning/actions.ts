@@ -34,6 +34,24 @@ export async function createElearning(formData: FormData) {
   revalidatePath("/elearning");
 }
 
+export async function updateElearning(formData: FormData) {
+  const sekolahId = await requireModule("elearning");
+  const id = Number(formData.get("id"));
+  const judul = String(formData.get("judul") ?? "").trim();
+  if (!id || !judul) return;
+  const guruId = Number(formData.get("guruId")) || null;
+  if (guruId) {
+    const g = await prisma.guru.findFirst({ where: { id: guruId, sekolahId }, select: { id: true } });
+    if (!g) return;
+  }
+  await prisma.elearning.updateMany({
+    where: { id, sekolahId },
+    data: { judul, guruId, kelas: str(formData.get("kelas")), mapel: str(formData.get("mapel")), link: str(formData.get("link")) },
+  });
+  await auditLog({ aksi: "update", entitas: "elearning", entitasId: id, detail: `Update elearning: ${judul}` });
+  revalidatePath("/elearning");
+}
+
 export async function deleteElearning(formData: FormData) {
   const sekolahId = await requireModule("elearning");
   const id = Number(formData.get("id"));

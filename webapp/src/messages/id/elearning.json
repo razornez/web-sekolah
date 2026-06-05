@@ -15,6 +15,7 @@
     "colAksi": "Aksi",
     "empty": "Belum ada materi.",
     "open": "buka",
-    "deleteConfirm": "Hapus \"{judul}\"?"
+    "deleteConfirm": "Hapus \"{judul}\"?",
+    "save": "Simpan"
   }
 }

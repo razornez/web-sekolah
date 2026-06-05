@@ -34,6 +34,21 @@ export async function deleteProjek(formData: FormData) {
   revalidatePath("/p5");
 }
 
+export async function updateProjek(formData: FormData) {
+  const sekolahId = await requireModule("p5");
+  const id = Number(formData.get("id"));
+  const tema = String(formData.get("tema") ?? "").trim();
+  const judul = String(formData.get("judul") ?? "").trim();
+  if (!id || !tema || !judul) return;
+  await prisma.projekP5.updateMany({
+    where: { id, sekolahId },
+    data: { tema, judul, deskripsi: String(formData.get("deskripsi") ?? "").trim() || null },
+  });
+  await auditLog({ aksi: "update", entitas: "p5", entitasId: id, detail: `Update projek P5: ${judul}` });
+  revalidatePath("/p5");
+  revalidatePath(`/p5/${id}`);
+}
+
 /** Set elemen yang ditargetkan projek (replace). */
 export async function saveTarget(formData: FormData) {
   const sekolahId = await requireModule("p5");

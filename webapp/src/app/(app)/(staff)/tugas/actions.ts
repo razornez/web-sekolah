@@ -34,6 +34,26 @@ export async function createTugas(formData: FormData) {
   revalidatePath("/tugas");
 }
 
+export async function updateTugas(formData: FormData) {
+  const sekolahId = await requireModule("tugas");
+  const id = Number(formData.get("id"));
+  const judul = String(formData.get("judul") ?? "").trim();
+  if (!id || !judul) return;
+  const rombelId = Number(formData.get("rombelId")) || null;
+  const deadlineRaw = String(formData.get("deadline") ?? "").trim();
+  await prisma.tugas.updateMany({
+    where: { id, sekolahId },
+    data: {
+      judul,
+      mapel: str(formData.get("mapel")),
+      rombelId,
+      deadline: deadlineRaw ? new Date(deadlineRaw) : null,
+    },
+  });
+  await auditLog({ aksi: "update", entitas: "tugas", entitasId: id, detail: `Update tugas: ${judul}` });
+  revalidatePath("/tugas");
+}
+
 export async function deleteTugas(formData: FormData) {
   const sekolahId = await requireModule("tugas");
   const id = Number(formData.get("id"));

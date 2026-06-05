@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
-import { createProjek, deleteProjek } from "./actions";
+import { createProjek, updateProjek, deleteProjek } from "./actions";
 
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
@@ -54,8 +54,17 @@ export default async function P5Page() {
                 <td className="px-4 py-2 text-gray-600">{p.tahunAjaran.tahun}</td>
                 <td className="px-4 py-2 text-gray-600">{t("targetNilaiValue", { target: p._count.target, nilai: p._count.penilaian })}</td>
                 <td className="px-4 py-2">
-                  <div className="flex items-center justify-end gap-3">
-                    <Link href={`/p5/${p.id}`} className="text-gray-600 hover:underline">{t("manage")}</Link>
+                  <div className="flex items-center justify-end gap-2">
+                    <Link href={`/p5/${p.id}`} className="rounded-md border border-gray-200 px-2 py-1 text-xs hover:bg-gray-50">{t("manage")}</Link>
+                    <details className="relative">
+                      <summary className="cursor-pointer list-none rounded-md border border-gray-200 px-2 py-1 text-xs hover:bg-gray-50">✏️</summary>
+                      <form action={updateProjek} className="absolute right-0 z-20 mt-1 flex w-72 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-xl">
+                        <input type="hidden" name="id" value={p.id} />
+                        <input name="judul" defaultValue={p.judul} required placeholder={t("fieldJudul")} className="w-full rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-gray-900" />
+                        <input name="tema" defaultValue={p.tema} required placeholder={t("fieldTema")} className="w-full rounded-md border border-gray-300 px-2 py-1 text-xs outline-none focus:border-gray-900" />
+                        <button className="rounded-md bg-gray-900 py-1 text-xs font-medium text-white hover:bg-gray-800">{t("save")}</button>
+                      </form>
+                    </details>
                     <ConfirmDelete action={deleteProjek} id={p.id} message={t("deleteConfirm", { judul: p.judul })} />
                   </div>
                 </td>

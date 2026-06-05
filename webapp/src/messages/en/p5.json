@@ -29,6 +29,7 @@
     "colNama": "Name",
     "noMembers": "This class group has no members yet.",
     "savePenilaian": "Save Assessment",
-    "predikatLegend": "Rating: MB=Beginning to Develop · SB=Developing · BSH=Developing as Expected · SAB=Highly Developed"
+    "predikatLegend": "Rating: MB=Beginning to Develop · SB=Developing · BSH=Developing as Expected · SAB=Highly Developed",
+    "save": "Save"
   }
 }

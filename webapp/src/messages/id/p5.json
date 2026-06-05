@@ -29,6 +29,7 @@
     "colNama": "Nama",
     "noMembers": "Rombel belum punya anggota.",
     "savePenilaian": "Simpan Penilaian",
-    "predikatLegend": "Predikat: MB=Mulai Berkembang · SB=Sedang Berkembang · BSH=Berkembang Sesuai Harapan · SAB=Sangat Berkembang"
+    "predikatLegend": "Predikat: MB=Mulai Berkembang · SB=Sedang Berkembang · BSH=Berkembang Sesuai Harapan · SAB=Sangat Berkembang",
+    "save": "Simpan"
   }
 }

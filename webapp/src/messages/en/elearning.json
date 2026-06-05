@@ -15,6 +15,7 @@
     "colAksi": "Actions",
     "empty": "No materials yet.",
     "open": "open",
-    "deleteConfirm": "Delete \"{judul}\"?"
+    "deleteConfirm": "Delete \"{judul}\"?",
+    "save": "Save"
   }
 }
