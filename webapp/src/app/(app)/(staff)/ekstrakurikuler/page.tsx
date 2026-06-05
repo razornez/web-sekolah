@@ -26,17 +26,23 @@ function cardColor(nama: string) {
   return CARD_COLORS[h % CARD_COLORS.length];
 }
 
-// Kategori ekskul sederhana dari nama
+// Kategori ekskul sederhana dari nama (urutan spesifik → umum)
 const KATEGORI_ICON: [RegExp, string][] = [
   [/pramuka|scout/i, "⛺"],
-  [/basket|voli|futsal|sepak.*bola|bola/i, "⚽"],
-  [/seni|tari|musik|paduan.*suara|drama|teater/i, "🎭"],
+  [/basket/i, "🏀"],
+  [/voli|volly|volley|bola voli/i, "🏐"],
+  [/futsal|sepak.*bola|sepakbola/i, "⚽"],
+  [/badminton|bulu.*tangkis/i, "🏸"],
+  [/tenis.*meja|pingpong|ping.*pong/i, "🏓"],
+  [/catur|chess/i, "♟️"],
+  [/seni|tari|musik|band|paduan.*suara|drama|teater|vokal/i, "🎭"],
   [/pmr|kesehatan|medis/i, "🏥"],
-  [/komputer|coding|robotik|tekno/i, "💻"],
-  [/english|debat|speak|jurnali/i, "📢"],
+  [/komputer|coding|robotik|tekno|it/i, "💻"],
+  [/english|debat|speak|jurnali|bahasa/i, "📢"],
   [/paskibra|drumband/i, "🥁"],
-  [/karate|silat|pencak|taekwondo|beladiri/i, "🥋"],
+  [/karate|silat|pencak|taekwondo|beladiri|tapak.*suci/i, "🥋"],
   [/renang|atletik|lari/i, "🏃"],
+  [/rohis|rohani|keagamaan|tahfiz|qiro/i, "🕌"],
 ];
 function getIcon(nama: string) {
   for (const [re, icon] of KATEGORI_ICON) if (re.test(nama)) return icon;
