@@ -133,11 +133,12 @@ export async function saveMutasi(formData: FormData) {
     if (!exists) return;
   }
   const tanggalRaw = str(formData.get("tanggal"));
+  const jenis = String(formData.get("jenis") ?? "keluar");
   await prisma.mutasiSiswa.create({
     data: {
       sekolahId,
       siswaId,
-      jenis: String(formData.get("jenis") ?? "keluar"),
+      jenis,
       asalSekolah: str(formData.get("asalSekolah")),
       tujuanSekolah: str(formData.get("tujuanSekolah")),
       alasan: str(formData.get("alasan")),
@@ -145,7 +146,18 @@ export async function saveMutasi(formData: FormData) {
       createdById: user.id,
     },
   });
+
+  // Update status siswa sesuai jenis mutasi (keluar → pindah, masuk → aktif)
+  if (siswaId) {
+    if (jenis === "keluar") {
+      await prisma.siswa.update({ where: { id: siswaId }, data: { status: "pindah" } });
+    } else if (jenis === "masuk") {
+      await prisma.siswa.update({ where: { id: siswaId }, data: { status: "aktif" } });
+    }
+  }
+
   revalidatePath("/mutasi");
+  revalidatePath("/siswa");
 }
 
 export async function deleteMutasi(formData: FormData) {
