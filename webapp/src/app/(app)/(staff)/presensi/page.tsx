@@ -563,13 +563,8 @@ export default async function PresensiPage({
                               const done = rombelId ? (donePerRombel.get(rombelId) ?? 0) : 0;
                               const belum = total - done;
                               const allDone = isToday && total > 0 && belum === 0;
-                              // Hari ini / lampau + ada kelas → klik langsung buka FORM INPUT presensi
-                              // (rombel + tanggal slot). Masa depan / tanpa kelas → tampilan detail.
-                              const slotHref = rombelId && !isFuture
-                                ? `/presensi/input?rombelId=${rombelId}&tanggal=${dateStr}`
-                                : `/presensi?jadwalId=${j.id}`;
                               return (
-                                <Link key={j.id} href={slotHref}
+                                <Link key={j.id} href={`/presensi?jadwalId=${j.id}`}
                                   className={`block rounded-lg border px-2 py-1.5 text-xs leading-tight transition-all hover:shadow-sm hover:-translate-y-0.5 ${colorMap[j.mapel ?? ""] ?? MAPEL_COLORS[0]}`}>
                                   <div className="font-bold line-clamp-2">{j.mapel ?? "—"}</div>
                                   {j.rombel && <div className="opacity-70 text-[10px]">{j.rombel.nama}</div>}
