@@ -139,7 +139,10 @@
       "uploading": "Mengunggah…",
       "uploadPhoto": "Unggah Foto",
       "guide": "Panduan"
-    }
+    },
+    "deleteConfirmTitle": "Konfirmasi Hapus",
+    "deleteConfirmYes": "Ya, Hapus",
+    "ok": "OK"
   },
   "roles": {
     "admin": "Admin",

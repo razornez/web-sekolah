@@ -1,15 +1,17 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { ConfirmModal } from "./ConfirmModal";
+import { ErrorModal } from "./ErrorModal";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DeleteAction = (formData: FormData) => Promise<any>;
 
 /**
  * Tombol hapus generik dengan:
- * - Konfirmasi window.confirm sebelum submit
- * - Menangkap error dari action (relasi, dll) dan menampilkan alert yang jelas
+ * - Modal konfirmasi custom (bukan window.confirm)
+ * - Modal error custom saat gagal karena relasi (bukan alert)
  */
 export function ConfirmDelete({
   action,
@@ -23,7 +25,10 @@ export function ConfirmDelete({
   label?: string;
 }) {
   const t = useTranslations("common");
-  // Wrap action agar selalu return DeleteResult shape
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   async function wrappedAction(
     _prev: { error?: string },
     formData: FormData,
@@ -35,29 +40,50 @@ export function ConfirmDelete({
     return {};
   }
 
-  const [state, formAction] = useActionState(wrappedAction, {});
+  const [state, formAction, pending] = useActionState(wrappedAction, {});
 
-  // Tampilkan error sebagai alert setelah action selesai
   useEffect(() => {
     if (state.error) {
-      alert(`${t("components.deleteFailedTitle")}\n\n${state.error}`);
+      setErrorMsg(state.error);
+      setShowError(true);
     }
-  }, [state, t]);
+  }, [state]);
+
+  function handleConfirm() {
+    setShowConfirm(false);
+    const fd = new FormData();
+    fd.append("id", String(id));
+    formAction(fd);
+  }
 
   return (
-    <form
-      action={formAction}
-      onSubmit={(ev) => {
-        if (!confirm(message)) ev.preventDefault();
-      }}
-    >
-      <input type="hidden" name="id" value={id} />
+    <>
       <button
-        type="submit"
-        className="cursor-pointer text-red-600 hover:underline text-sm"
+        type="button"
+        disabled={pending}
+        onClick={() => setShowConfirm(true)}
+        className="cursor-pointer text-red-600 hover:underline text-sm disabled:opacity-40"
       >
         {label ?? t("delete")}
       </button>
-    </form>
+
+      <ConfirmModal
+        open={showConfirm}
+        title={t("deleteConfirmTitle")}
+        message={message}
+        confirmLabel={t("deleteConfirmYes")}
+        cancelLabel={t("cancel")}
+        variant="danger"
+        onConfirm={handleConfirm}
+        onCancel={() => setShowConfirm(false)}
+      />
+
+      <ErrorModal
+        open={showError}
+        title={t("components.deleteFailedTitle")}
+        message={errorMsg}
+        onClose={() => setShowError(false)}
+      />
+    </>
   );
 }

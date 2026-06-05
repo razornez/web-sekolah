@@ -67,6 +67,7 @@
     "kehadiranPct": "Kehadiran",
     "sppBelum": "Tagihan Belum Lunas",
     "sppLunas": "SPP Lunas",
-    "wali": "Wali Kelas"
+    "wali": "Wali Kelas",
+    "cancel": "Batal"
   }
 }

@@ -139,7 +139,10 @@
       "uploading": "Uploading…",
       "uploadPhoto": "Upload Photo",
       "guide": "Guide"
-    }
+    },
+    "deleteConfirmTitle": "Confirm Delete",
+    "deleteConfirmYes": "Yes, Delete",
+    "ok": "OK"
   },
   "roles": {
     "admin": "Admin",

@@ -67,6 +67,7 @@
     "kehadiranPct": "Attendance",
     "sppBelum": "Unpaid Bills",
     "sppLunas": "Tuition Paid",
-    "wali": "Homeroom"
+    "wali": "Homeroom",
+    "cancel": "Cancel"
   }
 }

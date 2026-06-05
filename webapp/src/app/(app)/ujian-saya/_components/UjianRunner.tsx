@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { submitUjian } from "../actions";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 type Opsi = { label: string; teks: string };
 export type SoalItem = {
@@ -27,6 +28,7 @@ export function UjianRunner({
   const t = useTranslations("portal");
   const formRef = useRef<HTMLFormElement>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (!durasiMenit || !mulaiAtMs) return;
@@ -47,38 +49,53 @@ export function UjianRunner({
       : null;
 
   return (
-    <form ref={formRef} action={submitUjian} className="space-y-4">
-      <input type="hidden" name="ujianId" value={ujianId} />
-      {mmss && (
-        <div className="sticky top-0 z-10 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 shadow-sm">
-          {t("ujianTimeRemaining")} <b>{mmss}</b>
-        </div>
-      )}
-      {soal.map((s) => (
-        <div key={s.id} className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="font-medium text-gray-900">{s.nomor}. {s.pertanyaan}</div>
-          {s.tipe === "pilihan_ganda" ? (
-            <div className="mt-2 space-y-1">
-              {s.opsi.map((o) => (
-                <label key={o.label} className="flex items-start gap-2 text-sm">
-                  <input type="radio" name={`jawaban_${s.id}`} value={o.label} className="mt-1" />
-                  <span><b>{o.label}.</b> {o.teks}</span>
-                </label>
-              ))}
-            </div>
-          ) : (
-            <textarea name={`jawaban_${s.id}`} rows={3} className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
-          )}
-        </div>
-      ))}
-      <button
-        onClick={(e) => {
-          if (!confirm(t("ujianConfirmSubmit"))) e.preventDefault();
+    <>
+      <form ref={formRef} action={submitUjian} className="space-y-4">
+        <input type="hidden" name="ujianId" value={ujianId} />
+        {mmss && (
+          <div className="sticky top-0 z-10 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 shadow-sm">
+            {t("ujianTimeRemaining")} <b>{mmss}</b>
+          </div>
+        )}
+        {soal.map((s) => (
+          <div key={s.id} className="rounded-lg border border-gray-200 bg-white p-4">
+            <div className="font-medium text-gray-900">{s.nomor}. {s.pertanyaan}</div>
+            {s.tipe === "pilihan_ganda" ? (
+              <div className="mt-2 space-y-1">
+                {s.opsi.map((o) => (
+                  <label key={o.label} className="flex items-start gap-2 text-sm">
+                    <input type="radio" name={`jawaban_${s.id}`} value={o.label} className="mt-1" />
+                    <span><b>{o.label}.</b> {o.teks}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <textarea name={`jawaban_${s.id}`} rows={3} className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setShowConfirm(true)}
+          className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+        >
+          {t("ujianSubmitAnswers")}
+        </button>
+      </form>
+
+      <ConfirmModal
+        open={showConfirm}
+        title={t("ujianSubmitAnswers")}
+        message={t("ujianConfirmSubmit")}
+        confirmLabel={t("ujianSubmitAnswers")}
+        cancelLabel={t("cancel")}
+        variant="warning"
+        onConfirm={() => {
+          setShowConfirm(false);
+          formRef.current?.requestSubmit();
         }}
-        className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-      >
-        {t("ujianSubmitAnswers")}
-      </button>
-    </form>
+        onCancel={() => setShowConfirm(false)}
+      />
+    </>
   );
 }
