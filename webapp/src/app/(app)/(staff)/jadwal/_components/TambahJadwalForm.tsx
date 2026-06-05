@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { saveJadwal, type JadwalFormState } from "../actions";
 import { AutocompleteSelect } from "@/components/AutocompleteSelect";
 
@@ -20,6 +21,7 @@ export function TambahJadwalForm({
   mapelOptions: SelectOption[];
   rombelOptions: SelectOption[];
 }) {
+  const t = useTranslations("jadwal");
   const [state, action, pending] = useActionState<JadwalFormState, FormData>(saveJadwal, init);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -46,16 +48,16 @@ export function TambahJadwalForm({
                   </span>
                   <div>
                     <span className="font-semibold">
-                      {c.type === "guru" ? "Guru" : "Kelas"} {c.label}
+                      {c.type === "guru" ? t("conflictGuru") : t("conflictKelas")} {c.label}
                     </span>
-                    {" "}sudah punya jadwal{" "}
+                    {t("conflictHasSchedule")}
                     <span className="font-mono font-medium">
                       {c.existing.jamMulai ?? "?"}–{c.existing.jamSelesai ?? "?"}
                     </span>
                     {c.existing.mapel ? (
                       <> · <span className="font-medium">{c.existing.mapel}</span></>
                     ) : null}
-                    {" "}di hari yang sama.
+                    {t("conflictSameDay")}
                   </div>
                 </li>
               ))}
@@ -67,36 +69,36 @@ export function TambahJadwalForm({
       {/* Sukses */}
       {state.ok && (
         <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-800">
-          ✓ Jadwal berhasil disimpan.
+          {t("saveSuccess")}
         </div>
       )}
 
       <form ref={formRef} action={action} className="flex flex-wrap items-end gap-3">
         {/* Guru */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Guru <span className="text-red-500">*</span></label>
+          <label className="mb-1 block text-xs font-medium text-gray-500">{t("formGuru")} <span className="text-red-500">*</span></label>
           <AutocompleteSelect
             options={guruOptions}
             name="guruId"
-            placeholder="Cari nama guru…"
+            placeholder={t("searchGuru")}
             required
-            emptyLabel="— tidak ada —"
+            emptyLabel={t("noOption")}
             className={`${sel} min-w-[220px]`}
           />
         </div>
 
         {/* Hari */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Hari <span className="text-red-500">*</span></label>
+          <label className="mb-1 block text-xs font-medium text-gray-500">{t("formHari")} <span className="text-red-500">*</span></label>
           <select name="hariNama" required defaultValue="" className={sel}>
-            <option value="">— pilih —</option>
+            <option value="">{t("selectPlaceholder")}</option>
             {HARI_ORDER.map((h) => <option key={h} value={h}>{h}</option>)}
           </select>
         </div>
 
         {/* Jam Mulai */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Jam Mulai</label>
+          <label className="mb-1 block text-xs font-medium text-gray-500">{t("formJamMulai")}</label>
           <select name="jamMulai" defaultValue="07:00" className={sel}>
             {JAM_MULAI.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
@@ -104,7 +106,7 @@ export function TambahJadwalForm({
 
         {/* Jam Selesai */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Jam Selesai</label>
+          <label className="mb-1 block text-xs font-medium text-gray-500">{t("formJamSelesai")}</label>
           <select name="jamSelesai" defaultValue="08:30" className={sel}>
             {JAM_SELESAI.map((j) => <option key={j} value={j}>{j}</option>)}
           </select>
@@ -112,18 +114,18 @@ export function TambahJadwalForm({
 
         {/* Mapel */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Mapel <span className="text-red-500">*</span></label>
+          <label className="mb-1 block text-xs font-medium text-gray-500">{t("formMapel")} <span className="text-red-500">*</span></label>
           <select name="mapel" required defaultValue="" className={`${sel} min-w-[150px]`}>
-            <option value="" disabled>— pilih mapel —</option>
+            <option value="" disabled>{t("selectMapel")}</option>
             {mapelOptions.map((m) => <option key={m.key} value={m.value}>{m.label}</option>)}
           </select>
         </div>
 
         {/* Kelas */}
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Kelas <span className="text-red-500">*</span></label>
+          <label className="mb-1 block text-xs font-medium text-gray-500">{t("formKelas")} <span className="text-red-500">*</span></label>
           <select name="rombelId" required defaultValue="" className={`${sel} min-w-[130px]`}>
-            <option value="" disabled>— pilih kelas —</option>
+            <option value="" disabled>{t("selectKelas")}</option>
             {rombelOptions.map((r) => <option key={r.key} value={r.value}>{r.label}</option>)}
           </select>
         </div>
@@ -132,7 +134,7 @@ export function TambahJadwalForm({
           disabled={pending}
           className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
         >
-          {pending ? "Menyimpan…" : "Simpan"}
+          {pending ? t("saving") : t("save")}
         </button>
       </form>
     </div>

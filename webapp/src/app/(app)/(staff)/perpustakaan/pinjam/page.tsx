@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { pinjamBuku, kembalikanBuku } from "../actions";
@@ -15,6 +16,7 @@ export default async function PinjamPage({
   searchParams: Promise<{ q?: string; siswaId?: string }>;
 }) {
   const sekolahId = await requireModule("perpustakaan");
+  const t = await getTranslations("perpustakaan");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const siswaId = Number(sp.siswaId) || 0;
@@ -64,31 +66,31 @@ export default async function PinjamPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Peminjaman Buku</h1>
-          <p className="text-sm text-gray-500">Pilih siswa untuk melihat dan mengelola peminjaman.</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("lendingTitle")}</h1>
+          <p className="text-sm text-gray-500">{t("lendingSubtitle")}</p>
         </div>
         <Link href="/perpustakaan" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">
-          ← Katalog Buku
+          {t("backToCatalog")}
         </Link>
       </div>
 
       {/* Search siswa */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <p className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Cari Peminjam</p>
+        <p className="mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("findBorrower")}</p>
         <form className="flex gap-2">
           <SiswaAutocomplete
             name="q"
             defaultValue={q}
-            placeholder="Ketik nama atau NISN siswa…"
+            placeholder={t("searchStudentPlaceholder")}
             className="flex-1 rounded-lg border border-gray-300 py-2 pl-3 pr-8 text-sm outline-none focus:border-gray-900"
           />
-          <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+          <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("search")}</button>
         </form>
 
         {/* Kandidat list */}
         {q && !siswa && (
           <div className="mt-3 divide-y divide-gray-100 rounded-xl border border-gray-200 overflow-hidden">
-            {kandidat.length === 0 && <p className="px-4 py-3 text-sm text-gray-400">Tidak ada siswa cocok.</p>}
+            {kandidat.length === 0 && <p className="px-4 py-3 text-sm text-gray-400">{t("noStudentMatch")}</p>}
             {kandidat.map((s) => (
               <Link key={s.id} href={`/perpustakaan/pinjam?siswaId=${s.id}`}
                 className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50">
@@ -97,9 +99,9 @@ export default async function PinjamPage({
                 </div>
                 <div>
                   <div className="text-sm font-medium text-gray-900">{s.namaLengkap}</div>
-                  {s.nisn && <div className="text-xs text-gray-400">NISN: {s.nisn}</div>}
+                  {s.nisn && <div className="text-xs text-gray-400">{t("nisnLabel", { nisn: s.nisn })}</div>}
                 </div>
-                <span className="ml-auto text-xs text-indigo-500">Pilih →</span>
+                <span className="ml-auto text-xs text-indigo-500">{t("select")}</span>
               </Link>
             ))}
           </div>
@@ -116,46 +118,46 @@ export default async function PinjamPage({
             </div>
             <div className="flex-1">
               <div className="font-semibold text-gray-900">{siswa.namaLengkap}</div>
-              {siswa.nisn && <div className="text-xs text-gray-500">NISN: {siswa.nisn}</div>}
+              {siswa.nisn && <div className="text-xs text-gray-500">{t("nisnLabel", { nisn: siswa.nisn })}</div>}
             </div>
             <div className="flex gap-3">
               {aktif.length > 0 && (
                 <div className={`rounded-xl px-3 py-2 text-center ${overdueCount > 0 ? "bg-red-100" : "bg-amber-100"}`}>
                   <div className={`text-lg font-bold leading-none ${overdueCount > 0 ? "text-red-700" : "text-amber-700"}`}>{aktif.length}</div>
                   <div className={`text-xs ${overdueCount > 0 ? "text-red-500" : "text-amber-500"}`}>
-                    {overdueCount > 0 ? `${overdueCount} overdue` : "dipinjam"}
+                    {overdueCount > 0 ? t("overdueCount", { n: overdueCount }) : t("statBorrowedShort")}
                   </div>
                 </div>
               )}
               <div className="rounded-xl bg-green-100 px-3 py-2 text-center">
                 <div className="text-lg font-bold leading-none text-green-700">{selesai.length}</div>
-                <div className="text-xs text-green-500">selesai</div>
+                <div className="text-xs text-green-500">{t("statDone")}</div>
               </div>
             </div>
-            <Link href="/perpustakaan/pinjam" className="text-sm text-gray-500 hover:text-gray-900">Ganti ↗</Link>
+            <Link href="/perpustakaan/pinjam" className="text-sm text-gray-500 hover:text-gray-900">{t("change")}</Link>
           </div>
 
           {/* Form pinjam */}
           <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="mb-3 text-sm font-semibold text-gray-800">📕 Pinjamkan Buku</p>
+            <p className="mb-3 text-sm font-semibold text-gray-800">{t("lendBook")}</p>
             <form action={pinjamBuku} className="flex flex-wrap items-end gap-3">
               <input type="hidden" name="siswaId" value={siswa.id} />
               <div className="flex-1 min-w-48">
-                <label className="block text-xs text-gray-500 mb-1">Buku tersedia</label>
+                <label className="block text-xs text-gray-500 mb-1">{t("availableBook")}</label>
                 <select name="bukuId" required className={`${inCls} w-full`}>
-                  <option value="">— pilih buku —</option>
+                  <option value="">{t("selectBook")}</option>
                   {bukuTersedia.map((b) => {
                     const sisa = b.jumlahEksemplar - b._count.pinjaman;
-                    return <option key={b.id} value={b.id}>{b.judul} ({sisa} tersedia)</option>;
+                    return <option key={b.id} value={b.id}>{t("bookOption", { judul: b.judul, sisa })}</option>;
                   })}
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Durasi (hari)</label>
+                <label className="block text-xs text-gray-500 mb-1">{t("durationLabel")}</label>
                 <input name="durasiHari" type="number" min={1} defaultValue={7} className={`${inCls} w-24`} />
               </div>
               <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
-                + Pinjam
+                {t("borrow")}
               </button>
             </form>
           </div>
@@ -164,9 +166,9 @@ export default async function PinjamPage({
           {aktif.length > 0 && (
             <div className="rounded-xl border border-amber-200 bg-white shadow-sm overflow-hidden">
               <div className="flex items-center gap-2 border-b border-amber-100 bg-amber-50 px-4 py-3">
-                <span className="text-sm font-semibold text-amber-800">📖 Sedang Dipinjam ({aktif.length})</span>
+                <span className="text-sm font-semibold text-amber-800">{t("borrowingNow", { n: aktif.length })}</span>
                 {overdueCount > 0 && (
-                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">{overdueCount} overdue!</span>
+                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">{t("overdueBadge", { n: overdueCount })}</span>
                 )}
               </div>
               <div className="divide-y divide-gray-100">
@@ -182,30 +184,30 @@ export default async function PinjamPage({
                           {p.buku.judul}
                         </Link>
                         <div className="flex gap-3 mt-0.5">
-                          <span className="text-xs text-gray-500">Pinjam: {fmt(p.tanggalPinjam)}</span>
+                          <span className="text-xs text-gray-500">{t("labelPinjam", { tanggal: fmt(p.tanggalPinjam) })}</span>
                           <span className={`text-xs font-medium ${overdue ? "text-red-600" : "text-gray-500"}`}>
-                            Jatuh tempo: {fmt(due)}
+                            {t("labelJatuhTempo", { tanggal: fmt(due) })}
                           </span>
                         </div>
                       </div>
                       <div className="shrink-0">
                         {overdue ? (
                           <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">
-                            ⚠ {Math.abs(daysLeft)}h terlambat
+                            {t("daysLateShort", { n: Math.abs(daysLeft) })}
                           </span>
                         ) : daysLeft <= 2 ? (
                           <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
-                            {daysLeft === 0 ? "Hari ini!" : `${daysLeft}h lagi`}
+                            {daysLeft === 0 ? t("today") : t("daysLeftShort", { n: daysLeft })}
                           </span>
                         ) : (
-                          <span className="text-xs text-gray-400">{daysBorrowed}h dipinjam</span>
+                          <span className="text-xs text-gray-400">{t("daysBorrowedShort", { n: daysBorrowed })}</span>
                         )}
                       </div>
                       <form action={kembalikanBuku}>
                         <input type="hidden" name="id" value={p.id} />
                         <input type="hidden" name="siswaId" value={siswa.id} />
                         <button className={`rounded-lg px-3 py-1.5 text-xs font-medium text-white ${overdue ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}`}>
-                          Kembalikan
+                          {t("kembalikan")}
                         </button>
                       </form>
                     </div>
@@ -219,16 +221,16 @@ export default async function PinjamPage({
           {selesai.length > 0 && (
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
               <div className="border-b border-gray-100 bg-gray-50 px-4 py-3">
-                <span className="text-sm font-semibold text-gray-700">🕐 Riwayat ({selesai.length})</span>
+                <span className="text-sm font-semibold text-gray-700">{t("historyCount", { n: selesai.length })}</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50/50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">Buku</th>
-                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">Pinjam</th>
-                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">Kembali</th>
-                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">Durasi</th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">{t("colBuku")}</th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">{t("colPinjam")}</th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">{t("colKembali")}</th>
+                      <th className="px-4 py-2 text-left text-xs font-semibold text-gray-500">{t("colDurasi")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -249,7 +251,7 @@ export default async function PinjamPage({
                           <td className="px-4 py-2.5">
                             {days !== null ? (
                               <span className={`inline-flex rounded-full px-2 py-0.5 text-xs ${late ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-600"}`}>
-                                {days}h{late ? " ⚠" : ""}
+                                {late ? t("durationDaysShortLate", { n: days }) : t("durationDaysShort", { n: days })}
                               </span>
                             ) : "—"}
                           </td>
@@ -265,7 +267,7 @@ export default async function PinjamPage({
           {pinjaman.length === 0 && (
             <div className="rounded-xl border-2 border-dashed border-gray-200 py-10 text-center">
               <div className="text-4xl">📚</div>
-              <p className="mt-2 text-sm text-gray-500">Siswa ini belum pernah meminjam buku.</p>
+              <p className="mt-2 text-sm text-gray-500">{t("neverBorrowed")}</p>
             </div>
           )}
         </div>

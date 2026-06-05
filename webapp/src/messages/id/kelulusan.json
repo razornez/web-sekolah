@@ -1,0 +1,17 @@
+{
+  "kelulusan": {
+    "title": "Kelulusan",
+    "settingTitle": "Pengaturan Pengumuman",
+    "enablePublic": "Aktifkan pengumuman publik (siswa bisa cek di <url></url>)",
+    "fieldTanggalRilis": "Tanggal Rilis",
+    "fieldPengumuman": "Pengumuman",
+    "saveSetting": "Simpan Pengaturan",
+    "fieldRombel": "Rombel",
+    "show": "Tampilkan",
+    "colNo": "No",
+    "colNama": "Nama",
+    "colStatusKelulusan": "Status Kelulusan",
+    "empty": "Rombel belum punya anggota.",
+    "saveStatus": "Simpan Status"
+  }
+}

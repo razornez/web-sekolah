@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { uploadFotoGuru, uploadFotoSiswa, type FotoState } from "@/app/(app)/foto/actions";
 
 export function FotoUpload({
@@ -12,6 +13,7 @@ export function FotoUpload({
   ownerId: number;
   current: string | null;
 }) {
+  const t = useTranslations("common");
   const action = kind === "guru" ? uploadFotoGuru : uploadFotoSiswa;
   const [state, formAction, pending] = useActionState<FotoState, FormData>(action, { ok: false });
   // Preview: pakai URL dari action saat berhasil, fallback ke prop current, fallback ke local preview
@@ -27,7 +29,7 @@ export function FotoUpload({
 
   return (
     <div className="max-w-2xl space-y-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold text-gray-700">Foto Profil</h2>
+      <h2 className="text-sm font-semibold text-gray-700">{t("components.profilePhoto")}</h2>
       <div className="flex items-start gap-5">
         {/* Preview */}
         <div className="shrink-0">
@@ -35,7 +37,7 @@ export function FotoUpload({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={displaySrc}
-              alt="Foto profil"
+              alt={t("components.profilePhotoAlt")}
               className="h-32 w-32 rounded-xl border border-gray-200 object-cover shadow-sm"
             />
           ) : (
@@ -43,7 +45,7 @@ export function FotoUpload({
               <svg className="mb-1 h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span className="text-xs">Belum ada foto</span>
+              <span className="text-xs">{t("components.noPhoto")}</span>
             </div>
           )}
         </div>
@@ -52,7 +54,7 @@ export function FotoUpload({
         <form action={formAction} className="flex-1 space-y-3">
           <input type="hidden" name="ownerId" value={ownerId} />
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">Pilih foto baru</label>
+            <label className="mb-1 block text-xs font-medium text-gray-600">{t("components.chooseNewPhoto")}</label>
             <input
               ref={fileRef}
               type="file"
@@ -62,7 +64,7 @@ export function FotoUpload({
               onChange={handleFileChange}
               className="block w-full rounded-md border border-gray-300 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
             />
-            <p className="mt-1 text-xs text-gray-400">JPG / PNG / WebP · maks 2 MB</p>
+            <p className="mt-1 text-xs text-gray-400">{t("components.photoHint")}</p>
           </div>
 
           {state.message && (
@@ -82,14 +84,14 @@ export function FotoUpload({
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Mengunggah…
+                {t("components.uploading")}
               </>
             ) : (
               <>
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                Unggah Foto
+                {t("components.uploadPhoto")}
               </>
             )}
           </button>

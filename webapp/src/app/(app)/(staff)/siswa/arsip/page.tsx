@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { restoreSiswa } from "../actions";
@@ -8,6 +9,7 @@ const fmt = (d: Date | null) =>
 
 export default async function ArsipSiswaPage() {
   const sekolahId = await requireModule("siswa");
+  const t = await getTranslations("siswa");
   const rows = await prisma.siswa.findMany({
     where: { sekolahId, deletedAt: { not: null } },
     orderBy: { deletedAt: "desc" },
@@ -24,16 +26,16 @@ export default async function ArsipSiswaPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <Link href="/siswa" className="text-sm text-gray-500 hover:text-gray-900">← Data Siswa</Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Arsip Siswa</h1>
-          <p className="text-sm text-gray-500">{rows.length} siswa diarsipkan — bisa dipulihkan kapan saja</p>
+          <Link href="/siswa" className="text-sm text-gray-500 hover:text-gray-900">{t("arsipBackList")}</Link>
+          <h1 className="text-2xl font-semibold text-gray-900">{t("arsipTitle")}</h1>
+          <p className="text-sm text-gray-500">{t("arsipSubtitle", { n: rows.length })}</p>
         </div>
       </div>
 
       {rows.length === 0 && (
         <div className="rounded-lg border border-gray-200 bg-white px-6 py-12 text-center">
           <div className="text-4xl">🗑</div>
-          <p className="mt-2 text-sm text-gray-500">Arsip kosong. Belum ada siswa yang diarsipkan.</p>
+          <p className="mt-2 text-sm text-gray-500">{t("arsipEmptyTitle")}</p>
         </div>
       )}
 
@@ -42,11 +44,11 @@ export default async function ArsipSiswaPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-gray-500">
               <tr>
-                <th className="px-4 py-2 font-medium">Nama</th>
-                <th className="px-4 py-2 font-medium">NISN</th>
-                <th className="px-4 py-2 font-medium">Kelas Terakhir</th>
-                <th className="px-4 py-2 font-medium">Diarsipkan</th>
-                <th className="px-4 py-2 font-medium text-right">Aksi</th>
+                <th className="px-4 py-2 font-medium">{t("arsipColNama")}</th>
+                <th className="px-4 py-2 font-medium">{t("arsipColNisn")}</th>
+                <th className="px-4 py-2 font-medium">{t("arsipColKelasTerakhir")}</th>
+                <th className="px-4 py-2 font-medium">{t("arsipColDiarsipkan")}</th>
+                <th className="px-4 py-2 font-medium text-right">{t("arsipColAksi")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -60,7 +62,7 @@ export default async function ArsipSiswaPage() {
                     <form action={restoreSiswa} className="inline">
                       <input type="hidden" name="id" value={s.id} />
                       <button className="rounded-md border border-green-300 px-3 py-1 text-xs text-green-700 hover:bg-green-50">
-                        ↩ Pulihkan
+                        {t("arsipPulihkan")}
                       </button>
                     </form>
                   </td>
@@ -72,7 +74,7 @@ export default async function ArsipSiswaPage() {
       )}
 
       <p className="text-xs text-gray-400">
-        Siswa yang diarsipkan tidak muncul di daftar utama. Untuk hapus permanen, pulihkan dulu lalu gunakan opsi Hapus Permanen di halaman edit.
+        {t("arsipFooter")}
       </p>
     </div>
   );

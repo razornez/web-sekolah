@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 
@@ -31,6 +32,7 @@ function Section({ title, icon, children }: { title: string; icon: string; child
 
 export default async function SiswaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const sekolahId = await requireModule("siswa");
+  const t = await getTranslations("siswa");
   const { id } = await params;
 
   const siswa = await prisma.siswa.findFirst({
@@ -101,24 +103,24 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
                 </div>
               </div>
               <div className="flex gap-2">
-                <Link href="/siswa" className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50">← Daftar</Link>
-                <Link href={`/siswa/${siswa.id}/edit`} className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">✏️ Edit</Link>
-                <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50">🖨 Rapor</a>
+                <Link href="/siswa" className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50">{t("detailBackList")}</Link>
+                <Link href={`/siswa/${siswa.id}/edit`} className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">{t("detailEdit")}</Link>
+                <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50">{t("detailRapor")}</a>
               </div>
             </div>
             {/* Quick stats */}
             <div className="mt-3 flex flex-wrap gap-3">
               {[
-                { label: "Status", value: siswa.status, color: siswa.status === "aktif" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600" },
-                { label: "JK", value: siswa.jenisKelamin === "L" ? "♂ Laki-laki" : siswa.jenisKelamin === "P" ? "♀ Perempuan" : "—", color: "bg-gray-100 text-gray-600" },
-                { label: "Agama", value: siswa.agama, color: "bg-blue-50 text-blue-700" },
-                { label: "Tahun Masuk", value: siswa.tahunMasuk, color: "bg-amber-50 text-amber-700" },
+                { label: t("detailStatStatus"), value: siswa.status, color: siswa.status === "aktif" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600" },
+                { label: t("detailStatJk"), value: siswa.jenisKelamin === "L" ? t("detailMale") : siswa.jenisKelamin === "P" ? t("detailFemale") : "—", color: "bg-gray-100 text-gray-600" },
+                { label: t("detailStatAgama"), value: siswa.agama, color: "bg-blue-50 text-blue-700" },
+                { label: t("detailStatTahunMasuk"), value: siswa.tahunMasuk, color: "bg-amber-50 text-amber-700" },
               ].filter(s => s.value).map(s => (
                 <span key={s.label} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${s.color}`}>{s.value}</span>
               ))}
               {siswa.user && (
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${siswa.user.isActive ? "bg-indigo-50 text-indigo-700" : "bg-gray-100 text-gray-500"}`}>
-                  Akun: {siswa.user.username}
+                  {t("detailAccount", { username: siswa.user.username })}
                 </span>
               )}
             </div>
@@ -128,35 +130,35 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Data Pribadi */}
-        <Section title="Data Pribadi" icon="🪪">
+        <Section title={t("sectionDataPribadi")} icon="🪪">
           <dl>
-            <InfoRow label="Tempat Lahir" value={siswa.tempatLahir} />
-            <InfoRow label="Tanggal Lahir" value={siswa.tanggalLahir ? fmt(siswa.tanggalLahir) : null} />
-            <InfoRow label="NIK" value={siswa.nik} />
-            <InfoRow label="No. Induk" value={siswa.noInduk} />
-            <InfoRow label="Gol. Darah" value={siswa.golonganDarah} />
-            <InfoRow label="Tinggi / Berat" value={siswa.tinggiBadan ? `${siswa.tinggiBadan} cm / ${siswa.beratBadan ?? "?"} kg` : null} />
-            <InfoRow label="Kebutuhan Khusus" value={siswa.kebutuhanKhusus} />
-            <InfoRow label="Asal Sekolah" value={siswa.asalSekolah} />
+            <InfoRow label={t("rowTempatLahir")} value={siswa.tempatLahir} />
+            <InfoRow label={t("rowTanggalLahir")} value={siswa.tanggalLahir ? fmt(siswa.tanggalLahir) : null} />
+            <InfoRow label={t("rowNik")} value={siswa.nik} />
+            <InfoRow label={t("rowNoInduk")} value={siswa.noInduk} />
+            <InfoRow label={t("rowGolDarah")} value={siswa.golonganDarah} />
+            <InfoRow label={t("rowTinggiBerat")} value={siswa.tinggiBadan ? `${siswa.tinggiBadan} cm / ${siswa.beratBadan ?? "?"} kg` : null} />
+            <InfoRow label={t("rowKebutuhanKhusus")} value={siswa.kebutuhanKhusus} />
+            <InfoRow label={t("rowAsalSekolah")} value={siswa.asalSekolah} />
           </dl>
         </Section>
 
         {/* Alamat & Kontak */}
-        <Section title="Alamat & Kontak" icon="📍">
+        <Section title={t("sectionAlamatKontak")} icon="📍">
           <dl>
-            <InfoRow label="Alamat" value={siswa.alamat} />
-            <InfoRow label="Desa/Kel." value={[siswa.desaKel, siswa.kecamatan, siswa.kabupaten].filter(Boolean).join(", ")} />
-            <InfoRow label="Kode Pos" value={siswa.kodePos} />
-            <InfoRow label="No. HP" value={siswa.noHp} />
-            <InfoRow label="Tinggal Bersama" value={siswa.tinggalDengan} />
-            <InfoRow label="Transportasi" value={siswa.transportasi} />
+            <InfoRow label={t("rowAlamat")} value={siswa.alamat} />
+            <InfoRow label={t("rowDesaKel")} value={[siswa.desaKel, siswa.kecamatan, siswa.kabupaten].filter(Boolean).join(", ")} />
+            <InfoRow label={t("rowKodePos")} value={siswa.kodePos} />
+            <InfoRow label={t("rowNoHp")} value={siswa.noHp} />
+            <InfoRow label={t("rowTinggalBersama")} value={siswa.tinggalDengan} />
+            <InfoRow label={t("rowTransportasi")} value={siswa.transportasi} />
           </dl>
         </Section>
       </div>
 
       {/* Orang Tua / Wali */}
       {siswa.orangTuaWali.length > 0 && (
-        <Section title="Orang Tua / Wali" icon="👨‍👩‍👦">
+        <Section title={t("sectionOrangTua")} icon="👨‍👩‍👦">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {siswa.orangTuaWali.map((ot) => (
               <div key={ot.id} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
@@ -164,9 +166,9 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
                 <div className="font-medium text-gray-900">{ot.nama}</div>
                 <dl className="mt-1 space-y-0.5 text-xs text-gray-500">
                   {ot.pekerjaan && <div>{ot.pekerjaan}</div>}
-                  {ot.pendidikan && <div>Pend: {ot.pendidikan}</div>}
+                  {ot.pendidikan && <div>{t("otPend", { value: ot.pendidikan })}</div>}
                   {ot.noHp && <div>📱 {ot.noHp}</div>}
-                  {ot.penghasilan && <div>Rp {Number(ot.penghasilan).toLocaleString("id-ID")}/bln</div>}
+                  {ot.penghasilan && <div>{t("otPenghasilan", { value: Number(ot.penghasilan).toLocaleString("id-ID") })}</div>}
                 </dl>
               </div>
             ))}
@@ -175,17 +177,17 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       )}
 
       {/* Riwayat Kelas */}
-      <Section title="Riwayat Kelas" icon="🏫">
+      <Section title={t("sectionRiwayatKelas")} icon="🏫">
         {siswa.anggotaRombel.length === 0 ? (
-          <p className="text-sm text-gray-400">Belum ada riwayat kelas.</p>
+          <p className="text-sm text-gray-400">{t("emptyRiwayatKelas")}</p>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs text-gray-500">
               <tr>
-                <th className="px-3 py-2 text-left font-medium">Kelas / Rombel</th>
-                <th className="px-3 py-2 text-left font-medium">Tingkat</th>
-                <th className="px-3 py-2 text-left font-medium">Tahun Ajaran</th>
-                <th className="px-3 py-2 text-right font-medium">No. Absen</th>
+                <th className="px-3 py-2 text-left font-medium">{t("colKelasRombel")}</th>
+                <th className="px-3 py-2 text-left font-medium">{t("colTingkat")}</th>
+                <th className="px-3 py-2 text-left font-medium">{t("colTahunAjaran")}</th>
+                <th className="px-3 py-2 text-right font-medium">{t("colNoAbsen")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -193,7 +195,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
                 <tr key={ar.id} className={i === 0 ? "bg-green-50" : "hover:bg-gray-50"}>
                   <td className="px-3 py-2 font-medium text-gray-900">
                     {ar.rombel.nama}
-                    {i === 0 && <span className="ml-1.5 rounded bg-green-200 px-1 py-0.5 text-xs text-green-800">Saat ini</span>}
+                    {i === 0 && <span className="ml-1.5 rounded bg-green-200 px-1 py-0.5 text-xs text-green-800">{t("badgeSaatIni")}</span>}
                   </td>
                   <td className="px-3 py-2 text-gray-600">{ar.rombel.tingkat.nama}</td>
                   <td className="px-3 py-2 text-gray-600">{ar.rombel.tahunAjaran.tahun}</td>
@@ -206,20 +208,20 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       </Section>
 
       {/* Nilai Akademik */}
-      <Section title="Nilai Akademik" icon="📊">
+      <Section title={t("sectionNilaiAkademik")} icon="📊">
         {Object.keys(nilaiByPeriode).length === 0 ? (
-          <p className="text-sm text-gray-400">Belum ada data nilai.</p>
+          <p className="text-sm text-gray-400">{t("emptyNilai")}</p>
         ) : (
           <div className="space-y-4">
             {Object.entries(nilaiByPeriode).map(([periode, nilais]) => (
               <details key={periode} className="group" open={Object.keys(nilaiByPeriode).indexOf(periode) === 0}>
                 <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
                   <span>{periode}</span>
-                  <span className="text-xs font-normal text-gray-500">{nilais.length} mapel</span>
+                  <span className="text-xs font-normal text-gray-500">{t("nilaiMapelCount", { n: nilais.length })}</span>
                 </summary>
                 <table className="mt-2 w-full text-sm">
                   <thead className="text-xs text-gray-500">
-                    <tr><th className="px-3 py-1 text-left font-medium">Mapel</th><th className="px-3 py-1 font-medium">Nilai</th><th className="px-3 py-1 font-medium text-left">Capaian</th></tr>
+                    <tr><th className="px-3 py-1 text-left font-medium">{t("colMapel")}</th><th className="px-3 py-1 font-medium">{t("colNilai")}</th><th className="px-3 py-1 font-medium text-left">{t("colCapaian")}</th></tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {nilais.map((n) => {
@@ -243,9 +245,9 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {/* Prestasi */}
-        <Section title="Prestasi" icon="🏆">
+        <Section title={t("sectionPrestasi")} icon="🏆">
           {siswa.penerimaPrestasiList.length === 0 ? (
-            <p className="text-sm text-gray-400">Belum ada data prestasi.</p>
+            <p className="text-sm text-gray-400">{t("emptyPrestasi")}</p>
           ) : (
             <ul className="space-y-2">
               {siswa.penerimaPrestasiList.map((p) => (
@@ -262,9 +264,9 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
         </Section>
 
         {/* Beasiswa */}
-        <Section title="Beasiswa" icon="🎓">
+        <Section title={t("sectionBeasiswa")} icon="🎓">
           {siswa.penerimaBeasiswaList.length === 0 ? (
-            <p className="text-sm text-gray-400">Belum ada data beasiswa.</p>
+            <p className="text-sm text-gray-400">{t("emptyBeasiswa")}</p>
           ) : (
             <ul className="space-y-2">
               {siswa.penerimaBeasiswaList.map((b) => (
@@ -282,14 +284,14 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       </div>
 
       {/* SPP / Keuangan */}
-      <Section title="SPP / Keuangan" icon="💳">
+      <Section title={t("sectionSpp")} icon="💳">
         {Object.keys(sppByTahun).length === 0 ? (
-          <p className="text-sm text-gray-400">Belum ada data tagihan.</p>
+          <p className="text-sm text-gray-400">{t("emptySpp")}</p>
         ) : (
           <div className="space-y-4">
             {Object.entries(sppByTahun).map(([tahun, tagihanList]) => (
               <div key={tahun}>
-                <div className="mb-2 text-xs font-semibold text-gray-500">Tahun {tahun}</div>
+                <div className="mb-2 text-xs font-semibold text-gray-500">{t("sppTahun", { tahun })}</div>
                 <div className="flex flex-wrap gap-2">
                   {tagihanList.map((t) => (
                     <div key={t.id} className={`rounded-md border px-2.5 py-1.5 text-center text-xs ${t.status === "lunas" ? "border-green-200 bg-green-50 text-green-700" : t.status === "cicil" ? "border-blue-200 bg-blue-50 text-blue-700" : "border-red-200 bg-red-50 text-red-700"}`}>
@@ -303,30 +305,30 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
           </div>
         )}
         <div className="mt-3">
-          <Link href={`/spp?siswaId=${siswa.id}`} className="text-xs text-gray-500 hover:text-gray-900 hover:underline">Kelola SPP →</Link>
+          <Link href={`/spp?siswaId=${siswa.id}`} className="text-xs text-gray-500 hover:text-gray-900 hover:underline">{t("kelolaSpp")}</Link>
         </div>
       </Section>
 
       {/* Kehadiran */}
-      <Section title="Rekap Kehadiran" icon="📅">
+      <Section title={t("sectionKehadiran")} icon="📅">
         <div className="flex flex-wrap gap-3">
-          {[["hadir","✅","text-green-700","bg-green-50"],["izin","📋","text-blue-700","bg-blue-50"],["sakit","🤒","text-amber-700","bg-amber-50"],["alpa","❌","text-red-700","bg-red-50"],["terlambat","⏰","text-orange-700","bg-orange-50"]].map(([s, icon, tc, bg]) => (
+          {[["hadir","✅","text-green-700","bg-green-50",t("hadHadir")],["izin","📋","text-blue-700","bg-blue-50",t("hadIzin")],["sakit","🤒","text-amber-700","bg-amber-50",t("hadSakit")],["alpa","❌","text-red-700","bg-red-50",t("hadAlpa")],["terlambat","⏰","text-orange-700","bg-orange-50",t("hadTerlambat")]].map(([s, icon, tc, bg, label]) => (
             <div key={s} className={`rounded-xl border px-4 py-3 text-center ${bg}`}>
               <div className="text-xl">{icon}</div>
               <div className={`text-lg font-bold ${tc}`}>{hdSummary[s] ?? 0}</div>
-              <div className="text-xs text-gray-500">{s}</div>
+              <div className="text-xs text-gray-500">{label}</div>
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-gray-400">*Data {siswa.kehadiran.length} presensi terakhir</p>
+        <p className="mt-2 text-xs text-gray-400">{t("kehadiranNote", { n: siswa.kehadiran.length })}</p>
       </Section>
 
       {/* Catatan BK */}
       {siswa.kasus.length > 0 && (
-        <Section title="Catatan BK / Pelanggaran" icon="📝">
+        <Section title={t("sectionKasus")} icon="📝">
           <table className="w-full text-sm">
             <thead className="text-xs text-gray-500">
-              <tr><th className="px-3 py-1 text-left font-medium">Tanggal</th><th className="px-3 py-1 text-left font-medium">Pelanggaran</th><th className="px-3 py-1 font-medium">Poin</th><th className="px-3 py-1 text-left font-medium">Keterangan</th></tr>
+              <tr><th className="px-3 py-1 text-left font-medium">{t("colTanggal")}</th><th className="px-3 py-1 text-left font-medium">{t("colPelanggaran")}</th><th className="px-3 py-1 font-medium">{t("colPoin")}</th><th className="px-3 py-1 text-left font-medium">{t("colKeterangan")}</th></tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {siswa.kasus.map((k) => (
@@ -339,7 +341,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
               ))}
             </tbody>
           </table>
-          <p className="mt-1 text-xs font-semibold text-red-600">Total poin: {siswa.kasus.reduce((s, k) => s + k.poin, 0)}</p>
+          <p className="mt-1 text-xs font-semibold text-red-600">{t("totalPoin", { total: siswa.kasus.reduce((s, k) => s + k.poin, 0) })}</p>
         </Section>
       )}
     </div>

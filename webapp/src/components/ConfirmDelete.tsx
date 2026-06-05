@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import type { DeleteResult } from "@/lib/deleteError";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,13 +16,14 @@ export function ConfirmDelete({
   action,
   id,
   message,
-  label = "Hapus",
+  label,
 }: {
   action: DeleteAction;
   id: number;
   message: string;
   label?: string;
 }) {
+  const t = useTranslations("common");
   // Wrap action agar selalu return DeleteResult shape
   async function wrappedAction(
     _prev: { error?: string },
@@ -39,9 +41,9 @@ export function ConfirmDelete({
   // Tampilkan error sebagai alert setelah action selesai
   useEffect(() => {
     if (state.error) {
-      alert(`❌ Tidak bisa dihapus\n\n${state.error}`);
+      alert(`${t("components.deleteFailedTitle")}\n\n${state.error}`);
     }
-  }, [state]);
+  }, [state, t]);
 
   return (
     <form
@@ -55,7 +57,7 @@ export function ConfirmDelete({
         type="submit"
         className="cursor-pointer text-red-600 hover:underline text-sm"
       >
-        {label}
+        {label ?? t("delete")}
       </button>
     </form>
   );

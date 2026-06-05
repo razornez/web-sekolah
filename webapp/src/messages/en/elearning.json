@@ -1,0 +1,20 @@
+{
+  "elearning": {
+    "title": "E-Learning",
+    "fieldJudul": "Title",
+    "fieldGuru": "Teacher",
+    "guruEmpty": "— none —",
+    "fieldKelas": "Class",
+    "fieldMapel": "Subject",
+    "fieldLink": "Link/URL",
+    "addButton": "+ Add",
+    "colJudul": "Title",
+    "colKelas": "Class",
+    "colMapel": "Subject",
+    "colTautan": "Link",
+    "colAksi": "Actions",
+    "empty": "No materials yet.",
+    "open": "open",
+    "deleteConfirm": "Delete \"{judul}\"?"
+  }
+}

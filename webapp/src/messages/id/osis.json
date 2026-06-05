@@ -1,0 +1,19 @@
+{
+  "osis": {
+    "title": "Pemilihan OSIS",
+    "summary": "{candidates} kandidat · {votes} suara masuk",
+    "fieldNo": "No",
+    "fieldKetua": "Ketua",
+    "fieldWakil": "Wakil",
+    "fieldVisi": "Visi",
+    "add": "+ Tambah",
+    "colKandidat": "Kandidat",
+    "colSuara": "Suara",
+    "colAksi": "Aksi",
+    "empty": "Belum ada kandidat.",
+    "wakilPlaceholder": "wakil",
+    "visiPlaceholder": "visi",
+    "save": "Simpan",
+    "deleteConfirm": "Hapus kandidat No.{no}?"
+  }
+}

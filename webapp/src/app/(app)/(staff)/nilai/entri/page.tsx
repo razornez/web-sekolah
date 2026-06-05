@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
@@ -7,16 +8,28 @@ import { PeriodeSelect } from "@/components/filters/PeriodeSelect";
 import { saveEntriNilai } from "./actions";
 import { SiswaAvatar } from "@/components/SiswaAvatar";
 
-const TIPE_LABEL: Record<string, { label: string; color: string }> = {
-  harian:         { label: "Ulangan Harian", color: "bg-blue-100 text-blue-700" },
-  tugas:          { label: "Tugas / PR", color: "bg-green-100 text-green-700" },
-  ulangan:        { label: "Ulangan Blok", color: "bg-cyan-100 text-cyan-700" },
-  uts:            { label: "UTS", color: "bg-amber-100 text-amber-700" },
-  uas:            { label: "UAS", color: "bg-orange-100 text-orange-700" },
-  sumatif_harian: { label: "Sumatif Harian (KurMer)", color: "bg-purple-100 text-purple-700" },
-  sumatif_akhir:  { label: "Sumatif Akhir Semester", color: "bg-pink-100 text-pink-700" },
-  formatif:       { label: "Formatif (tidak dihitung)", color: "bg-gray-100 text-gray-600" },
-  praktik:        { label: "Praktik", color: "bg-teal-100 text-teal-700" },
+const TIPE_COLOR: Record<string, string> = {
+  harian:         "bg-blue-100 text-blue-700",
+  tugas:          "bg-green-100 text-green-700",
+  ulangan:        "bg-cyan-100 text-cyan-700",
+  uts:            "bg-amber-100 text-amber-700",
+  uas:            "bg-orange-100 text-orange-700",
+  sumatif_harian: "bg-purple-100 text-purple-700",
+  sumatif_akhir:  "bg-pink-100 text-pink-700",
+  formatif:       "bg-gray-100 text-gray-600",
+  praktik:        "bg-teal-100 text-teal-700",
+};
+
+const TIPE_KEYS: Record<string, string> = {
+  harian:         "tipeHarian",
+  tugas:          "tipeTugas",
+  ulangan:        "tipeUlangan",
+  uts:            "tipeUts",
+  uas:            "tipeUas",
+  sumatif_harian: "tipeSumatifHarian",
+  sumatif_akhir:  "tipeSumatifAkhir",
+  formatif:       "tipeFormatif",
+  praktik:        "tipePraktik",
 };
 
 export default async function EntriNilaiPage({
@@ -25,6 +38,8 @@ export default async function EntriNilaiPage({
   searchParams: Promise<{ rombelId?: string; periodeId?: string; mapelId?: string; tipe?: string }>;
 }) {
   const sekolahId = await requireModule("nilai");
+  const t = await getTranslations("nilai");
+  const tipeLabel = (k: string): string => (TIPE_KEYS[k] ? t(TIPE_KEYS[k]) : k);
   const sp = await searchParams;
   const rombelId = Number(sp.rombelId) || 0;
   const periodeId = Number(sp.periodeId) || 0;
@@ -65,35 +80,35 @@ export default async function EntriNilaiPage({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <Link href="/nilai" className="text-sm text-gray-500 hover:text-gray-900">← Nilai Rapor</Link>
-          <h1 className="mt-0.5 text-2xl font-bold text-gray-900">Entri Nilai Harian</h1>
-          <p className="text-sm text-gray-500">Input nilai mentah: ulangan harian, tugas, UTS, UAS — dasar perhitungan rapor.</p>
+          <Link href="/nilai" className="text-sm text-gray-500 hover:text-gray-900">{t("entriBack")}</Link>
+          <h1 className="mt-0.5 text-2xl font-bold text-gray-900">{t("entriTitle")}</h1>
+          <p className="text-sm text-gray-500">{t("entriDescription")}</p>
         </div>
       </div>
 
       {/* Filter */}
       <form className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Kelas / Rombel</label>
-          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId} emptyLabel="— pilih rombel —" className="rounded-md border border-gray-300 px-2 py-2 text-sm" /></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Periode</label>
-          <PeriodeSelect sekolahId={sekolahId} name="periodeId" defaultValue={periodeId||""} emptyLabel="— pilih periode —" className="rounded-md border border-gray-300 px-2 py-2 text-sm" /></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Mata Pelajaran</label>
-          <MapelSelect sekolahId={sekolahId} name="mapelId" defaultValue={mapelId||""} emptyLabel="— pilih mapel —" className="rounded-md border border-gray-300 px-2 py-2 text-sm" /></div>
+        <div><label className="mb-1 block text-xs font-medium text-gray-500">{t("fieldRombel")}</label>
+          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={rombelId} emptyLabel={t("pickRombel")} className="rounded-md border border-gray-300 px-2 py-2 text-sm" /></div>
+        <div><label className="mb-1 block text-xs font-medium text-gray-500">{t("fieldPeriode")}</label>
+          <PeriodeSelect sekolahId={sekolahId} name="periodeId" defaultValue={periodeId||""} emptyLabel={t("pickPeriode")} className="rounded-md border border-gray-300 px-2 py-2 text-sm" /></div>
+        <div><label className="mb-1 block text-xs font-medium text-gray-500">{t("fieldMapel")}</label>
+          <MapelSelect sekolahId={sekolahId} name="mapelId" defaultValue={mapelId||""} emptyLabel={t("pickMapel")} className="rounded-md border border-gray-300 px-2 py-2 text-sm" /></div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Tipe Nilai</label>
+          <label className="mb-1 block text-xs font-medium text-gray-500">{t("fieldTipe")}</label>
           <select name="tipe" defaultValue={tipe} className="rounded-md border border-gray-300 px-2 py-2 text-sm">
-            {Object.entries(TIPE_LABEL).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
+            {Object.keys(TIPE_COLOR).map((k) => (
+              <option key={k} value={k}>{tipeLabel(k)}</option>
             ))}
           </select>
         </div>
-        <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Tampilkan</button>
+        <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">{t("show")}</button>
       </form>
 
       {!ready && (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-12 text-center text-gray-400">
           <div className="text-4xl">📝</div>
-          <p className="mt-2 text-sm">Pilih rombel, periode, mapel, dan tipe nilai.</p>
+          <p className="mt-2 text-sm">{t("entriEmptyFilter")}</p>
         </div>
       )}
 
@@ -104,13 +119,13 @@ export default async function EntriNilaiPage({
             <div className="border-b border-gray-100 bg-gray-50 px-4 py-3 flex items-center justify-between">
               <div>
                 <span className="text-sm font-semibold text-gray-700">
-                  {TIPE_LABEL[tipe]?.label ?? tipe}
+                  {tipeLabel(tipe)}
                 </span>
-                <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${TIPE_LABEL[tipe]?.color ?? "bg-gray-100"}`}>
+                <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${TIPE_COLOR[tipe] ?? "bg-gray-100"}`}>
                   {tipe.replace("_", " ")}
                 </span>
               </div>
-              <p className="text-xs text-gray-400">{anggota.length} siswa</p>
+              <p className="text-xs text-gray-400">{t("siswaCount", { n: anggota.length })}</p>
             </div>
             <form action={saveEntriNilai} className="p-0">
               <input type="hidden" name="rombelId" value={rombelId} />
@@ -121,11 +136,11 @@ export default async function EntriNilaiPage({
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-xs text-gray-500">
                   <tr>
-                    <th className="px-4 py-2 text-left font-semibold">No</th>
-                    <th className="px-4 py-2 text-left font-semibold">Nama Siswa</th>
-                    <th className="px-4 py-2 font-semibold">Nilai Baru</th>
-                    <th className="px-4 py-2 text-left font-semibold">Keterangan</th>
-                    <th className="px-4 py-2 text-left font-semibold">Riwayat</th>
+                    <th className="px-4 py-2 text-left font-semibold">{t("colNo")}</th>
+                    <th className="px-4 py-2 text-left font-semibold">{t("colNamaSiswa")}</th>
+                    <th className="px-4 py-2 font-semibold">{t("colNilaiBaru")}</th>
+                    <th className="px-4 py-2 text-left font-semibold">{t("colKeterangan")}</th>
+                    <th className="px-4 py-2 text-left font-semibold">{t("colRiwayat")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -144,7 +159,7 @@ export default async function EntriNilaiPage({
                           </div>
                           {avg != null && (
                             <span className={`ml-2 rounded px-1.5 py-0.5 text-xs ${avg >= 75 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                              rata {avg}
+                              {t("avgBadge", { n: avg })}
                             </span>
                           )}
                         </td>
@@ -152,7 +167,7 @@ export default async function EntriNilaiPage({
                           <input type="number" min={0} max={100} name={`nilai_${a.siswaId}`} placeholder="—" className="w-16 rounded-md border border-gray-300 px-2 py-1 text-center text-sm" />
                         </td>
                         <td className="px-4 py-2">
-                          <input name={`ket_${a.siswaId}`} placeholder="nama ulangan…" className="w-36 rounded-md border border-gray-300 px-2 py-1 text-sm" />
+                          <input name={`ket_${a.siswaId}`} placeholder={t("ketPlaceholder")} className="w-36 rounded-md border border-gray-300 px-2 py-1 text-sm" />
                         </td>
                         <td className="px-4 py-2">
                           <div className="flex flex-wrap gap-1">
@@ -171,8 +186,8 @@ export default async function EntriNilaiPage({
               </table>
               {anggota.length > 0 && (
                 <div className="border-t border-gray-100 p-4 flex items-center gap-3">
-                  <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">💾 Simpan Entri Nilai</button>
-                  <p className="text-xs text-gray-400">Nilai kosong tidak disimpan.</p>
+                  <button className="rounded-md bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">{t("saveEntri")}</button>
+                  <p className="text-xs text-gray-400">{t("entriSaveHint")}</p>
                 </div>
               )}
             </form>

@@ -1,17 +1,19 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 const STATUS_OPTS = ["aktif", "lulus", "pindah", "keluar", "alumni"] as const;
 
-export function StatusSiswaChips({
+export async function StatusSiswaChips({
   current,
   buildUrl,
 }: {
   current: string;
   buildUrl: (status: string) => string;
 }) {
+  const t = await getTranslations("common");
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <span className="text-xs text-gray-500">Status:</span>
+      <span className="text-xs text-gray-500">{t("components.statusLabel")}</span>
       {["", ...STATUS_OPTS].map((s) => (
         <Link
           key={s}
@@ -22,7 +24,7 @@ export function StatusSiswaChips({
               : "border-gray-200 hover:bg-gray-50"
           }`}
         >
-          {s === "" ? "Semua" : s.charAt(0).toUpperCase() + s.slice(1)}
+          {s === "" ? t("all") : s.charAt(0).toUpperCase() + s.slice(1)}
         </Link>
       ))}
     </div>

@@ -1,0 +1,21 @@
+{
+  "jurnal": {
+    "title": "Teaching Journal",
+    "fieldGuru": "Teacher *",
+    "guruEmpty": "— select teacher —",
+    "fieldTanggal": "Date",
+    "fieldKelas": "Class",
+    "fieldMapel": "Subject",
+    "mapelEmpty": "— select subject —",
+    "fieldMateri": "Topic",
+    "addButton": "+ Record",
+    "colTanggal": "Date",
+    "colGuru": "Teacher",
+    "colKelas": "Class",
+    "colMapel": "Subject",
+    "colMateri": "Topic",
+    "colAksi": "Actions",
+    "empty": "No journal entries yet.",
+    "deleteConfirm": "Delete this journal entry?"
+  }
+}

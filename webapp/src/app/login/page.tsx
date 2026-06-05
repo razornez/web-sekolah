@@ -1,6 +1,9 @@
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { LoginForm } from "./LoginForm";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 async function login(formData: FormData) {
   "use server";
@@ -12,7 +15,6 @@ async function login(formData: FormData) {
       redirectTo: "/dashboard",
     });
   } catch (error) {
-    // signIn melempar redirect saat sukses — itu harus diteruskan.
     if (error instanceof AuthError) {
       redirect("/login?error=1");
     }
@@ -26,70 +28,40 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const t = await getTranslations("auth");
+  const tApp = await getTranslations("app");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <form
-        action={login}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-gray-200 bg-white p-8 shadow-sm"
-      >
-        <div className="space-y-1 text-center">
-          <h1 className="text-xl font-semibold text-gray-900">Smart School</h1>
-          <p className="text-sm text-gray-500">Masuk ke akun Anda</p>
+    <main className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-900 p-4">
+      {/* Language switcher pojok kanan atas */}
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher />
+      </div>
+
+      <div className="w-full max-w-md">
+        {/* Brand */}
+        <div className="mb-6 text-center">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-3xl backdrop-blur">
+            🏫
+          </div>
+          <h1 className="text-2xl font-bold text-white">{tApp("brand")}</h1>
+          <p className="mt-1 text-sm text-gray-300">{tApp("tagline")}</p>
         </div>
 
-        {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-            Username atau password salah.
-          </p>
-        )}
+        {/* Card */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-7 shadow-2xl sm:p-8">
+          <div className="mb-6 text-center">
+            <h2 className="text-xl font-bold text-gray-900">{t("loginTitle")}</h2>
+            <p className="mt-1 text-sm text-gray-500">{t("loginSubtitle")}</p>
+          </div>
 
-        <div className="space-y-1">
-          <label htmlFor="sekolah" className="text-sm font-medium text-gray-700">
-            Kode Sekolah
-          </label>
-          <input
-            id="sekolah"
-            name="sekolah"
-            placeholder="mis. smartschool"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900"
-          />
+          <LoginForm action={login} hasError={!!error} />
         </div>
 
-        <div className="space-y-1">
-          <label htmlFor="username" className="text-sm font-medium text-gray-700">
-            Username
-          </label>
-          <input
-            id="username"
-            name="username"
-            required
-            autoComplete="username"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label htmlFor="password" className="text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-800"
-        >
-          Masuk
-        </button>
-      </form>
+        <p className="mt-6 text-center text-xs text-gray-400">
+          © {new Date().getFullYear()} {tApp("brand")} · {t("footer")}
+        </p>
+      </div>
     </main>
   );
 }

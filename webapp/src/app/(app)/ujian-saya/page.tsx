@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isStaff } from "@/lib/session";
 
@@ -7,6 +8,7 @@ export default async function UjianSayaPage() {
   const user = await getCurrentUser();
   if (isStaff(user.role)) redirect("/ujian");
   const sekolahId = user.sekolahId ?? -1;
+  const t = await getTranslations("portal");
 
   const siswa = await prisma.siswa.findFirst({
     where: { userId: user.id, sekolahId },
@@ -15,8 +17,8 @@ export default async function UjianSayaPage() {
   if (!siswa) {
     return (
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-gray-900">Ujian Saya</h1>
-        <p className="text-gray-500">Hanya siswa yang dapat mengikuti ujian.</p>
+        <h1 className="text-2xl font-semibold text-gray-900">{t("ujianTitle")}</h1>
+        <p className="text-gray-500">{t("ujianOnlyStudent")}</p>
       </div>
     );
   }
@@ -36,22 +38,22 @@ export default async function UjianSayaPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">Ujian Saya</h1>
-      {ujian.length === 0 && <p className="text-sm text-gray-400">Belum ada ujian tersedia.</p>}
+      <h1 className="text-2xl font-semibold text-gray-900">{t("ujianTitle")}</h1>
+      {ujian.length === 0 && <p className="text-sm text-gray-400">{t("ujianEmpty")}</p>}
       {ujian.map((u) => {
         const h = u.hasil[0];
-        const label = !h ? "Mulai" : h.status === "selesai" ? "Lihat Hasil" : "Lanjutkan";
+        const label = !h ? t("ujianStart") : h.status === "selesai" ? t("ujianViewResult") : t("ujianContinue");
         return (
           <div key={u.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4">
             <div>
               <div className="font-medium text-gray-900">{u.judul}</div>
               <div className="text-xs text-gray-400">
-                {u.mapel ?? "-"} · {u._count.soal} soal{u.durasiMenit ? ` · ${u.durasiMenit} menit` : ""}
+                {u.mapel ?? "-"} · {t("ujianSoalCount", { count: u._count.soal })}{u.durasiMenit ? ` · ${t("ujianDurasi", { menit: u.durasiMenit })}` : ""}
               </div>
             </div>
             <div className="flex items-center gap-3">
               {h?.status === "selesai" && (
-                <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Skor: {h.skor ?? "-"}</span>
+                <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{t("ujianSkor", { skor: h.skor ?? "-" })}</span>
               )}
               <Link href={`/ujian-saya/${u.id}`} className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">
                 {label}

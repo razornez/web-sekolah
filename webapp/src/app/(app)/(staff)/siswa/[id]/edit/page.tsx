@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { AccountPanel } from "@/components/AccountPanel";
@@ -8,6 +9,7 @@ import SiswaForm from "../../_components/SiswaForm";
 
 export default async function EditSiswaPage({ params }: { params: Promise<{ id: string }> }) {
   const sekolahId = await requireModule("siswa");
+  const t = await getTranslations("siswa");
   const provinsiOpts = await prisma.refProvinsi.findMany({ orderBy: { nama: "asc" }, select: { kode: true, nama: true } });
   const { id } = await params;
   const siswa = await prisma.siswa.findFirst({
@@ -20,15 +22,15 @@ export default async function EditSiswaPage({ params }: { params: Promise<{ id: 
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <Link href={`/siswa/${siswa.id}`} className="text-sm text-gray-500 hover:text-gray-900">← Profil Siswa</Link>
+          <Link href={`/siswa/${siswa.id}`} className="text-sm text-gray-500 hover:text-gray-900">{t("editBackProfil")}</Link>
           <h1 className="text-2xl font-semibold text-gray-900">{siswa.namaLengkap}</h1>
         </div>
         <div className="flex gap-2">
           <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
-            Cetak Rapor
+            {t("editCetakRapor")}
           </a>
           <Link href={`/siswa/${siswa.id}/delete`} className="rounded-md border border-red-300 px-3 py-2 text-sm text-red-700 hover:bg-red-50">
-            Hapus
+            {t("editHapus")}
           </Link>
         </div>
       </div>

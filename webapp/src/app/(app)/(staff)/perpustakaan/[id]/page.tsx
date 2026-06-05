@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { kembalikanBuku } from "../actions";
@@ -32,6 +33,7 @@ export default async function DetailBukuPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const sekolahId = await requireModule("perpustakaan");
+  const t = await getTranslations("perpustakaan");
   const { id } = await params;
   const tab = (await searchParams).tab ?? "detail";
 
@@ -63,7 +65,7 @@ export default async function DetailBukuPage({
     <div className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/perpustakaan" className="hover:text-gray-900">Perpustakaan</Link>
+        <Link href="/perpustakaan" className="hover:text-gray-900">{t("detailBreadcrumb")}</Link>
         <span>/</span>
         <span className="text-gray-700 line-clamp-1">{buku.judul}</span>
       </div>
@@ -94,19 +96,19 @@ export default async function DetailBukuPage({
               {/* Stok gauge */}
               <div className="mt-4 flex flex-wrap gap-3">
                 <div className="rounded-xl bg-white/10 backdrop-blur px-4 py-2">
-                  <div className="text-xs font-medium text-white/60">Eksemplar</div>
+                  <div className="text-xs font-medium text-white/60">{t("statEksemplar")}</div>
                   <div className="text-2xl font-bold text-white leading-none">{buku.jumlahEksemplar}</div>
                 </div>
                 <div className={`rounded-xl px-4 py-2 ${stokTersedia > 0 ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                  <div className="text-xs font-medium text-white/60">Tersedia</div>
+                  <div className="text-xs font-medium text-white/60">{t("statTersedia")}</div>
                   <div className={`text-2xl font-bold leading-none ${stokTersedia > 0 ? "text-green-300" : "text-red-300"}`}>{stokTersedia}</div>
                 </div>
                 <div className="rounded-xl bg-amber-400/20 px-4 py-2">
-                  <div className="text-xs font-medium text-white/60">Dipinjam</div>
+                  <div className="text-xs font-medium text-white/60">{t("statDipinjam")}</div>
                   <div className="text-2xl font-bold text-amber-300 leading-none">{aktif.length}</div>
                 </div>
                 <div className="rounded-xl bg-white/10 px-4 py-2">
-                  <div className="text-xs font-medium text-white/60">Total Transaksi</div>
+                  <div className="text-xs font-medium text-white/60">{t("statTotalTransaksi")}</div>
                   <div className="text-2xl font-bold text-white leading-none">{buku.pinjaman.length}</div>
                 </div>
               </div>
@@ -116,11 +118,11 @@ export default async function DetailBukuPage({
 
         {/* Tabs */}
         <div className="flex border-b border-gray-200 bg-gray-50 px-4">
-          {[["detail","📋 Detail & Edit"],["pinjaman","📖 Peminjam Aktif"],["riwayat","🕐 Riwayat"]].map(([t, l]) => (
-            <Link key={t} href={`/perpustakaan/${buku.id}?tab=${t}`}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${tab === t ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+          {[["detail",t("tabDetail")],["pinjaman",t("tabPeminjamAktif")],["riwayat",t("tabRiwayat")]].map(([key, l]) => (
+            <Link key={key} href={`/perpustakaan/${buku.id}?tab=${key}`}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px ${tab === key ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
               {l}
-              {t === "pinjaman" && aktif.length > 0 && (
+              {key === "pinjaman" && aktif.length > 0 && (
                 <span className={`ml-1.5 inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-bold ${aktif.some(p => dayDiff(p.tanggalPinjam) > (p.durasiHari ?? 7)) ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"}`}>
                   {aktif.length}
                 </span>
@@ -152,7 +154,7 @@ export default async function DetailBukuPage({
               {aktif.length === 0 ? (
                 <div className="rounded-xl border-2 border-dashed border-gray-200 py-12 text-center">
                   <div className="text-4xl">📚</div>
-                  <p className="mt-2 text-sm text-gray-500">Semua eksemplar tersedia — tidak ada yang dipinjam.</p>
+                  <p className="mt-2 text-sm text-gray-500">{t("allCopiesAvailable")}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -175,8 +177,8 @@ export default async function DetailBukuPage({
                             </Link>
                           ) : <span className="text-gray-500">—</span>}
                           <div className="flex flex-wrap gap-3 mt-0.5">
-                            <span className="text-xs text-gray-500">Pinjam: {fmt(p.tanggalPinjam)}</span>
-                            <span className="text-xs text-gray-500">Jatuh tempo: {fmt(due)}</span>
+                            <span className="text-xs text-gray-500">{t("labelPinjam", { tanggal: fmt(p.tanggalPinjam) })}</span>
+                            <span className="text-xs text-gray-500">{t("labelJatuhTempo", { tanggal: fmt(due) })}</span>
                           </div>
                         </div>
                         {/* Status */}
@@ -184,15 +186,15 @@ export default async function DetailBukuPage({
                           {overdue ? (
                             <div>
                               <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">
-                                ⚠ {Math.abs(daysLeft)} hari terlambat
+                                {t("daysLate", { n: Math.abs(daysLeft) })}
                               </span>
                             </div>
                           ) : (
                             <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${daysLeft <= 2 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}>
-                              {daysLeft === 0 ? "Hari ini!" : `${daysLeft}h lagi`}
+                              {daysLeft === 0 ? t("today") : t("daysLeftLong", { n: daysLeft })}
                             </span>
                           )}
-                          <div className="mt-1 text-xs text-gray-400">{borrowed} hari dipinjam</div>
+                          <div className="mt-1 text-xs text-gray-400">{t("daysBorrowedLong", { n: borrowed })}</div>
                         </div>
                         {/* Return action */}
                         <form action={kembalikanBuku}>
@@ -200,7 +202,7 @@ export default async function DetailBukuPage({
                           <input type="hidden" name="siswaId" value={p.siswaId ?? ""} />
                           <input type="hidden" name="redirect" value={`/perpustakaan/${buku.id}?tab=pinjaman`} />
                           <button className={`rounded-lg px-3 py-1.5 text-xs font-medium text-white ${overdue ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}`}>
-                            Kembalikan
+                            {t("kembalikan")}
                           </button>
                         </form>
                       </div>
@@ -210,7 +212,7 @@ export default async function DetailBukuPage({
               )}
               <div className="flex justify-end">
                 <Link href={`/perpustakaan/pinjam`} className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
-                  + Pinjamkan Buku Ini
+                  {t("lendThisBook")}
                 </Link>
               </div>
             </div>
@@ -221,17 +223,17 @@ export default async function DetailBukuPage({
             <div className="space-y-3">
               {selesai.length === 0 ? (
                 <div className="rounded-xl border-2 border-dashed border-gray-200 py-10 text-center">
-                  <p className="text-sm text-gray-400">Belum ada riwayat pengembalian.</p>
+                  <p className="text-sm text-gray-400">{t("noReturnHistory")}</p>
                 </div>
               ) : (
                 <div className="overflow-hidden rounded-xl border border-gray-200">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Peminjam</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tgl Pinjam</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Tgl Kembali</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Durasi Aktual</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("colPeminjam")}</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("colTglPinjam")}</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("colTglKembali")}</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("colDurasiAktual")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -254,7 +256,7 @@ export default async function DetailBukuPage({
                             <td className="px-4 py-3">
                               {days !== null ? (
                                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${late ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-600"}`}>
-                                  {days} hari{late ? " (terlambat)" : ""}
+                                  {late ? t("durationDaysLate", { n: days }) : t("durationDays", { n: days })}
                                 </span>
                               ) : "—"}
                             </td>

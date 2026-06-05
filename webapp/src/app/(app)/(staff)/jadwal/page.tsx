@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { RombelSelect } from "@/components/filters/RombelSelect";
@@ -18,6 +19,7 @@ const COLORS = ["bg-blue-50 border-blue-300 text-blue-900","bg-emerald-50 border
 
 export default async function JadwalPage({ searchParams }: { searchParams: Promise<{ guruId?: string; rombelId?: string; mode?: string }> }) {
   const sekolahId = await requireModule("jadwal");
+  const t = await getTranslations("jadwal");
   const sp = await searchParams;
   const fGuru = Number(sp.guruId) || 0;
   const fRombel = Number(sp.rombelId) || 0;
@@ -49,34 +51,34 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-5">
-      <PageGuide icon="🗓" title="Jadwal Mengajar"
-        description="Timetable mingguan. Tiap slot menampilkan mapel + guru + kelas dengan warna berbeda per mapel. Filter per guru atau kelas untuk tampilan spesifik."
-        tips={["Filter Guru → jadwal mengajar guru tertentu.", "Filter Kelas → jadwal pelajaran satu kelas.", "Mode Kalender: visual timetable. Mode List: tabel detail.", "Tambah jadwal di bagian bawah."]} />
+      <PageGuide icon="🗓" title={t("title")}
+        description={t("guideDescription")}
+        tips={[t("guideTip1"), t("guideTip2"), t("guideTip3"), t("guideTip4")]} />
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Jadwal Mengajar</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <div className="flex overflow-hidden rounded-lg border border-gray-300 text-xs font-medium">
-          <Link href={`/jadwal?mode=kalender&guruId=${fGuru}&rombelId=${fRombel}`} className={`px-3 py-1.5 transition-colors ${mode==="kalender"?"bg-gray-900 text-white":"bg-white text-gray-600 hover:bg-gray-50"}`}>🗓 Kalender</Link>
-          <Link href={`/jadwal?mode=list&guruId=${fGuru}&rombelId=${fRombel}`} className={`border-l px-3 py-1.5 transition-colors ${mode==="list"?"bg-gray-900 text-white":"bg-white text-gray-600 hover:bg-gray-50"}`}>📋 List</Link>
+          <Link href={`/jadwal?mode=kalender&guruId=${fGuru}&rombelId=${fRombel}`} className={`px-3 py-1.5 transition-colors ${mode==="kalender"?"bg-gray-900 text-white":"bg-white text-gray-600 hover:bg-gray-50"}`}>{t("modeKalender")}</Link>
+          <Link href={`/jadwal?mode=list&guruId=${fGuru}&rombelId=${fRombel}`} className={`border-l px-3 py-1.5 transition-colors ${mode==="list"?"bg-gray-900 text-white":"bg-white text-gray-600 hover:bg-gray-50"}`}>{t("modeList")}</Link>
         </div>
       </div>
 
       <form className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <input type="hidden" name="mode" value={mode} />
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Guru</label>
-          <GuruSelect sekolahId={sekolahId} name="guruId" defaultValue={fGuru||""} emptyLabel="— Semua Guru —" className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[220px]" /></div>
-        <div><label className="mb-1 block text-xs font-medium text-gray-500">Kelas / Rombel</label>
+        <div><label className="mb-1 block text-xs font-medium text-gray-500">{t("filterGuru")}</label>
+          <GuruSelect sekolahId={sekolahId} name="guruId" defaultValue={fGuru||""} emptyLabel={t("allGuru")} className="rounded-md border border-gray-300 px-2 py-1.5 text-sm min-w-[220px]" /></div>
+        <div><label className="mb-1 block text-xs font-medium text-gray-500">{t("filterKelas")}</label>
           <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue={fRombel||""} className="rounded-md border border-gray-300 px-2 py-1.5 text-sm" /></div>
-        <button className="rounded-md bg-gray-900 px-4 py-1.5 text-sm font-semibold text-white hover:bg-gray-800">Filter</button>
-        {(fGuru||fRombel) && <Link href={`/jadwal?mode=${mode}`} className="text-sm text-gray-500 hover:text-gray-900">Reset</Link>}
+        <button className="rounded-md bg-gray-900 px-4 py-1.5 text-sm font-semibold text-white hover:bg-gray-800">{t("filter")}</button>
+        {(fGuru||fRombel) && <Link href={`/jadwal?mode=${mode}`} className="text-sm text-gray-500 hover:text-gray-900">{t("reset")}</Link>}
       </form>
 
       {/* Tambah Jadwal — collapsible, di atas kalender */}
       <details className="group rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white shadow-sm">
         <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 select-none">
-          <span className="text-sm font-semibold text-gray-800">➕ Tambah Jadwal</span>
-          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
-          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
+          <span className="text-sm font-semibold text-gray-800">{t("tambahJadwal")}</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">{t("buka")}</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">{t("tutup")}</span>
         </summary>
         <TambahJadwalForm
           guruOptions={guruList.map((g) => ({ key: g.id, value: g.id, label: g.namaGuru }))}
@@ -90,12 +92,12 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
           <table className="w-full min-w-[640px] border-collapse text-sm">
             <thead><tr>
-              <th className="bg-gray-900 text-white px-3 py-3 text-left text-xs font-semibold w-28">Jam</th>
+              <th className="bg-gray-900 text-white px-3 py-3 text-left text-xs font-semibold w-28">{t("colJam")}</th>
               {hariNames.map((h) => <th key={h} className="bg-gray-900 text-white px-3 py-3 text-center text-xs font-semibold min-w-[130px]">{h}</th>)}
             </tr></thead>
             <tbody>
               {/* Istirahat row 1 */}
-              <tr><td colSpan={hariNames.length+1} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">☕ 10:00 – 10:15 (Istirahat)</td></tr>
+              <tr><td colSpan={hariNames.length+1} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">{t("breakIstirahat1")}</td></tr>
               {JAM_MULAI.map((jam, idx) => (
                 <tr key={jam} className={idx%2===0?"bg-white":"bg-gray-50/40"}>
                   <td className="border border-gray-100 px-3 py-2 text-xs font-mono font-medium text-gray-500 align-top whitespace-nowrap">{JAM_LABEL[jam]??jam}</td>
@@ -119,10 +121,10 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                   })}
                 </tr>
               ))}
-              <tr><td colSpan={hariNames.length+1} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">☕ 13:15 – 13:30 (Istirahat)</td></tr>
+              <tr><td colSpan={hariNames.length+1} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">{t("breakIstirahat2")}</td></tr>
             </tbody>
           </table>
-          {jadwal.length===0 && <div className="py-12 text-center text-gray-400"><div className="text-3xl">🗓</div><p className="mt-2 text-sm">Belum ada jadwal.</p></div>}
+          {jadwal.length===0 && <div className="py-12 text-center text-gray-400"><div className="text-3xl">🗓</div><p className="mt-2 text-sm">{t("noJadwal")}</p></div>}
         </div>
       )}
 
@@ -132,16 +134,16 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs text-gray-500">
               <tr>
-                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">Hari</th>
-                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">Jam</th>
-                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">Mapel</th>
-                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">Guru</th>
-                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">Kelas</th>
-                <th className="px-4 py-3 text-right font-semibold uppercase tracking-wide">Aksi</th>
+                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">{t("colHari")}</th>
+                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">{t("colJam")}</th>
+                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">{t("colMapel")}</th>
+                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">{t("colGuru")}</th>
+                <th className="px-4 py-3 text-left font-semibold uppercase tracking-wide">{t("colKelas")}</th>
+                <th className="px-4 py-3 text-right font-semibold uppercase tracking-wide">{t("colAksi")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {jadwal.length===0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Belum ada jadwal.</td></tr>}
+              {jadwal.length===0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">{t("noJadwal")}</td></tr>}
               {jadwal.map((j) => (
                 <tr key={j.id} className="hover:bg-gray-50">
                   <td className="px-4 py-2.5 font-medium text-gray-800">{j.hari.nama}</td>
@@ -150,7 +152,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                   <td className="px-4 py-2.5"><Link href={`/guru/${j.guru.id}`} className="text-gray-700 hover:underline">{j.guru.namaGuru}</Link></td>
                   <td className="px-4 py-2.5 text-gray-600">{j.rombel?.nama??"-"}</td>
                   <td className="px-4 py-2.5 text-right">
-                    <ConfirmDelete action={deleteJadwalAction} id={j.id} message={`Hapus jadwal ${j.mapel ?? ""} — ${j.guru.namaGuru} (${j.hari.nama})?`} />
+                    <ConfirmDelete action={deleteJadwalAction} id={j.id} message={t("deleteConfirm", { mapel: j.mapel ?? "", guru: j.guru.namaGuru, hari: j.hari.nama })} />
                   </td>
                 </tr>
               ))}

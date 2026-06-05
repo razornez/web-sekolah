@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { submitUjian } from "../actions";
 
 type Opsi = { label: string; teks: string };
@@ -23,6 +24,7 @@ export function UjianRunner({
   mulaiAtMs: number | null;
   soal: SoalItem[];
 }) {
+  const t = useTranslations("portal");
   const formRef = useRef<HTMLFormElement>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
 
@@ -49,7 +51,7 @@ export function UjianRunner({
       <input type="hidden" name="ujianId" value={ujianId} />
       {mmss && (
         <div className="sticky top-0 z-10 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-800 shadow-sm">
-          ⏱ Sisa waktu: <b>{mmss}</b>
+          {t("ujianTimeRemaining")} <b>{mmss}</b>
         </div>
       )}
       {soal.map((s) => (
@@ -71,11 +73,11 @@ export function UjianRunner({
       ))}
       <button
         onClick={(e) => {
-          if (!confirm("Kumpulkan jawaban? Tidak bisa diubah lagi.")) e.preventDefault();
+          if (!confirm(t("ujianConfirmSubmit"))) e.preventDefault();
         }}
         className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
       >
-        Kumpulkan Jawaban
+        {t("ujianSubmitAnswers")}
       </button>
     </form>
   );

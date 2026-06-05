@@ -16,6 +16,7 @@ export default auth((req: NextRequest & { auth: { user?: unknown } | null }) => 
 
   const isPublic =
     path === "/login" ||
+    path === "/lupa-password" ||
     path.startsWith("/daftar/") ||
     path.startsWith("/api/auth") ||
     path.startsWith("/api/siswa") ||

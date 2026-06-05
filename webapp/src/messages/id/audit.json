@@ -1,0 +1,23 @@
+{
+  "audit": {
+    "title": "Audit Log",
+    "subtitle": "{n} entri · semua aksi tulis oleh staf",
+    "fieldAksi": "Aksi",
+    "all": "Semua",
+    "fieldEntitas": "Entitas",
+    "filter": "Filter",
+    "searchUser": "Cari nama user",
+    "search": "Cari",
+    "reset": "Reset",
+    "colWaktu": "Waktu",
+    "colUser": "User",
+    "colRole": "Role",
+    "colAksi": "Aksi",
+    "colEntitas": "Entitas",
+    "colDetail": "Detail",
+    "empty": "Belum ada log.",
+    "pageInfo": "Halaman {page} dari {total}",
+    "prev": "← Sebelumnya",
+    "next": "Selanjutnya →"
+  }
+}

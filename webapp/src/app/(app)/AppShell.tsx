@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { NavMenu } from "./NavMenu";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 type NavItem = { href: string; label: string };
 type User = { name?: string | null; role: string };
@@ -33,6 +34,12 @@ export function AppShell({
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const t = useTranslations("common");
+  const tApp = useTranslations("app");
+  const tRoles = useTranslations("roles");
+  const roleLabel = (role: string) => {
+    try { return tRoles(role as never); } catch { return role; }
+  };
 
   // Tutup sidebar saat navigasi (mobile)
   useEffect(() => { setOpen(false); }, [pathname]);
@@ -69,8 +76,8 @@ export function AppShell({
         {/* Logo */}
         <div className="flex items-center justify-between bg-gradient-to-br from-gray-900 to-gray-700 px-5 py-4">
           <div>
-            <div className="text-base font-bold text-white">🏫 Smart School</div>
-            <div className="mt-0.5 text-[11px] text-gray-400">Sistem Informasi Sekolah</div>
+            <div className="text-base font-bold text-white">🏫 {tApp("brand")}</div>
+            <div className="mt-0.5 text-[11px] text-gray-400">{tApp("tagline")}</div>
           </div>
           {/* Close btn (mobile only) */}
           <button
@@ -94,14 +101,18 @@ export function AppShell({
               <div className="truncate text-sm font-medium text-gray-800">{user.name}</div>
               <div>
                 <span className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${roleColors[user.role] ?? "bg-gray-100 text-gray-600"}`}>
-                  {user.role}
+                  {roleLabel(user.role)}
                 </span>
               </div>
             </div>
           </div>
+          {/* Language switcher */}
+          <div className="mt-2 flex justify-center">
+            <LanguageSwitcher />
+          </div>
           <form action={signOutAction}>
             <button className="mt-2 w-full cursor-pointer rounded-lg py-1.5 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-              ↩ Keluar
+              ↩ {t("logout")}
             </button>
           </form>
         </div>
@@ -121,10 +132,11 @@ export function AppShell({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="font-bold text-gray-900">🏫 Smart School</span>
+          <span className="font-bold text-gray-900">🏫 {tApp("brand")}</span>
           <div className="ml-auto flex items-center gap-2">
+            <LanguageSwitcher compact />
             <span className={`rounded px-2 py-0.5 text-xs font-medium ${roleColors[user.role] ?? "bg-gray-100 text-gray-600"}`}>
-              {user.role}
+              {roleLabel(user.role)}
             </span>
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-semibold text-gray-600">
               {initials}

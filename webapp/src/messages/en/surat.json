@@ -1,0 +1,28 @@
+{
+  "surat": {
+    "title": "Letter Administration",
+    "addSurat": "+ Add Letter",
+    "searchPlaceholder": "Search subject / number…",
+    "search": "Search",
+    "reset": "Reset",
+    "colTanggal": "Date",
+    "colNomor": "Number",
+    "colPerihal": "Subject",
+    "colJenis": "Type",
+    "colAksi": "Actions",
+    "empty": "No letters yet.",
+    "edit": "Edit",
+    "deleteConfirm": "Delete letter \"{perihal}\"?",
+    "newTitle": "Add Letter",
+    "editTitle": "Edit Letter",
+    "fieldPerihal": "Subject *",
+    "fieldTanggal": "Date",
+    "fieldNomor": "Number",
+    "fieldJenis": "Type",
+    "jenisPlaceholder": "incoming / outgoing",
+    "fieldIsi": "Content",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}

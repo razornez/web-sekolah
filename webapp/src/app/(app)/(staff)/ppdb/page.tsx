@@ -1,19 +1,20 @@
 import Link from "next/link";
 import { type Prisma, StatusPpdb } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { PageGuide } from "@/components/PageGuide";
 
 const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 
-const STATUS_STEPS: { key: StatusPpdb; label: string; color: string }[] = [
-  { key: "baru",       label: "Baru",        color: "bg-gray-100 text-gray-700" },
-  { key: "verifikasi", label: "Verifikasi",   color: "bg-blue-100 text-blue-700" },
-  { key: "tes",        label: "Tes",          color: "bg-purple-100 text-purple-700" },
-  { key: "wawancara",  label: "Wawancara",    color: "bg-indigo-100 text-indigo-700" },
-  { key: "diterima",   label: "Diterima ✓",   color: "bg-green-100 text-green-700" },
-  { key: "cadangan",   label: "Cadangan",     color: "bg-amber-100 text-amber-700" },
-  { key: "ditolak",    label: "Ditolak ✗",    color: "bg-red-100 text-red-700" },
+const STATUS_STEPS: { key: StatusPpdb; labelKey: string; color: string }[] = [
+  { key: "baru",       labelKey: "statusBaru",        color: "bg-gray-100 text-gray-700" },
+  { key: "verifikasi", labelKey: "statusVerifikasi",   color: "bg-blue-100 text-blue-700" },
+  { key: "tes",        labelKey: "statusTes",          color: "bg-purple-100 text-purple-700" },
+  { key: "wawancara",  labelKey: "statusWawancara",    color: "bg-indigo-100 text-indigo-700" },
+  { key: "diterima",   labelKey: "statusDiterima",   color: "bg-green-100 text-green-700" },
+  { key: "cadangan",   labelKey: "statusCadangan",     color: "bg-amber-100 text-amber-700" },
+  { key: "ditolak",    labelKey: "statusDitolak",    color: "bg-red-100 text-red-700" },
 ];
 const badgeOf = (s: StatusPpdb) => STATUS_STEPS.find((x) => x.key === s) ?? STATUS_STEPS[0];
 
@@ -28,6 +29,7 @@ export default async function PpdbPage({
   }>;
 }) {
   const sekolahId = await requireModule("ppdb");
+  const t = await getTranslations("ppdb");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const statusFilter = sp.status ?? "";
@@ -81,7 +83,7 @@ export default async function PpdbPage({
   } else if (groupBy === "jalur") {
     const map = new Map<string, Row[]>();
     for (const r of rows) {
-      const k = r.jalur?.nama ?? "Tanpa Jalur";
+      const k = r.jalur?.nama ?? t("tanpaJalur");
       if (!map.has(k)) map.set(k, []);
       map.get(k)!.push(r);
     }
@@ -89,20 +91,20 @@ export default async function PpdbPage({
   } else if (groupBy === "asalSekolah") {
     const map = new Map<string, Row[]>();
     for (const r of rows) {
-      const k = r.asalSekolah?.trim() || "Tidak Diketahui";
+      const k = r.asalSekolah?.trim() || t("tidakDiketahui");
       if (!map.has(k)) map.set(k, []);
       map.get(k)!.push(r);
     }
     groups = [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map((e) => ({ key: e[0], label: e[0], rows: e[1] }));
   } else if (groupBy === "jenisKelamin") {
     groups = [
-      { key: "L", label: "Laki-laki", rows: rows.filter((r) => r.jenisKelamin === "L") },
-      { key: "P", label: "Perempuan", rows: rows.filter((r) => r.jenisKelamin === "P") },
+      { key: "L", label: t("male"), rows: rows.filter((r) => r.jenisKelamin === "L") },
+      { key: "P", label: t("female"), rows: rows.filter((r) => r.jenisKelamin === "P") },
     ].filter((g) => g.rows.length > 0);
   } else if (groupBy === "status") {
     groups = STATUS_STEPS.map((s) => ({
       key: s.key,
-      label: s.label,
+      label: t(s.labelKey),
       rows: rows.filter((r) => r.status === s.key),
     })).filter((g) => g.rows.length > 0);
   }
@@ -114,34 +116,34 @@ export default async function PpdbPage({
     <div className="space-y-5">
       <PageGuide
         icon="🏫"
-        title="PPDB"
-        description="Penerimaan Peserta Didik Baru. Pantau proses pendaftaran, verifikasi, seleksi, hingga keputusan akhir setiap calon siswa."
+        title={t("title")}
+        description={t("guideDescription")}
         tips={[
-          "Klik nama pendaftar untuk melihat detail, riwayat tahapan, dan dokumen.",
-          "Gunakan Group By untuk memetakan pendaftar per jalur atau asal sekolah.",
-          "Arsip = data yang sudah di-soft-delete (tidak permanen, bisa dipulihkan).",
-          "Setiap perubahan status tersimpan otomatis sebagai history.",
+          t("tip1"),
+          t("tip2"),
+          t("tip3"),
+          t("tip4"),
         ]}
       />
 
       {/* Header */}
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">PPDB — Pendaftar</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{t("headerTitle")}</h1>
           <p className="text-sm text-gray-500">
-            {totalAktif} pendaftar aktif ·{" "}
+            {t("activeCount", { n: totalAktif })} ·{" "}
             <Link href={`/daftar/${sekolah?.slug}`} className="underline hover:text-gray-900">/daftar/{sekolah?.slug}</Link>
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/ppdb/new" className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            Tambah Pendaftar
+            {t("addPendaftar")}
           </Link>
-          <Link href="/ppdb/jalur" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">Kelola Jalur</Link>
+          <Link href="/ppdb/jalur" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">{t("manageJalur")}</Link>
           <Link href={showArsip ? "/ppdb" : "/ppdb?arsip=1"}
             className={`rounded-lg border px-3 py-2 text-sm ${showArsip ? "border-red-300 bg-red-50 text-red-700" : "border-gray-300 hover:bg-gray-50"}`}>
-            {showArsip ? "← Aktif" : "🗑 Arsip"}
+            {showArsip ? t("backToActive") : t("archive")}
           </Link>
         </div>
       </div>
@@ -151,12 +153,12 @@ export default async function PpdbPage({
         <div className="flex flex-wrap gap-2">
           <Link href={makeFilter({ status: "" })}
             className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!statusFilter ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
-            Semua ({totalAktif})
+            {t("all")} ({totalAktif})
           </Link>
           {STATUS_STEPS.map((s) => (
             <Link key={s.key} href={makeFilter({ status: s.key })}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium ${statusFilter === s.key ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
-              {s.label} {countMap[s.key] ? `(${countMap[s.key]})` : ""}
+              {t(s.labelKey)} {countMap[s.key] ? `(${countMap[s.key]})` : ""}
             </Link>
           ))}
         </div>
@@ -168,39 +170,39 @@ export default async function PpdbPage({
           <input type="hidden" name="status" value={statusFilter} />
           <input type="hidden" name="arsip" value={showArsip ? "1" : ""} />
           <div className="w-full sm:flex-1 sm:min-w-48">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Cari Nama</label>
-            <input name="q" defaultValue={q} placeholder="Nama pendaftar…"
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldCariNama")}</label>
+            <input name="q" defaultValue={q} placeholder={t("placeholderNama")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
           </div>
           <div className="w-full sm:w-auto">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Jalur</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldJalur")}</label>
             <select name="jalur" defaultValue={jalurFilter} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
-              <option value="">Semua Jalur</option>
+              <option value="">{t("allJalur")}</option>
               {jalurList.map((j) => <option key={j.id} value={j.id}>{j.nama}</option>)}
             </select>
           </div>
           <div className="w-full sm:w-auto">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Jenis Kelamin</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldJenisKelamin")}</label>
             <select name="jk" defaultValue={jkFilter} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
-              <option value="">Semua</option>
-              <option value="L">Laki-laki</option>
-              <option value="P">Perempuan</option>
+              <option value="">{t("allJk")}</option>
+              <option value="L">{t("male")}</option>
+              <option value="P">{t("female")}</option>
             </select>
           </div>
           <div className="w-full sm:w-auto">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Grup per</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldGroupBy")}</label>
             <select name="groupBy" defaultValue={groupBy} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
-              <option value="none">— tidak dikelompokkan —</option>
-              <option value="jalur">Jalur</option>
-              <option value="asalSekolah">Asal Sekolah</option>
-              <option value="jenisKelamin">Jenis Kelamin</option>
-              <option value="status">Status</option>
+              <option value="none">{t("groupNone")}</option>
+              <option value="jalur">{t("groupJalur")}</option>
+              <option value="asalSekolah">{t("groupAsalSekolah")}</option>
+              <option value="jenisKelamin">{t("groupJenisKelamin")}</option>
+              <option value="status">{t("groupStatus")}</option>
             </select>
           </div>
           <div className="flex gap-2">
-            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Terapkan</button>
+            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("apply")}</button>
             {(q || jalurFilter || jkFilter || groupBy !== "none") && (
-              <Link href={`/ppdb?arsip=${showArsip ? "1" : ""}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">Reset</Link>
+              <Link href={`/ppdb?arsip=${showArsip ? "1" : ""}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">{t("reset")}</Link>
             )}
           </div>
         </form>
@@ -210,7 +212,7 @@ export default async function PpdbPage({
       {rows.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
           <div className="text-4xl">🏫</div>
-          <p className="mt-3 text-sm text-gray-500">{showArsip ? "Tidak ada data di arsip." : "Belum ada pendaftar."}</p>
+          <p className="mt-3 text-sm text-gray-500">{showArsip ? t("emptyArchive") : t("empty")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -225,13 +227,13 @@ export default async function PpdbPage({
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-left">
                   <tr>
-                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">Tgl Daftar</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Nama</th>
-                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">L/P</th>
-                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">Asal Sekolah</th>
-                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">Jalur</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Aksi</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">{t("colTglDaftar")}</th>
+                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("colNama")}</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">{t("colLP")}</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">{t("colAsalSekolah")}</th>
+                    <th className="hidden px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide sm:table-cell">{t("colJalur")}</th>
+                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">{t("colStatus")}</th>
+                    <th className="px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">{t("colAksi")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -251,7 +253,7 @@ export default async function PpdbPage({
                         <td className="hidden px-4 py-3 text-gray-600 sm:table-cell">{p.jalur?.nama ?? "—"}</td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${b.color}`}>
-                            {b.label}
+                            {t(b.labelKey)}
                           </span>
                           {p.catatan && (
                             <p className="mt-0.5 text-xs text-gray-400 max-w-[180px] truncate" title={p.catatan}>
@@ -261,7 +263,7 @@ export default async function PpdbPage({
                         </td>
                         <td className="px-4 py-3 text-right">
                           <Link href={`/ppdb/${p.id}`} className="rounded-md border border-gray-300 px-2.5 py-1 text-xs hover:bg-gray-100">
-                            Detail
+                            {t("detail")}
                           </Link>
                         </td>
                       </tr>
@@ -277,10 +279,10 @@ export default async function PpdbPage({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>Halaman {page} dari {totalPages} ({total} pendaftar)</span>
+          <span>{t("pageInfo", { page, total: totalPages, n: total })}</span>
           <div className="flex gap-2">
-            {page > 1 && <Link href={hp(page - 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">← Sebelumnya</Link>}
-            {page < totalPages && <Link href={hp(page + 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">Selanjutnya →</Link>}
+            {page > 1 && <Link href={hp(page - 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("prev")}</Link>}
+            {page < totalPages && <Link href={hp(page + 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("next")}</Link>}
           </div>
         </div>
       )}

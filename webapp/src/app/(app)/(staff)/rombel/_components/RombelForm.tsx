@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useEffect } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { saveRombel, type RombelFormState } from "../actions";
 import { AutocompleteSelect } from "@/components/AutocompleteSelect";
 import type { GuruOption } from "../options";
@@ -29,6 +30,7 @@ function namaToKode(nama: string): string {
 }
 
 function GuruSummaryCard({ guru }: { guru: GuruOption }) {
+  const t = useTranslations("rombel");
   const initials = guru.namaGuru.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   const waliCount = guru.rombelWali.length;
   const pendidikan = guru.pendidikan[0];
@@ -59,7 +61,7 @@ function GuruSummaryCard({ guru }: { guru: GuruOption }) {
         {waliCount > 0 && (
           <div className="shrink-0 text-center rounded-xl bg-indigo-100 px-3 py-1.5">
             <div className="text-lg font-bold leading-none text-indigo-700">{waliCount}</div>
-            <div className="text-[10px] text-indigo-500">kali wali</div>
+            <div className="text-[10px] text-indigo-500">{t("cardKaliWali")}</div>
           </div>
         )}
       </div>
@@ -68,15 +70,15 @@ function GuruSummaryCard({ guru }: { guru: GuruOption }) {
       <div className="grid grid-cols-3 divide-x divide-indigo-100 border-b border-indigo-100 bg-indigo-50/40">
         <div className="px-3 py-2 text-center">
           <div className="text-base font-bold text-gray-800">{guru._count.jadwalGuru}</div>
-          <div className="text-[10px] text-gray-500">Jadwal</div>
+          <div className="text-[10px] text-gray-500">{t("cardJadwal")}</div>
         </div>
         <div className="px-3 py-2 text-center">
           <div className="text-base font-bold text-gray-800">{guru.mapelDiampu.length}</div>
-          <div className="text-[10px] text-gray-500">Mapel</div>
+          <div className="text-[10px] text-gray-500">{t("cardMapel")}</div>
         </div>
         <div className="px-3 py-2 text-center">
           <div className="text-base font-bold text-gray-800">{waliCount}</div>
-          <div className="text-[10px] text-gray-500">Pernah Wali</div>
+          <div className="text-[10px] text-gray-500">{t("cardPernahWali")}</div>
         </div>
       </div>
 
@@ -96,7 +98,7 @@ function GuruSummaryCard({ guru }: { guru: GuruOption }) {
         {guru.nip && (
           <div className="flex items-center gap-2">
             <span className="text-indigo-400">🪪</span>
-            <span className="text-gray-500">NIP: {guru.nip}</span>
+            <span className="text-gray-500">{t("cardNip", { nip: guru.nip })}</span>
           </div>
         )}
         {/* Mapel */}
@@ -115,7 +117,7 @@ function GuruSummaryCard({ guru }: { guru: GuruOption }) {
           <div className="flex items-start gap-2">
             <span className="text-indigo-400 mt-0.5">🏫</span>
             <div>
-              <span className="text-gray-500 font-medium">Riwayat wali: </span>
+              <span className="text-gray-500 font-medium">{t("cardRiwayatWali")}</span>
               <span className="text-gray-600">
                 {guru.rombelWali.map((r) => `${r.nama} (${r.tahunAjaran.tahun})`).join(", ")}
               </span>
@@ -123,7 +125,7 @@ function GuruSummaryCard({ guru }: { guru: GuruOption }) {
           </div>
         )}
         {waliCount === 0 && guru._count.jadwalGuru === 0 && (
-          <p className="text-amber-600 text-xs">⚠ Belum ada data mengajar tercatat.</p>
+          <p className="text-amber-600 text-xs">{t("cardNoData")}</p>
         )}
       </div>
     </div>
@@ -141,6 +143,7 @@ export default function RombelForm({
   tingkatOptions: Option[];
   guruList: GuruOption[];
 }) {
+  const t = useTranslations("rombel");
   const [state, formAction, pending] = useActionState<RombelFormState, FormData>(saveRombel, { ok: false });
   const e = state.errors ?? {};
 
@@ -175,7 +178,7 @@ export default function RombelForm({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nama Rombel <span className="text-red-500">*</span>
+              {t("formNamaRombel")} <span className="text-red-500">*</span>
             </label>
             <input
               name="nama"
@@ -188,8 +191,8 @@ export default function RombelForm({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Kode Kelas
-              <span className="ml-1 text-xs font-normal text-gray-400">(otomatis, bisa diubah)</span>
+              {t("formKodeKelas")}
+              <span className="ml-1 text-xs font-normal text-gray-400">{t("kodeHint")}</span>
             </label>
             <input
               name="kodeKelas"
@@ -200,7 +203,7 @@ export default function RombelForm({
               className={`${inputCls} font-mono`}
             />
             <p className="mt-0.5 text-[11px] text-gray-400">
-              Kosongkan untuk reset ke otomatis
+              {t("kodeResetHint")}
             </p>
           </div>
         </div>
@@ -209,10 +212,10 @@ export default function RombelForm({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tahun Ajaran <span className="text-red-500">*</span>
+              {t("formTahunAjaran")} <span className="text-red-500">*</span>
             </label>
             <select name="tahunAjaranId" defaultValue={initial?.tahunAjaranId ?? defaultTA ?? ""} className={inputCls}>
-              <option value="">— pilih —</option>
+              <option value="">{t("optPilih")}</option>
               {tahunAjaranOptions.map((o) => (
                 <option key={o.id} value={o.id}>{o.label}</option>
               ))}
@@ -221,10 +224,10 @@ export default function RombelForm({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tingkat <span className="text-red-500">*</span>
+              {t("formTingkat")} <span className="text-red-500">*</span>
             </label>
             <select name="tingkatId" defaultValue={initial?.tingkatId ?? ""} className={inputCls}>
-              <option value="">— pilih —</option>
+              <option value="">{t("optPilih")}</option>
               {tingkatOptions.map((o) => (
                 <option key={o.id} value={o.id}>{o.label}</option>
               ))}
@@ -235,7 +238,7 @@ export default function RombelForm({
 
         {/* Wali Kelas */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Wali Kelas</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t("formWaliKelas")}</label>
           <AutocompleteSelect
             options={guruList.map((g) => ({
               key: g.id, value: g.id, label: g.namaGuru,
@@ -244,8 +247,8 @@ export default function RombelForm({
             name="waliGuruId"
             defaultValue={initial?.waliGuruId ?? ""}
             defaultLabel={guruList.find((g) => g.id === initial?.waliGuruId)?.namaGuru ?? ""}
-            placeholder="Cari nama guru…"
-            emptyLabel="— tidak ada —"
+            placeholder={t("cariGuruPlaceholder")}
+            emptyLabel={t("optTidakAda")}
             className={inputCls}
             onChange={(val) => setWaliId(val)}
           />
@@ -253,7 +256,7 @@ export default function RombelForm({
           {/* Summary card */}
           {selectedGuru && <GuruSummaryCard guru={selectedGuru} />}
           {waliId && !selectedGuru && (
-            <p className="mt-2 text-xs text-gray-400">Memuat data guru…</p>
+            <p className="mt-2 text-xs text-gray-400">{t("memuatGuru")}</p>
           )}
         </div>
       </div>
@@ -261,9 +264,9 @@ export default function RombelForm({
       <div className="flex items-center gap-3 border-t border-gray-100 bg-gray-50/60 px-6 py-4">
         <button type="submit" disabled={pending}
           className="rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50">
-          {pending ? "Menyimpan…" : "Simpan"}
+          {pending ? t("saving") : t("save")}
         </button>
-        <Link href="/rombel" className="text-sm text-gray-500 hover:text-gray-900">Batal</Link>
+        <Link href="/rombel" className="text-sm text-gray-500 hover:text-gray-900">{t("cancel")}</Link>
       </div>
     </form>
   );

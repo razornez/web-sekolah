@@ -1,0 +1,30 @@
+{
+  "tugas": {
+    "title": "Tugas",
+    "fieldJudul": "Judul",
+    "fieldMapel": "Mapel",
+    "fieldRombel": "Rombel",
+    "rombelEmptyLabel": "- semua -",
+    "fieldDeadline": "Deadline",
+    "add": "+ Tambah",
+    "colJudul": "Judul",
+    "colMapel": "Mapel",
+    "colRombel": "Rombel",
+    "colDeadline": "Deadline",
+    "colTerkumpul": "Terkumpul",
+    "colAksi": "Aksi",
+    "empty": "Belum ada tugas.",
+    "rombelSemua": "Semua",
+    "check": "Periksa",
+    "deleteConfirm": "Hapus tugas \"{judul}\"?",
+    "back": "← Tugas",
+    "detailSubtitle": "{mapel} · {n} pengumpulan",
+    "colSiswa": "Siswa",
+    "colJawaban": "Jawaban",
+    "colWaktu": "Waktu",
+    "colNilai": "Nilai",
+    "emptyPengumpulan": "Belum ada yang mengumpulkan.",
+    "attachment": "lampiran",
+    "save": "Simpan"
+  }
+}

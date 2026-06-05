@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getSekolahId } from "@/lib/session";
 import { addTagihan, bayarTagihan, deleteTagihan } from "./actions";
@@ -15,6 +16,7 @@ export default async function SppPage({
   searchParams: Promise<{ q?: string; siswaId?: string }>;
 }) {
   const sekolahId = await getSekolahId();
+  const t = await getTranslations("spp");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const siswaId = Number(sp.siswaId) || 0;
@@ -60,21 +62,21 @@ export default async function SppPage({
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">SPP / Keuangan</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{t("title")}</h1>
         <Link href="/spp/jenis" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
-          Kelola Jenis Pembayaran
+          {t("managePaymentType")}
         </Link>
       </div>
 
       {/* cari siswa */}
       <form className="flex gap-2">
-        <SiswaAutocomplete name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" className="w-80 rounded-md border border-gray-300 py-2 pl-3 pr-8 text-sm outline-none focus:border-gray-900" />
-        <button className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+        <SiswaAutocomplete name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="w-80 rounded-md border border-gray-300 py-2 pl-3 pr-8 text-sm outline-none focus:border-gray-900" />
+        <button className="rounded-md border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("search")}</button>
       </form>
 
       {q && !siswa && (
         <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
-          {kandidat.length === 0 && <li className="px-4 py-3 text-sm text-gray-400">Tidak ada siswa cocok.</li>}
+          {kandidat.length === 0 && <li className="px-4 py-3 text-sm text-gray-400">{t("noMatch")}</li>}
           {kandidat.map((s) => (
             <li key={s.id} className="px-4 py-2 text-sm">
               <Link href={`/spp?siswaId=${s.id}`} className="text-gray-900 hover:underline">
@@ -91,23 +93,23 @@ export default async function SppPage({
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-medium text-gray-900">{siswa.namaLengkap}</h2>
             <span className="text-xs text-gray-400">{siswa.nisn ?? ""}</span>
-            <Link href="/spp" className="ml-auto text-sm text-gray-500 hover:text-gray-900">Ganti siswa</Link>
+            <Link href="/spp" className="ml-auto text-sm text-gray-500 hover:text-gray-900">{t("changeStudent")}</Link>
           </div>
 
           {/* tambah tagihan */}
           <form action={addTagihan} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-white p-4">
             <input type="hidden" name="siswaId" value={siswa.id} />
             <div>
-              <label className="block text-xs text-gray-500">Jenis</label>
+              <label className="block text-xs text-gray-500">{t("jenis")}</label>
               <select name="jenisId" required className={inCls}>
-                <option value="">- pilih -</option>
+                <option value="">{t("selectPlaceholder")}</option>
                 {jenisList.map((j) => (
-                  <option key={j.id} value={j.id}>{j.nama} ({rupiah(j.nominal)})</option>
+                  <option key={j.id} value={j.id}>{t("jenisOption", { nama: j.nama, nominal: rupiah(j.nominal) })}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500">Bulan</label>
+              <label className="block text-xs text-gray-500">{t("bulan")}</label>
               <select name="bulan" defaultValue={new Date().getMonth() + 1} className={inCls}>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((b) => (
                   <option key={b} value={b}>{BULAN[b]}</option>
@@ -115,59 +117,59 @@ export default async function SppPage({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500">Tahun</label>
+              <label className="block text-xs text-gray-500">{t("tahun")}</label>
               <input name="tahun" type="number" defaultValue={tahunIni} className={`${inCls} w-24`} />
             </div>
             <div>
-              <label className="block text-xs text-gray-500">Nominal (opsional)</label>
+              <label className="block text-xs text-gray-500">{t("nominalOptional")}</label>
               <input name="nominal" type="number" min={0} defaultValue={0} className={`${inCls} w-32`} />
             </div>
-            <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Tagihan</button>
+            <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">{t("addTagihan")}</button>
           </form>
 
           <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-gray-500">
                 <tr>
-                  <th className="px-4 py-2 font-medium">Jenis</th>
-                  <th className="px-4 py-2 font-medium">Periode</th>
-                  <th className="px-4 py-2 font-medium">Nominal</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                  <th className="px-4 py-2 font-medium text-right">Aksi</th>
+                  <th className="px-4 py-2 font-medium">{t("colJenis")}</th>
+                  <th className="px-4 py-2 font-medium">{t("colPeriode")}</th>
+                  <th className="px-4 py-2 font-medium">{t("colNominal")}</th>
+                  <th className="px-4 py-2 font-medium">{t("colStatus")}</th>
+                  <th className="px-4 py-2 font-medium text-right">{t("colAksi")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {tagihan.length === 0 && (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Belum ada tagihan.</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">{t("empty")}</td></tr>
                 )}
-                {tagihan.map((t) => (
-                  <tr key={t.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 text-gray-900">{t.jenis.nama}</td>
-                    <td className="px-4 py-2 text-gray-600">{BULAN[t.bulan]} {t.tahun}</td>
-                    <td className="px-4 py-2 text-gray-600">{rupiah(t.nominal)}</td>
+                {tagihan.map((row) => (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 text-gray-900">{row.jenis.nama}</td>
+                    <td className="px-4 py-2 text-gray-600">{BULAN[row.bulan]} {row.tahun}</td>
+                    <td className="px-4 py-2 text-gray-600">{rupiah(row.nominal)}</td>
                     <td className="px-4 py-2">
-                      <span className={`rounded px-1.5 py-0.5 text-xs ${t.status === "lunas" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
-                        {t.status}
+                      <span className={`rounded px-1.5 py-0.5 text-xs ${row.status === "lunas" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                        {row.status}
                       </span>
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center justify-end gap-3">
-                        {t.status !== "lunas" && (
+                        {row.status !== "lunas" && (
                           <form action={bayarTagihan}>
-                            <input type="hidden" name="id" value={t.id} />
+                            <input type="hidden" name="id" value={row.id} />
                             <input type="hidden" name="siswaId" value={siswa.id} />
-                            <button className="rounded-md bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700">Bayar</button>
+                            <button className="rounded-md bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700">{t("pay")}</button>
                           </form>
                         )}
-                        {t.status === "lunas" && t.pembayaran[0] && (
-                          <Link href={`/cetak/kwitansi/${t.pembayaran[0].id}`} target="_blank" className="text-gray-600 hover:underline">
-                            Kwitansi
+                        {row.status === "lunas" && row.pembayaran[0] && (
+                          <Link href={`/cetak/kwitansi/${row.pembayaran[0].id}`} target="_blank" className="text-gray-600 hover:underline">
+                            {t("receipt")}
                           </Link>
                         )}
                         <form action={deleteTagihan}>
-                          <input type="hidden" name="id" value={t.id} />
+                          <input type="hidden" name="id" value={row.id} />
                           <input type="hidden" name="siswaId" value={siswa.id} />
-                          <button className="text-red-600 hover:underline">Hapus</button>
+                          <button className="text-red-600 hover:underline">{t("delete")}</button>
                         </form>
                       </div>
                     </td>

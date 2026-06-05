@@ -1,46 +1,49 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { isStaff } from "@/lib/session";
 import { canAccess, type ModuleKey } from "@/lib/permissions";
+import { R, PORTAL } from "@/lib/routes";
 import { AppShell } from "./AppShell";
 
-const STAFF_NAV: { href: string; label: string; key?: ModuleKey }[] = [
-  { href: "/dashboard",        label: "Dashboard" },
-  { href: "/pengumuman",       label: "Pengumuman",         key: "pengumuman" },
-  { href: "/siswa",            label: "Data Siswa",          key: "siswa" },
-  { href: "/prestasi",         label: "Prestasi & Beasiswa", key: "siswa" },
-  { href: "/mutasi",           label: "Mutasi Siswa",        key: "siswa" },
-  { href: "/kenaikan-kelas",   label: "Kenaikan Kelas",      key: "rombel" },
-  { href: "/guru",             label: "Data Guru",           key: "guru" },
-  { href: "/rombel",           label: "Rombel / Kelas",      key: "rombel" },
-  { href: "/mapel",            label: "Mata Pelajaran",      key: "mapel" },
-  { href: "/nilai",            label: "Nilai / Rapor",       key: "nilai" },
-  { href: "/nilai/entri",      label: "Entri Nilai Harian",  key: "nilai" },
-  { href: "/p5",               label: "Projek P5",           key: "p5" },
-  { href: "/jurnal",           label: "Jurnal Mengajar",     key: "jurnal" },
-  { href: "/jadwal",           label: "Jadwal Mengajar",     key: "jadwal" },
-  { href: "/elearning",        label: "E-Learning",          key: "elearning" },
-  { href: "/tugas",            label: "Tugas",               key: "tugas" },
-  { href: "/ujian",            label: "Ujian Online",        key: "ujian" },
-  { href: "/presensi",         label: "Presensi",            key: "presensi" },
-  { href: "/ekstrakurikuler",  label: "Ekstrakurikuler",     key: "ekstrakurikuler" },
-  { href: "/bk",               label: "BK / Pelanggaran",   key: "bk" },
-  { href: "/perpustakaan",     label: "Perpustakaan",        key: "perpustakaan" },
-  { href: "/sarpras",          label: "Sarpras",             key: "sarpras" },
-  { href: "/surat",            label: "Surat",               key: "surat" },
-  { href: "/spp",              label: "SPP / Keuangan",      key: "spp" },
-  { href: "/ppdb",             label: "PPDB",                key: "ppdb" },
-  { href: "/kelulusan",        label: "Kelulusan",           key: "kelulusan" },
-  { href: "/osis",             label: "Pemilihan OSIS",      key: "osis" },
-  { href: "/audit",            label: "Audit Log",           key: "audit" },
-  { href: "/pengaturan",       label: "⚙ Pengaturan",       key: "pengaturan" },
+// navKey = key di messages "nav.*", icon opsional prefix
+const STAFF_NAV: { href: string; navKey: string; key?: ModuleKey; icon?: string }[] = [
+  { href: R.DASHBOARD,       navKey: "dashboard" },
+  { href: R.PENGUMUMAN,      navKey: "pengumuman",      key: "pengumuman" },
+  { href: R.SISWA,           navKey: "siswa",            key: "siswa" },
+  { href: R.PRESTASI,        navKey: "prestasi",         key: "siswa" },
+  { href: R.MUTASI,          navKey: "mutasi",           key: "siswa" },
+  { href: R.KENAIKAN_KELAS,  navKey: "kenaikanKelas",    key: "rombel" },
+  { href: R.GURU,            navKey: "guru",             key: "guru" },
+  { href: R.ROMBEL,          navKey: "rombel",           key: "rombel" },
+  { href: R.MAPEL,           navKey: "mapel",            key: "mapel" },
+  { href: R.NILAI,           navKey: "nilai",            key: "nilai" },
+  { href: R.NILAI_ENTRI,     navKey: "nilaiEntri",       key: "nilai" },
+  { href: R.P5,              navKey: "p5",               key: "p5" },
+  { href: R.JURNAL,          navKey: "jurnal",           key: "jurnal" },
+  { href: R.JADWAL,          navKey: "jadwal",           key: "jadwal" },
+  { href: R.ELEARNING,       navKey: "elearning",        key: "elearning" },
+  { href: R.TUGAS,           navKey: "tugas",            key: "tugas" },
+  { href: R.UJIAN,           navKey: "ujian",            key: "ujian" },
+  { href: R.PRESENSI,        navKey: "presensi",         key: "presensi" },
+  { href: R.EKSTRAKURIKULER, navKey: "ekstrakurikuler",  key: "ekstrakurikuler" },
+  { href: R.BK,              navKey: "bk",               key: "bk" },
+  { href: R.PERPUSTAKAAN,    navKey: "perpustakaan",     key: "perpustakaan" },
+  { href: R.SARPRAS,         navKey: "sarpras",          key: "sarpras" },
+  { href: R.SURAT,           navKey: "surat",            key: "surat" },
+  { href: R.SPP,             navKey: "spp",              key: "spp" },
+  { href: R.PPDB,            navKey: "ppdb",             key: "ppdb" },
+  { href: R.KELULUSAN,       navKey: "kelulusan",        key: "kelulusan" },
+  { href: R.OSIS,            navKey: "osis",             key: "osis" },
+  { href: R.AUDIT,           navKey: "audit",            key: "audit" },
+  { href: R.PENGATURAN,      navKey: "pengaturan",       key: "pengaturan", icon: "⚙ " },
 ];
 
-const PORTAL_NAV = [
-  { href: "/portal",      label: "Portal Saya" },
-  { href: "/tugas-saya",  label: "Tugas Saya" },
-  { href: "/ujian-saya",  label: "Ujian Saya" },
-  { href: "/vote",        label: "Pemilihan OSIS" },
+const PORTAL_NAV: { href: string; navKey: string }[] = [
+  { href: PORTAL.HOME,  navKey: "portalSaya" },
+  { href: PORTAL.TUGAS, navKey: "tugasSaya" },
+  { href: PORTAL.UJIAN, navKey: "ujianSaya" },
+  { href: PORTAL.VOTE,  navKey: "vote" },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -48,9 +51,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session?.user) redirect("/login");
   const user = session.user;
 
-  const nav = isStaff(user.role)
+  const t = await getTranslations("nav");
+
+  const source = isStaff(user.role)
     ? STAFF_NAV.filter((n) => !n.key || canAccess(user.role, n.key))
     : PORTAL_NAV;
+
+  const nav = source.map((n) => ({
+    href: n.href,
+    label: ("icon" in n && n.icon ? n.icon : "") + t(n.navKey as never),
+  }));
 
   async function handleSignOut() {
     "use server";

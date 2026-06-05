@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { saveSurat, type SuratFormState } from "../actions";
 
 export type SuratInitial = {
@@ -21,6 +22,7 @@ function Err({ msg }: { msg?: string[] }) {
 }
 
 export default function SuratForm({ initial }: { initial?: SuratInitial }) {
+  const t = useTranslations("surat");
   const [state, formAction, pending] = useActionState<SuratFormState, FormData>(saveSurat, { ok: false });
   const e = state.errors ?? {};
 
@@ -31,34 +33,34 @@ export default function SuratForm({ initial }: { initial?: SuratInitial }) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="sm:col-span-2">
-          <label className="text-sm font-medium text-gray-700">Perihal *</label>
+          <label className="text-sm font-medium text-gray-700">{t("fieldPerihal")}</label>
           <input name="perihal" defaultValue={initial?.perihal ?? ""} className={inCls} />
           <Err msg={e.perihal} />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700">Tanggal</label>
+          <label className="text-sm font-medium text-gray-700">{t("fieldTanggal")}</label>
           <input type="date" name="tanggal" defaultValue={initial?.tanggal ?? ""} className={inCls} />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700">Nomor</label>
+          <label className="text-sm font-medium text-gray-700">{t("fieldNomor")}</label>
           <input name="nomor" defaultValue={initial?.nomor ?? ""} className={inCls} />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700">Jenis</label>
-          <input name="jenis" defaultValue={initial?.jenis ?? ""} placeholder="masuk / keluar" className={inCls} />
+          <label className="text-sm font-medium text-gray-700">{t("fieldJenis")}</label>
+          <input name="jenis" defaultValue={initial?.jenis ?? ""} placeholder={t("jenisPlaceholder")} className={inCls} />
         </div>
       </div>
 
       <div>
-        <label className="text-sm font-medium text-gray-700">Isi</label>
+        <label className="text-sm font-medium text-gray-700">{t("fieldIsi")}</label>
         <textarea name="isi" defaultValue={initial?.isi ?? ""} rows={5} className={inCls} />
       </div>
 
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending} className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50">
-          {pending ? "Menyimpan…" : "Simpan"}
+          {pending ? t("saving") : t("save")}
         </button>
-        <Link href="/surat" className="text-sm text-gray-500 hover:text-gray-900">Batal</Link>
+        <Link href="/surat" className="text-sm text-gray-500 hover:text-gray-900">{t("cancel")}</Link>
       </div>
     </form>
   );

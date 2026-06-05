@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -12,6 +13,7 @@ const fmt = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: 
 
 export default async function JurnalPage() {
   const sekolahId = await requireStaff();
+  const t = await getTranslations("jurnal");
   const rows = await prisma.jurnalGuru.findMany({
     where: { sekolahId },
     orderBy: { tanggal: "desc" },
@@ -22,34 +24,34 @@ export default async function JurnalPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">Jurnal Mengajar Guru</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">{t("title")}</h1>
 
       <form action={createJurnal} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-white p-4">
         <div>
-          <label className="block text-xs text-gray-500">Guru *</label>
-          <GuruSelect sekolahId={sekolahId} name="guruId" required emptyLabel="— pilih guru —" className={inCls} />
+          <label className="block text-xs text-gray-500">{t("fieldGuru")}</label>
+          <GuruSelect sekolahId={sekolahId} name="guruId" required emptyLabel={t("guruEmpty")} className={inCls} />
         </div>
-        <div><label className="block text-xs text-gray-500">Tanggal</label><input type="date" name="tanggal" defaultValue={today} className={inCls} /></div>
-        <div><label className="block text-xs text-gray-500">Kelas</label><input name="kelas" className={`${inCls} w-24`} /></div>
+        <div><label className="block text-xs text-gray-500">{t("fieldTanggal")}</label><input type="date" name="tanggal" defaultValue={today} className={inCls} /></div>
+        <div><label className="block text-xs text-gray-500">{t("fieldKelas")}</label><input name="kelas" className={`${inCls} w-24`} /></div>
         <div>
-          <label className="block text-xs text-gray-500">Mapel</label>
-          <MapelSelect sekolahId={sekolahId} name="mapel" defaultValue="" emptyLabel="— pilih mapel —" className={inCls} />
+          <label className="block text-xs text-gray-500">{t("fieldMapel")}</label>
+          <MapelSelect sekolahId={sekolahId} name="mapel" defaultValue="" emptyLabel={t("mapelEmpty")} className={inCls} />
         </div>
         <div>
-          <label className="block text-xs text-gray-500">Kelas</label>
+          <label className="block text-xs text-gray-500">{t("fieldKelas")}</label>
           <RombelSelect sekolahId={sekolahId} name="kelas" defaultValue="" className={inCls} />
         </div>
-        <div className="flex-1"><label className="block text-xs text-gray-500">Materi</label><input name="materi" className={`${inCls} w-full`} /></div>
-        <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Catat</button>
+        <div className="flex-1"><label className="block text-xs text-gray-500">{t("fieldMateri")}</label><input name="materi" className={`${inCls} w-full`} /></div>
+        <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">{t("addButton")}</button>
       </form>
 
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
-            <tr><th className="px-4 py-2 font-medium">Tanggal</th><th className="px-4 py-2 font-medium">Guru</th><th className="px-4 py-2 font-medium">Kelas</th><th className="px-4 py-2 font-medium">Mapel</th><th className="px-4 py-2 font-medium">Materi</th><th className="px-4 py-2 font-medium text-right">Aksi</th></tr>
+            <tr><th className="px-4 py-2 font-medium">{t("colTanggal")}</th><th className="px-4 py-2 font-medium">{t("colGuru")}</th><th className="px-4 py-2 font-medium">{t("colKelas")}</th><th className="px-4 py-2 font-medium">{t("colMapel")}</th><th className="px-4 py-2 font-medium">{t("colMateri")}</th><th className="px-4 py-2 font-medium text-right">{t("colAksi")}</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {rows.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Belum ada jurnal.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">{t("empty")}</td></tr>}
             {rows.map((j) => (
               <tr key={j.id} className="hover:bg-gray-50">
                 <td className="px-4 py-2 text-gray-600">{fmt(j.tanggal)}</td>
@@ -61,7 +63,7 @@ export default async function JurnalPage() {
                 <td className="px-4 py-2 text-gray-600">{j.kelas ?? "-"}</td>
                 <td className="px-4 py-2 text-gray-600">{j.mapel ?? "-"}</td>
                 <td className="px-4 py-2 text-gray-600">{j.materi ?? "-"}</td>
-                <td className="px-4 py-2 text-right"><ConfirmDelete action={deleteJurnal} id={j.id} message="Hapus jurnal ini?" /></td>
+                <td className="px-4 py-2 text-right"><ConfirmDelete action={deleteJurnal} id={j.id} message={t("deleteConfirm")} /></td>
               </tr>
             ))}
           </tbody>

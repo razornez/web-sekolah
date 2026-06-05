@@ -1,0 +1,17 @@
+{
+  "kelulusan": {
+    "title": "Graduation",
+    "settingTitle": "Announcement Settings",
+    "enablePublic": "Enable public announcement (students can check at <url></url>)",
+    "fieldTanggalRilis": "Release Date",
+    "fieldPengumuman": "Announcement",
+    "saveSetting": "Save Settings",
+    "fieldRombel": "Class/Group",
+    "show": "Show",
+    "colNo": "No",
+    "colNama": "Name",
+    "colStatusKelulusan": "Graduation Status",
+    "empty": "This class has no members yet.",
+    "saveStatus": "Save Status"
+  }
+}

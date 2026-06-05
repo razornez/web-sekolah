@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { saveMapel, type MapelFormState } from "../actions";
 import { AutocompleteSelect, type ACOption } from "@/components/AutocompleteSelect";
 
@@ -39,6 +40,7 @@ export default function MapelForm({
   initial?: MapelInitial;
   guruOptions?: ACOption[];
 }) {
+  const t = useTranslations("mapel");
   const [state, formAction, pending] = useActionState<MapelFormState, FormData>(saveMapel, { ok: false });
   const e = state.errors ?? {};
   const [kode, setKode] = useState(initial?.kodeMapel ?? "");
@@ -50,7 +52,7 @@ export default function MapelForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Nama Mapel *</label>
+          <label className="block text-sm font-medium text-gray-700">{t("formNamaMapel")}</label>
           <input
             name="namaMapel"
             defaultValue={initial?.namaMapel ?? ""}
@@ -63,7 +65,7 @@ export default function MapelForm({
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Kode * <span className="text-xs text-gray-400">(auto, bisa diedit)</span>
+            {t("formKode")} <span className="text-xs text-gray-400">{t("kodeHint")}</span>
           </label>
           <input
             name="kodeMapel"
@@ -77,17 +79,17 @@ export default function MapelForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Kelompok *</label>
+          <label className="block text-sm font-medium text-gray-700">{t("formKelompok")}</label>
           <select name="kelompok" defaultValue={initial?.kelompok ?? "A"} className={inputCls}>
-            <option value="A">A — Wajib Umum</option>
-            <option value="B">B — Wajib Pilihan</option>
-            <option value="C">C — Peminatan</option>
-            <option value="lintasminat">Lintas Minat</option>
-            <option value="muatanlokal">Muatan Lokal</option>
+            <option value="A">{t("optKelompokA")}</option>
+            <option value="B">{t("optKelompokB")}</option>
+            <option value="C">{t("optKelompokC")}</option>
+            <option value="lintasminat">{t("optLintasMinat")}</option>
+            <option value="muatanlokal">{t("optMuatanLokal")}</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Fase</label>
+          <label className="block text-sm font-medium text-gray-700">{t("formFase")}</label>
           <select name="fase" defaultValue={initial?.fase ?? ""} className={inputCls}>
             <option value="">-</option>
             {["A", "B", "C", "D", "E", "F"].map((f) => (
@@ -96,33 +98,33 @@ export default function MapelForm({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">KKM</label>
+          <label className="block text-sm font-medium text-gray-700">{t("formKkm")}</label>
           <input type="number" name="kkm" defaultValue={initial?.kkm ?? 75} min={0} max={100} className={inputCls} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">No. Urut</label>
+          <label className="block text-sm font-medium text-gray-700">{t("formNoUrut")}</label>
           <input type="number" name="noUrut" defaultValue={initial?.noUrut ?? ""} className={inputCls} />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Guru Pengampu Utama</label>
+        <label className="block text-sm font-medium text-gray-700">{t("formGuruPengampu")}</label>
         <AutocompleteSelect
           options={guruOptions}
           name="guruId"
           defaultValue={initial?.guruId ?? ""}
           defaultLabel={guruOptions.find((o) => String(o.value) === String(initial?.guruId))?.label ?? ""}
-          placeholder="Cari nama guru…"
-          emptyLabel="— tidak ada —"
+          placeholder={t("cariGuruPlaceholder")}
+          emptyLabel={t("optTidakAda")}
           className={inputCls}
         />
       </div>
 
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending} className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50">
-          {pending ? "Menyimpan…" : "Simpan"}
+          {pending ? t("saving") : t("save")}
         </button>
-        <Link href="/mapel" className="text-sm text-gray-500 hover:text-gray-900">Batal</Link>
+        <Link href="/mapel" className="text-sm text-gray-500 hover:text-gray-900">{t("cancel")}</Link>
       </div>
     </form>
   );

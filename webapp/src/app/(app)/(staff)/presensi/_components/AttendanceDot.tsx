@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { markSiswaHadir, setSiswaStatus } from "../actions";
 import type { StatusPresensi } from "@prisma/client";
 
 type Status = StatusPresensi | null;
 
-const STATUS_CFG: Record<StatusPresensi, { bg: string; ring: string; label: string; icon: string }> = {
-  hadir:     { bg: "bg-emerald-500", ring: "ring-emerald-300", label: "Hadir",     icon: "✓" },
-  terlambat: { bg: "bg-amber-400",   ring: "ring-amber-200",   label: "Terlambat", icon: "⏱" },
-  izin:      { bg: "bg-sky-400",     ring: "ring-sky-200",     label: "Izin",      icon: "i" },
-  sakit:     { bg: "bg-violet-400",  ring: "ring-violet-200",  label: "Sakit",     icon: "+" },
-  alpa:      { bg: "bg-red-500",     ring: "ring-red-300",     label: "Alpa",      icon: "✗" },
+const STATUS_CFG: Record<StatusPresensi, { bg: string; ring: string; labelKey: string; icon: string }> = {
+  hadir:     { bg: "bg-emerald-500", ring: "ring-emerald-300", labelKey: "statusHadir",     icon: "✓" },
+  terlambat: { bg: "bg-amber-400",   ring: "ring-amber-200",   labelKey: "statusTerlambat", icon: "⏱" },
+  izin:      { bg: "bg-sky-400",     ring: "ring-sky-200",     labelKey: "statusIzin",      icon: "i" },
+  sakit:     { bg: "bg-violet-400",  ring: "ring-violet-200",  labelKey: "statusSakit",     icon: "+" },
+  alpa:      { bg: "bg-red-500",     ring: "ring-red-300",     labelKey: "statusAlpa",      icon: "✗" },
 };
 
 const STATUS_ORDER: StatusPresensi[] = ["hadir", "terlambat", "izin", "sakit", "alpa"];
@@ -29,6 +30,7 @@ export function AttendanceDot({
   isFuture?: boolean;
   size?: "sm" | "md";
 }) {
+  const t = useTranslations("presensi");
   const [status, setStatus] = useState<Status>(initStatus);
   const [showMenu, setShowMenu] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -38,7 +40,7 @@ export function AttendanceDot({
   // Future → gray placeholder
   if (isFuture) {
     return (
-      <div className={`${dim} rounded-full bg-gray-100 border border-dashed border-gray-200`} title="Belum terjadwal" />
+      <div className={`${dim} rounded-full bg-gray-100 border border-dashed border-gray-200`} title={t("dotFutureTooltip")} />
     );
   }
 
@@ -47,7 +49,7 @@ export function AttendanceDot({
     return (
       <button
         disabled={isPending}
-        title="Belum diisi — klik tandai Hadir"
+        title={t("dotBelumTooltip")}
         onClick={() => {
           setStatus("hadir");
           startTransition(() => markSiswaHadir(siswaId, tanggal));
@@ -66,7 +68,7 @@ export function AttendanceDot({
   return (
     <div className="relative">
       <button
-        title={`${cfg.label} — klik untuk ganti`}
+        title={t("dotChangeTooltip", { status: t(cfg.labelKey) })}
         onClick={() => setShowMenu((v) => !v)}
         className={`${dim} rounded-full ${cfg.bg} font-bold text-white flex items-center justify-center
           ring-2 ${cfg.ring} ring-offset-1 hover:scale-110 transition-transform cursor-pointer`}
@@ -80,7 +82,7 @@ export function AttendanceDot({
           {STATUS_ORDER.map((s) => {
             const c = STATUS_CFG[s];
             return (
-              <button key={s} title={c.label}
+              <button key={s} title={t(c.labelKey)}
                 onClick={() => {
                   setStatus(s);
                   setShowMenu(false);

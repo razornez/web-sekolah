@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -10,6 +11,7 @@ const fmt = (d: Date | null) => (d ? d.toLocaleDateString("id-ID", { day: "2-dig
 
 export default async function TugasPage() {
   const sekolahId = await requireModule("tugas");
+  const t = await getTranslations("tugas");
   const [rows, rombel] = await Promise.all([
     prisma.tugas.findMany({
       where: { sekolahId },
@@ -23,37 +25,37 @@ export default async function TugasPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">Tugas</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">{t("title")}</h1>
 
       <form action={createTugas} className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-white p-4">
-        <div className="flex-1"><label className="block text-xs text-gray-500">Judul</label><input name="judul" required className={`${inCls} w-full`} /></div>
-        <div><label className="block text-xs text-gray-500">Mapel</label><input name="mapel" className={inCls} /></div>
+        <div className="flex-1"><label className="block text-xs text-gray-500">{t("fieldJudul")}</label><input name="judul" required className={`${inCls} w-full`} /></div>
+        <div><label className="block text-xs text-gray-500">{t("fieldMapel")}</label><input name="mapel" className={inCls} /></div>
         <div>
-          <label className="block text-xs text-gray-500">Rombel</label>
-          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" emptyLabel="- semua -" className={inCls} />
+          <label className="block text-xs text-gray-500">{t("fieldRombel")}</label>
+          <RombelSelect sekolahId={sekolahId} name="rombelId" defaultValue="" emptyLabel={t("rombelEmptyLabel")} className={inCls} />
         </div>
-        <div><label className="block text-xs text-gray-500">Deadline</label><input type="date" name="deadline" className={inCls} /></div>
-        <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Tambah</button>
+        <div><label className="block text-xs text-gray-500">{t("fieldDeadline")}</label><input type="date" name="deadline" className={inCls} /></div>
+        <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">{t("add")}</button>
       </form>
 
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
-            <tr><th className="px-4 py-2 font-medium">Judul</th><th className="px-4 py-2 font-medium">Mapel</th><th className="px-4 py-2 font-medium">Rombel</th><th className="px-4 py-2 font-medium">Deadline</th><th className="px-4 py-2 font-medium">Terkumpul</th><th className="px-4 py-2 font-medium text-right">Aksi</th></tr>
+            <tr><th className="px-4 py-2 font-medium">{t("colJudul")}</th><th className="px-4 py-2 font-medium">{t("colMapel")}</th><th className="px-4 py-2 font-medium">{t("colRombel")}</th><th className="px-4 py-2 font-medium">{t("colDeadline")}</th><th className="px-4 py-2 font-medium">{t("colTerkumpul")}</th><th className="px-4 py-2 font-medium text-right">{t("colAksi")}</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {rows.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Belum ada tugas.</td></tr>}
-            {rows.map((t) => (
-              <tr key={t.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2"><Link href={`/tugas/${t.id}`} className="font-medium text-gray-900 hover:underline">{t.judul}</Link></td>
-                <td className="px-4 py-2 text-gray-600">{t.mapel ?? "-"}</td>
-                <td className="px-4 py-2 text-gray-600">{t.rombelId ? rombelMap.get(t.rombelId) ?? "-" : "Semua"}</td>
-                <td className="px-4 py-2 text-gray-600">{fmt(t.deadline)}</td>
-                <td className="px-4 py-2 text-gray-600">{t._count.pengumpulan}</td>
+            {rows.length === 0 && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">{t("empty")}</td></tr>}
+            {rows.map((tg) => (
+              <tr key={tg.id} className="hover:bg-gray-50">
+                <td className="px-4 py-2"><Link href={`/tugas/${tg.id}`} className="font-medium text-gray-900 hover:underline">{tg.judul}</Link></td>
+                <td className="px-4 py-2 text-gray-600">{tg.mapel ?? "-"}</td>
+                <td className="px-4 py-2 text-gray-600">{tg.rombelId ? rombelMap.get(tg.rombelId) ?? "-" : t("rombelSemua")}</td>
+                <td className="px-4 py-2 text-gray-600">{fmt(tg.deadline)}</td>
+                <td className="px-4 py-2 text-gray-600">{tg._count.pengumpulan}</td>
                 <td className="px-4 py-2 text-right">
                   <div className="flex items-center justify-end gap-3">
-                    <Link href={`/tugas/${t.id}`} className="text-gray-600 hover:underline">Periksa</Link>
-                    <ConfirmDelete action={deleteTugas} id={t.id} message={`Hapus tugas "${t.judul}"?`} />
+                    <Link href={`/tugas/${tg.id}`} className="text-gray-600 hover:underline">{t("check")}</Link>
+                    <ConfirmDelete action={deleteTugas} id={tg.id} message={t("deleteConfirm", { judul: tg.judul })} />
                   </div>
                 </td>
               </tr>

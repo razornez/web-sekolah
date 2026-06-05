@@ -1,0 +1,20 @@
+{
+  "elearning": {
+    "title": "E-Learning",
+    "fieldJudul": "Judul",
+    "fieldGuru": "Guru",
+    "guruEmpty": "— tidak ada —",
+    "fieldKelas": "Kelas",
+    "fieldMapel": "Mapel",
+    "fieldLink": "Link/Tautan",
+    "addButton": "+ Tambah",
+    "colJudul": "Judul",
+    "colKelas": "Kelas",
+    "colMapel": "Mapel",
+    "colTautan": "Tautan",
+    "colAksi": "Aksi",
+    "empty": "Belum ada materi.",
+    "open": "buka",
+    "deleteConfirm": "Hapus \"{judul}\"?"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "tugas": {
+    "title": "Assignments",
+    "fieldJudul": "Title",
+    "fieldMapel": "Subject",
+    "fieldRombel": "Class Group",
+    "rombelEmptyLabel": "- all -",
+    "fieldDeadline": "Deadline",
+    "add": "+ Add",
+    "colJudul": "Title",
+    "colMapel": "Subject",
+    "colRombel": "Class Group",
+    "colDeadline": "Deadline",
+    "colTerkumpul": "Submitted",
+    "colAksi": "Actions",
+    "empty": "No assignments yet.",
+    "rombelSemua": "All",
+    "check": "Review",
+    "deleteConfirm": "Delete assignment \"{judul}\"?",
+    "back": "← Assignments",
+    "detailSubtitle": "{mapel} · {n} submissions",
+    "colSiswa": "Student",
+    "colJawaban": "Answer",
+    "colWaktu": "Time",
+    "colNilai": "Grade",
+    "emptyPengumpulan": "No submissions yet.",
+    "attachment": "attachment",
+    "save": "Save"
+  }
+}

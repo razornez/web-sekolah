@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -22,6 +23,18 @@ export default async function SarprasPage({
   searchParams: Promise<{ q?: string; kondisi?: string; kategori?: string }>;
 }) {
   const sekolahId = await requireStaff();
+  const t = await getTranslations("sarpras");
+  // Map DB kondisi values → translation keys (keys stay as stored DB values).
+  const KONDISI_KEY: Record<string, string> = {
+    "Baik": "kondisiBaik",
+    "Cukup": "kondisiCukup",
+    "Rusak Ringan": "kondisiRusakRingan",
+    "Rusak Berat": "kondisiRusakBerat",
+    "Tidak Layak": "kondisiTidakLayak",
+    "Tidak Diketahui": "kondisiUnknown",
+    "Lainnya": "other",
+  };
+  const kondisiLabel = (k: string): string => (KONDISI_KEY[k] ? t(KONDISI_KEY[k]) : k);
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const kondisiFilter = sp.kondisi ?? "";
@@ -63,56 +76,56 @@ export default async function SarprasPage({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Sarana &amp; Prasarana</h1>
-          <p className="text-sm text-gray-500">{rows.length} dari {await prisma.sarpras.count({ where: { sekolahId } })} item</p>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{t("title")}</h1>
+          <p className="text-sm text-gray-500">{t("subtitle", { shown: rows.length, total: await prisma.sarpras.count({ where: { sekolahId } }) })}</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/sarpras/kategori" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">Kelola Kategori</Link>
+          <Link href="/sarpras/kategori" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">{t("manageCategory")}</Link>
         </div>
       </div>
 
       {/* Form tambah */}
       <details className="group rounded-2xl border border-gray-200 bg-white shadow-sm">
         <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 select-none">
-          <span className="text-sm font-semibold text-gray-800">+ Tambah Item Baru</span>
-          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
-          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
+          <span className="text-sm font-semibold text-gray-800">{t("addItem")}</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">{t("open")}</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">{t("close")}</span>
         </summary>
         <form action={createSarpras} className="border-t border-gray-100 px-5 py-4 flex flex-wrap items-end gap-2 sm:gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Nama *</label>
-            <input name="nama" required placeholder="Proyektor" className={`${inCls} min-w-[160px]`} />
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldNama")}</label>
+            <input name="nama" required placeholder={t("namaPlaceholder")} className={`${inCls} min-w-[160px]`} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldKategori")}</label>
             <select name="kategoriId" defaultValue="" className={inCls}>
-              <option value="">— pilih —</option>
+              <option value="">{t("selectPlaceholder")}</option>
               {kategori.map((k) => <option key={k.id} value={k.id}>{k.nama}</option>)}
-              <option value="__lainnya">Lainnya</option>
+              <option value="__lainnya">{t("other")}</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Jumlah</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldJumlah")}</label>
             <input name="jumlah" type="number" min={0} defaultValue={1} className={`${inCls} w-20`} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kondisi</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldKondisi")}</label>
             <select name="kondisi" defaultValue="Baik" className={inCls}>
-              <option value="">— kondisi —</option>
-              {KONDISI_LIST.map(k => <option key={k} value={k}>{k}</option>)}
-              <option value="Lainnya">Lainnya</option>
+              <option value="">{t("kondisiPlaceholder")}</option>
+              {KONDISI_LIST.map(k => <option key={k} value={k}>{kondisiLabel(k)}</option>)}
+              <option value="Lainnya">{t("other")}</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Tahun Pengadaan</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldTahunPengadaan")}</label>
             <input name="tahunPengadaan" type="number" min={1990} max={2099}
               placeholder={String(new Date().getFullYear())} className={`${inCls} w-28`} />
           </div>
           <div className="flex-1 min-w-36">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Keterangan</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldKeterangan")}</label>
             <input name="keterangan" className={`${inCls} w-full`} />
           </div>
-          <button className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Simpan</button>
+          <button className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">{t("save")}</button>
         </form>
       </details>
 
@@ -120,29 +133,29 @@ export default async function SarprasPage({
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <form className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-40">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Cari nama</label>
-            <input name="q" defaultValue={q} placeholder="Proyektor, meja, kursi…"
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("searchLabel")}</label>
+            <input name="q" defaultValue={q} placeholder={t("searchPlaceholder")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kondisi</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldKondisi")}</label>
             <select name="kondisi" defaultValue={kondisiFilter} className={inCls}>
-              <option value="">Semua</option>
-              {KONDISI_LIST.map(k => <option key={k} value={k}>{k}</option>)}
-              <option value="Lainnya">Lainnya</option>
+              <option value="">{t("all")}</option>
+              {KONDISI_LIST.map(k => <option key={k} value={k}>{kondisiLabel(k)}</option>)}
+              <option value="Lainnya">{t("other")}</option>
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldKategori")}</label>
             <select name="kategori" defaultValue={kategoriFilter || ""} className={inCls}>
-              <option value="">Semua Kategori</option>
+              <option value="">{t("allCategories")}</option>
               {kategori.map(k => <option key={k.id} value={k.id}>{k.nama}</option>)}
             </select>
           </div>
           <div className="flex gap-2">
-            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Terapkan</button>
+            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("apply")}</button>
             {(q || kondisiFilter || kategoriFilter > 0) && (
-              <Link href="/sarpras" className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">Reset</Link>
+              <Link href="/sarpras" className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">{t("reset")}</Link>
             )}
           </div>
         </form>
@@ -152,14 +165,13 @@ export default async function SarprasPage({
       <div className="flex flex-wrap gap-2">
         <Link href={makeFilter({ kondisi: "" })}
           className={`rounded-full border px-3 py-1.5 text-xs font-medium ${!kondisiFilter ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
-          Semua ({rows.length})
+          {t("allCount", { n: rows.length })}
         </Link>
         {sortedGroups.map(([k, items]) => {
-          const cfg = KONDISI_CONFIG[k];
           return (
             <Link key={k} href={makeFilter({ kondisi: k })}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium ${kondisiFilter === k ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
-              {cfg ? `${k} (${items.length})` : `${k} (${items.length})`}
+              {`${kondisiLabel(k)} (${items.length})`}
             </Link>
           );
         })}
@@ -168,7 +180,7 @@ export default async function SarprasPage({
       {/* Grouped list */}
       {rows.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-12 text-center text-gray-400">
-          Tidak ada item sarpras.
+          {t("emptyFilter")}
         </div>
       ) : (
         <div className="space-y-5">
@@ -178,21 +190,21 @@ export default async function SarprasPage({
               <div key={kondisi} className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
                 {/* Group header */}
                 <div className={`flex items-center gap-3 border-b border-gray-100 px-5 py-3 ${cfg ? cfg.bg : "bg-gray-100"}`}>
-                  <span className={`text-sm font-bold ${cfg ? cfg.color : "text-gray-600"}`}>{kondisi}</span>
+                  <span className={`text-sm font-bold ${cfg ? cfg.color : "text-gray-600"}`}>{kondisiLabel(kondisi)}</span>
                   <span className="rounded-full bg-white/70 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                    {items.length} item · {items.reduce((s, i) => s + i.jumlah, 0)} unit
+                    {t("groupSummary", { items: items.length, units: items.reduce((s, i) => s + i.jumlah, 0) })}
                   </span>
                 </div>
                 {/* Items */}
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-xs text-gray-500">
                     <tr>
-                      <th className="px-4 py-2 text-left font-semibold uppercase tracking-wide">Nama</th>
-                      <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">Kategori</th>
-                      <th className="px-4 py-2 text-center font-semibold uppercase tracking-wide">Jumlah</th>
-                      <th className="hidden px-4 py-2 text-center font-semibold uppercase tracking-wide sm:table-cell">Thn Pengadaan</th>
-                      <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">Keterangan</th>
-                      <th className="px-4 py-2 text-right font-semibold uppercase tracking-wide">Aksi</th>
+                      <th className="px-4 py-2 text-left font-semibold uppercase tracking-wide">{t("colNama")}</th>
+                      <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">{t("colKategori")}</th>
+                      <th className="px-4 py-2 text-center font-semibold uppercase tracking-wide">{t("colJumlah")}</th>
+                      <th className="hidden px-4 py-2 text-center font-semibold uppercase tracking-wide sm:table-cell">{t("colTahun")}</th>
+                      <th className="hidden px-4 py-2 text-left font-semibold uppercase tracking-wide sm:table-cell">{t("colKeterangan")}</th>
+                      <th className="px-4 py-2 text-right font-semibold uppercase tracking-wide">{t("colAksi")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -208,7 +220,7 @@ export default async function SarprasPage({
                         <td className="hidden px-4 py-2.5 text-center text-gray-500 sm:table-cell">{s.tahunPengadaan ?? "—"}</td>
                         <td className="hidden px-4 py-2.5 text-gray-500 max-w-[200px] truncate sm:table-cell">{s.keterangan ?? "—"}</td>
                         <td className="px-4 py-2.5 text-right">
-                          <ConfirmDelete action={deleteSarpras} id={s.id} message={`Hapus "${s.nama}"?`} />
+                          <ConfirmDelete action={deleteSarpras} id={s.id} message={t("deleteConfirm", { nama: s.nama })} />
                         </td>
                       </tr>
                     ))}

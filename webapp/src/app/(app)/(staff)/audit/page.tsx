@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 
@@ -18,6 +19,7 @@ export default async function AuditPage({
   searchParams: Promise<{ aksi?: string; entitas?: string; user?: string; page?: string }>;
 }) {
   const sekolahId = await requireModule("audit");
+  const t = await getTranslations("audit");
   const sp = await searchParams;
   const aksi = sp.aksi ?? "";
   const entitas = sp.entitas ?? "";
@@ -60,18 +62,18 @@ export default async function AuditPage({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Audit Log</h1>
-        <p className="text-sm text-gray-500">{total.toLocaleString("id-ID")} entri · semua aksi tulis oleh staf</p>
+        <h1 className="text-2xl font-semibold text-gray-900">{t("title")}</h1>
+        <p className="text-sm text-gray-500">{t("subtitle", { n: total.toLocaleString("id-ID") })}</p>
       </div>
 
       {/* Filter */}
       <div className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 bg-white p-4">
         <div>
-          <label className="block text-xs text-gray-500">Aksi</label>
+          <label className="block text-xs text-gray-500">{t("fieldAksi")}</label>
           <div className="flex gap-1">
             {["", "create", "update", "delete"].map((a) => (
               <Link key={a} href={hrefFilter({ aksi: a })} className={`rounded px-2 py-1 text-xs border ${aksi === a ? "border-gray-900 bg-gray-900 text-white" : "border-gray-300 hover:bg-gray-100"}`}>
-                {a === "" ? "Semua" : a}
+                {a === "" ? t("all") : a}
               </Link>
             ))}
           </div>
@@ -80,26 +82,26 @@ export default async function AuditPage({
           <input type="hidden" name="aksi" value={aksi} />
           <input type="hidden" name="user" value={user} />
           <div>
-            <label className="block text-xs text-gray-500">Entitas</label>
+            <label className="block text-xs text-gray-500">{t("fieldEntitas")}</label>
             <select name="entitas" defaultValue={entitas} className="rounded-md border border-gray-300 px-2 py-1 text-sm">
-              <option value="">Semua</option>
+              <option value="">{t("all")}</option>
               {entitasList.map((e) => <option key={e.entitas} value={e.entitas}>{e.entitas}</option>)}
             </select>
           </div>
-          <button className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100">Filter</button>
+          <button className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100">{t("filter")}</button>
         </form>
         <form className="flex items-end gap-2">
           <input type="hidden" name="aksi" value={aksi} />
           <input type="hidden" name="entitas" value={entitas} />
-          <div><label className="block text-xs text-gray-500">Cari nama user</label><input name="user" defaultValue={user} className="rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900" /></div>
-          <button className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100">Cari</button>
+          <div><label className="block text-xs text-gray-500">{t("searchUser")}</label><input name="user" defaultValue={user} className="rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900" /></div>
+          <button className="rounded-md border border-gray-300 px-3 py-1 text-sm hover:bg-gray-100">{t("search")}</button>
         </form>
-        {(aksi || entitas || user) && <Link href="/audit" className="text-sm text-gray-500 hover:text-gray-900">Reset</Link>}
+        {(aksi || entitas || user) && <Link href="/audit" className="text-sm text-gray-500 hover:text-gray-900">{t("reset")}</Link>}
       </div>
 
       {/* Entitas filter chips */}
       <div className="flex flex-wrap gap-1">
-        <Link href={hrefFilter({ entitas: "" })} className={`rounded-full border px-3 py-1 text-xs ${!entitas ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-100"}`}>Semua</Link>
+        <Link href={hrefFilter({ entitas: "" })} className={`rounded-full border px-3 py-1 text-xs ${!entitas ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-100"}`}>{t("all")}</Link>
         {entitasList.map((e) => (
           <Link key={e.entitas} href={hrefFilter({ entitas: e.entitas })} className={`rounded-full border px-3 py-1 text-xs ${entitas === e.entitas ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-100"}`}>
             {e.entitas}
@@ -111,17 +113,17 @@ export default async function AuditPage({
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
-              <th className="px-4 py-2 font-medium">Waktu</th>
-              <th className="px-4 py-2 font-medium">User</th>
-              <th className="px-4 py-2 font-medium">Role</th>
-              <th className="px-4 py-2 font-medium">Aksi</th>
-              <th className="px-4 py-2 font-medium">Entitas</th>
-              <th className="px-4 py-2 font-medium">Detail</th>
+              <th className="px-4 py-2 font-medium">{t("colWaktu")}</th>
+              <th className="px-4 py-2 font-medium">{t("colUser")}</th>
+              <th className="px-4 py-2 font-medium">{t("colRole")}</th>
+              <th className="px-4 py-2 font-medium">{t("colAksi")}</th>
+              <th className="px-4 py-2 font-medium">{t("colEntitas")}</th>
+              <th className="px-4 py-2 font-medium">{t("colDetail")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {rows.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">Belum ada log.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400">{t("empty")}</td></tr>
             )}
             {rows.map((r) => (
               <tr key={String(r.id)} className="hover:bg-gray-50">
@@ -141,10 +143,10 @@ export default async function AuditPage({
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>Halaman {page} dari {totalPages}</span>
+          <span>{t("pageInfo", { page, total: totalPages })}</span>
           <div className="flex gap-2">
-            {page > 1 && <Link href={hrefPage(page - 1)} className="rounded-md border border-gray-300 px-3 py-1.5 hover:bg-gray-100">← Sebelumnya</Link>}
-            {page < totalPages && <Link href={hrefPage(page + 1)} className="rounded-md border border-gray-300 px-3 py-1.5 hover:bg-gray-100">Selanjutnya →</Link>}
+            {page > 1 && <Link href={hrefPage(page - 1)} className="rounded-md border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("prev")}</Link>}
+            {page < totalPages && <Link href={hrefPage(page + 1)} className="rounded-md border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("next")}</Link>}
           </div>
         </div>
       )}

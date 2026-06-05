@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -11,6 +12,7 @@ export default async function RombelPage({
   searchParams: Promise<{ ta?: string; tingkat?: string; wali?: string; groupBy?: string }>;
 }) {
   const sekolahId = await requireModule("rombel");
+  const t = await getTranslations("rombel");
   const sp = await searchParams;
   const taFilter = Number(sp.ta) || 0;
   const tingkatFilter = Number(sp.tingkat) || 0;
@@ -62,7 +64,7 @@ export default async function RombelPage({
         groups.push({
           key: r.tahunAjaranId,
           label: r.tahunAjaran.tahun,
-          sublabel: r.tahunAjaran.aktif ? "Aktif" : undefined,
+          sublabel: r.tahunAjaran.aktif ? t("groupAktif") : undefined,
           rows: group,
         });
       }
@@ -81,7 +83,7 @@ export default async function RombelPage({
       }
     }
   } else {
-    groups = [{ key: "all", label: "Semua Rombel", rows }];
+    groups = [{ key: "all", label: t("groupAllRombel"), rows }];
   }
 
   const makeFilter = (extra: Record<string, string>) =>
@@ -92,11 +94,11 @@ export default async function RombelPage({
       {/* Header */}
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Rombel / Kelas</h1>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{t("title")}</h1>
           <p className="text-sm text-gray-500">
-            {rows.length} rombel · {totalSiswa.toLocaleString("id-ID")} siswa
+            {t("summary", { rombel: rows.length, siswa: totalSiswa.toLocaleString("id-ID") })}
             {tanpaWali > 0 && (
-              <span className="ml-2 text-amber-600">· ⚠ {tanpaWali} tanpa wali kelas</span>
+              <span className="ml-2 text-amber-600">{t("tanpaWali", { n: tanpaWali })}</span>
             )}
           </p>
         </div>
@@ -105,7 +107,7 @@ export default async function RombelPage({
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Rombel
+          {t("addRombel")}
         </Link>
       </div>
 
@@ -113,43 +115,43 @@ export default async function RombelPage({
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <form className="flex flex-wrap items-end gap-2 sm:gap-3">
           <div className="w-full sm:w-auto">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Tahun Ajaran</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelTahunAjaran")}</label>
             <select name="ta" defaultValue={taFilter || ""} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
-              <option value="">Semua TA</option>
+              <option value="">{t("optAllTa")}</option>
               {tahunAjaranList.map((t) => (
                 <option key={t.id} value={t.id}>{t.tahun}{t.aktif ? " ★" : ""}</option>
               ))}
             </select>
           </div>
           <div className="w-full sm:w-auto">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Tingkat</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelTingkat")}</label>
             <select name="tingkat" defaultValue={tingkatFilter || ""} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
-              <option value="">Semua Tingkat</option>
+              <option value="">{t("optAllTingkat")}</option>
               {tingkatList.map((t) => (
                 <option key={t.id} value={t.id}>{t.nama}</option>
               ))}
             </select>
           </div>
           <div className="w-full sm:w-auto">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Wali Kelas</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelWali")}</label>
             <select name="wali" defaultValue={waliFilter} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
-              <option value="">Semua</option>
-              <option value="ada">Ada wali kelas</option>
-              <option value="kosong">Belum ada wali</option>
+              <option value="">{t("optAll")}</option>
+              <option value="ada">{t("optWaliAda")}</option>
+              <option value="kosong">{t("optWaliKosong")}</option>
             </select>
           </div>
           <div className="w-full sm:w-auto">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kelompokkan</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelGroupBy")}</label>
             <select name="groupBy" defaultValue={groupBy} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-sm outline-none focus:border-gray-900 sm:w-auto">
-              <option value="ta">Per Tahun Ajaran</option>
-              <option value="tingkat">Per Tingkat</option>
-              <option value="none">Tanpa pengelompokan</option>
+              <option value="ta">{t("groupPerTa")}</option>
+              <option value="tingkat">{t("groupPerTingkat")}</option>
+              <option value="none">{t("groupNone")}</option>
             </select>
           </div>
           <div className="flex gap-2">
-            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Terapkan</button>
+            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("apply")}</button>
             {(taFilter || tingkatFilter || waliFilter) && (
-              <Link href="/rombel" className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">Reset</Link>
+              <Link href="/rombel" className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">{t("reset")}</Link>
             )}
           </div>
         </form>
@@ -157,7 +159,7 @@ export default async function RombelPage({
 
       {/* Group by tabs (quick switch) */}
       <div className="flex gap-1">
-        {[["ta", "Per TA"], ["tingkat", "Per Tingkat"], ["none", "Flat"]].map(([val, lbl]) => (
+        {[["ta", t("tabPerTa")], ["tingkat", t("tabPerTingkat")], ["none", t("tabFlat")]].map(([val, lbl]) => (
           <Link key={val} href={makeFilter({ groupBy: val })}
             className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${groupBy === val ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
             {lbl}
@@ -169,9 +171,9 @@ export default async function RombelPage({
       {rows.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
           <div className="text-4xl">🏫</div>
-          <p className="mt-3 text-sm text-gray-500">Belum ada rombel yang sesuai filter.</p>
+          <p className="mt-3 text-sm text-gray-500">{t("emptyFilter")}</p>
           <Link href="/rombel/new" className="mt-3 inline-block rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800">
-            + Tambah Rombel
+            {t("addRombelPlus")}
           </Link>
         </div>
       ) : (
@@ -188,10 +190,10 @@ export default async function RombelPage({
                     </span>
                   )}
                   <span className="rounded-full bg-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                    {g.rows.length} rombel
+                    {t("groupCount", { n: g.rows.length })}
                   </span>
                   <span className="text-xs text-gray-400">
-                    {g.rows.reduce((s, r) => s + r._count.anggota, 0)} siswa
+                    {t("groupSiswa", { n: g.rows.reduce((s, r) => s + r._count.anggota, 0) })}
                   </span>
                 </div>
               </div>
@@ -225,7 +227,7 @@ export default async function RombelPage({
                       {/* Siswa count + bar */}
                       <div className="mt-3">
                         <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                          <span>Siswa</span>
+                          <span>{t("siswaLabel")}</span>
                           <span className="font-semibold text-gray-700">{r._count.anggota}</span>
                         </div>
                         <div className="h-1.5 w-full rounded-full bg-gray-100">
@@ -246,19 +248,19 @@ export default async function RombelPage({
                             <span className="truncate text-xs text-gray-600">{r.waliGuru.namaGuru}</span>
                           </>
                         ) : (
-                          <span className="text-xs text-amber-600">⚠ Belum ada wali kelas</span>
+                          <span className="text-xs text-amber-600">{t("belumAdaWali")}</span>
                         )}
                       </div>
 
                       {/* Actions */}
                       <div className="mt-3 flex items-center gap-2 border-t border-gray-100 pt-2.5">
                         <Link href={`/rombel/${r.id}`} className="flex-1 rounded-lg border border-gray-300 py-1 text-center text-xs font-medium hover:bg-gray-100">
-                          Kelola
+                          {t("kelola")}
                         </Link>
                         <Link href={`/rombel/${r.id}/edit`} className="rounded-lg border border-gray-300 px-2 py-1 text-xs hover:bg-gray-100">
-                          Edit
+                          {t("edit")}
                         </Link>
-                        <ConfirmDelete action={deleteRombel} id={r.id} message={`Hapus rombel "${r.nama}"?`} />
+                        <ConfirmDelete action={deleteRombel} id={r.id} message={t("confirmDelete", { nama: r.nama })} />
                       </div>
                     </div>
                   );

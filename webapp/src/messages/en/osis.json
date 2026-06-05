@@ -1,0 +1,19 @@
+{
+  "osis": {
+    "title": "Student Council Election",
+    "summary": "{candidates} candidates · {votes} votes cast",
+    "fieldNo": "No",
+    "fieldKetua": "Chairperson",
+    "fieldWakil": "Vice",
+    "fieldVisi": "Vision",
+    "add": "+ Add",
+    "colKandidat": "Candidate",
+    "colSuara": "Votes",
+    "colAksi": "Actions",
+    "empty": "No candidates yet.",
+    "wakilPlaceholder": "vice",
+    "visiPlaceholder": "vision",
+    "save": "Save",
+    "deleteConfirm": "Delete candidate No.{no}?"
+  }
+}

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import RombelForm from "../../_components/RombelForm";
@@ -10,6 +11,7 @@ export default async function EditRombelPage({
   params: Promise<{ id: string }>;
 }) {
   const sekolahId = await requireModule("rombel");
+  const t = await getTranslations("rombel");
   const { id } = await params;
   const [rombel, opts] = await Promise.all([
     prisma.rombel.findFirst({ where: { id: Number(id), sekolahId } }),
@@ -19,7 +21,7 @@ export default async function EditRombelPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">Edit Rombel</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">{t("editTitle")}</h1>
       <RombelForm
         {...opts}
         initial={{

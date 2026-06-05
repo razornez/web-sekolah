@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -59,6 +60,7 @@ export default async function PerpustakaanPage({
   searchParams: Promise<{ q?: string; page?: string; filter?: string }>;
 }) {
   const sekolahId = await requireModule("perpustakaan");
+  const t = await getTranslations("perpustakaan");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const page = Math.max(1, Number(sp.page) || 1);
@@ -104,28 +106,28 @@ export default async function PerpustakaanPage({
     <div className="space-y-5">
       <PageGuide
         icon="📚"
-        title="Perpustakaan"
-        description="Kelola koleksi buku, peminjaman, dan pengembalian. Setiap buku ditampilkan dengan cover berwarna, status stok, dan daftar peminjam aktif."
+        title={t("title")}
+        description={t("guideDescription")}
         tips={[
-          "Filter 'Dipinjam' untuk melihat buku yang sedang keluar.",
-          "Filter 'Tersedia' untuk buku yang semua eksemplarnya ada.",
-          "Buku merah = overdue (dipinjam > 7 hari, belum dikembalikan).",
-          "Klik + Pinjam → halaman peminjaman per siswa.",
+          t("tip1"),
+          t("tip2"),
+          t("tip3"),
+          t("tip4"),
         ]}
       />
 
       {/* Header & Stats */}
       <div className="flex flex-wrap items-start gap-4">
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Perpustakaan</h1>
-          <p className="text-sm text-gray-500">{total.toLocaleString("id-ID")} judul · {(stats._sum.jumlahEksemplar ?? 0).toLocaleString("id-ID")} eksemplar</p>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{t("title")}</h1>
+          <p className="text-sm text-gray-500">{t("subtitle", { judul: total.toLocaleString("id-ID"), eksemplar: (stats._sum.jumlahEksemplar ?? 0).toLocaleString("id-ID") })}</p>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-3">
           {/* Stat chips */}
           {overdueCount > 0 && (
             <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-3 py-2">
               <span className="text-lg">⚠️</span>
-              <div><div className="text-lg font-bold text-red-700 leading-none">{overdueCount}</div><div className="text-xs text-red-500">Overdue</div></div>
+              <div><div className="text-lg font-bold text-red-700 leading-none">{overdueCount}</div><div className="text-xs text-red-500">{t("overdue")}</div></div>
             </div>
           )}
           <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">
@@ -134,15 +136,15 @@ export default async function PerpustakaanPage({
               <div className="text-lg font-bold text-amber-700 leading-none">
                 {rows.reduce((s, r) => s + r._count.pinjaman, 0)}
               </div>
-              <div className="text-xs text-amber-500">Dipinjam</div>
+              <div className="text-xs text-amber-500">{t("borrowed")}</div>
             </div>
           </div>
           <Link href="/perpustakaan/pinjam" className="flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            Pinjam Buku
+            {t("borrowBook")}
           </Link>
           <Link href="/perpustakaan/new" className="flex items-center gap-2 rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50">
-            + Tambah Buku
+            {t("addBook")}
           </Link>
         </div>
       </div>
@@ -151,12 +153,12 @@ export default async function PerpustakaanPage({
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <form className="flex flex-1 gap-2">
           <input type="hidden" name="filter" value={filter} />
-          <input name="q" defaultValue={q} placeholder="Cari judul, pengarang, ISBN…" className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
-          <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+          <input name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
+          <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("search")}</button>
           {q && <Link href={`/perpustakaan?filter=${filter}`} className="px-2 py-2 text-sm text-gray-500 hover:text-gray-900">✕</Link>}
         </form>
         <div className="flex gap-1">
-          {[["semua","Semua"],["tersedia","Tersedia"],["dipinjam","Dipinjam"]].map(([val, lbl]) => (
+          {[["semua",t("filterAll")],["tersedia",t("filterAvailable")],["dipinjam",t("filterBorrowed")]].map(([val, lbl]) => (
             <Link key={val} href={`/perpustakaan?${new URLSearchParams({ q, filter: val, page:"1" }).toString()}`}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${filter === val ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
               {lbl}
@@ -169,7 +171,7 @@ export default async function PerpustakaanPage({
       {rows.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
           <div className="text-5xl">📚</div>
-          <p className="mt-3 text-sm text-gray-500">Tidak ada buku ditemukan.</p>
+          <p className="mt-3 text-sm text-gray-500">{t("empty")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -196,11 +198,11 @@ export default async function PerpustakaanPage({
                     {/* Stok badges */}
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${stokTersedia > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                        📦 {stokTersedia}/{b.jumlahEksemplar} tersedia
+                        {t("stockAvailable", { tersedia: stokTersedia, total: b.jumlahEksemplar })}
                       </span>
                       {dipinjam > 0 && (
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${hasOverdue ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
-                          {hasOverdue ? "⚠️" : "📖"} {dipinjam} dipinjam
+                          {hasOverdue ? "⚠️" : "📖"} {t("borrowedBadge", { n: dipinjam })}
                         </span>
                       )}
                     </div>
@@ -220,13 +222,13 @@ export default async function PerpustakaanPage({
                                 <Link href={`/siswa/${p.siswa?.id}`} className="hover:underline">{p.siswa?.namaLengkap ?? "?"}</Link>
                               </span>
                               <span className={`ml-auto shrink-0 ${overdue ? "font-semibold" : ""}`}>
-                                {overdue ? `⚠ ${days}h` : `${days}h`}
+                                {overdue ? t("daysOverdue", { n: days }) : t("daysShort", { n: days })}
                               </span>
                             </div>
                           );
                         })}
                         {b.pinjaman.length > 2 && (
-                          <p className="text-xs text-gray-400 text-center">+{b.pinjaman.length - 2} lainnya</p>
+                          <p className="text-xs text-gray-400 text-center">{t("moreOthers", { n: b.pinjaman.length - 2 })}</p>
                         )}
                       </div>
                     )}
@@ -240,12 +242,12 @@ export default async function PerpustakaanPage({
                   </div>
                   <div className="flex gap-2">
                     <Link href={`/perpustakaan/pinjam`} className="rounded-md bg-gray-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-gray-800">
-                      + Pinjam
+                      {t("borrow")}
                     </Link>
                     <Link href={`/perpustakaan/${b.id}`} className="rounded-md border border-gray-300 px-2.5 py-1 text-xs hover:bg-white">
-                      Edit
+                      {t("edit")}
                     </Link>
-                    <ConfirmDelete action={deleteBuku} id={b.id} message={`Hapus "${b.judul}"?`} />
+                    <ConfirmDelete action={deleteBuku} id={b.id} message={t("deleteConfirm", { judul: b.judul })} />
                   </div>
                 </div>
               </div>
@@ -257,10 +259,10 @@ export default async function PerpustakaanPage({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>Halaman {page} dari {totalPages} ({total.toLocaleString("id-ID")} judul)</span>
+          <span>{t("pageInfo", { page, total: totalPages, judul: total.toLocaleString("id-ID") })}</span>
           <div className="flex gap-2">
-            {page > 1 && <Link href={hp(page - 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">← Sebelumnya</Link>}
-            {page < totalPages && <Link href={hp(page + 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">Selanjutnya →</Link>}
+            {page > 1 && <Link href={hp(page - 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("prev")}</Link>}
+            {page < totalPages && <Link href={hp(page + 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("next")}</Link>}
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { AttendanceDot } from "./_components/AttendanceDot";
@@ -89,6 +90,7 @@ export default async function PresensiPage({
   searchParams: Promise<{ jadwalId?: string; week?: string }>;
 }) {
   const sekolahId = await requireModule("presensi");
+  const t = await getTranslations("presensi");
   const sp = await searchParams;
   const jadwalId = Number(sp.jadwalId) || 0;
 
@@ -116,9 +118,9 @@ export default async function PresensiPage({
       return (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
           <div className="text-4xl">🔍</div>
-          <p className="mt-3 font-semibold text-red-800">Jadwal tidak ditemukan</p>
-          <p className="mt-1 text-sm text-red-600">jadwalId={jadwalId} tidak ada atau bukan milik sekolah ini.</p>
-          <Link href="/presensi" className="mt-4 inline-block rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-100">← Kembali ke Kalender</Link>
+          <p className="mt-3 font-semibold text-red-800">{t("jadwalNotFound")}</p>
+          <p className="mt-1 text-sm text-red-600">{t("jadwalNotFoundDetail", { id: jadwalId })}</p>
+          <Link href="/presensi" className="mt-4 inline-block rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-100">{t("backToCalendar")}</Link>
         </div>
       );
     }
@@ -126,23 +128,29 @@ export default async function PresensiPage({
       return (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <Link href="/presensi" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">← Kalender</Link>
+            <Link href="/presensi" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">{t("backToCalendarShort")}</Link>
             <h1 className="text-xl font-bold text-gray-900">{jadwal.mapel ?? "—"}</h1>
           </div>
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
             <div className="text-5xl">🏫</div>
-            <p className="mt-3 font-semibold text-amber-800">Jadwal belum memiliki kelas / rombel</p>
+            <p className="mt-3 font-semibold text-amber-800">{t("noRombelTitle")}</p>
             <p className="mt-1 text-sm text-amber-700">
-              Jadwal <strong>{jadwal.mapel}</strong> ({jadwal.hari.nama} · {jadwal.jamMulai}–{jadwal.jamSelesai}){" "}
-              oleh <strong>{jadwal.guru.namaGuru}</strong> belum dikaitkan ke rombel manapun.
+              {t.rich("noRombelDetail", {
+                mapel: jadwal.mapel ?? "—",
+                hari: jadwal.hari.nama,
+                jamMulai: jadwal.jamMulai ?? "",
+                jamSelesai: jadwal.jamSelesai ?? "",
+                guru: jadwal.guru.namaGuru,
+                b: (chunks) => <strong>{chunks}</strong>,
+              })}
             </p>
-            <p className="mt-2 text-sm text-amber-600">Presensi memerlukan daftar siswa dari rombel.</p>
+            <p className="mt-2 text-sm text-amber-600">{t("noRombelHint")}</p>
             <div className="mt-4 flex justify-center gap-3">
               <Link href="/jadwal" className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">
-                ✏️ Edit Jadwal → Tambahkan Kelas
+                {t("editJadwalAddClass")}
               </Link>
               <Link href="/presensi" className="rounded-lg border border-amber-300 px-4 py-2 text-sm text-amber-700 hover:bg-amber-100">
-                ← Kembali
+                {t("back")}
               </Link>
             </div>
           </div>
@@ -224,7 +232,7 @@ export default async function PresensiPage({
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-start gap-3">
                 <Link href="/presensi" className="mt-0.5 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs text-white hover:bg-white/20">
-                  ← Kalender
+                  {t("backToCalendarShort")}
                 </Link>
                 <div>
                   <h1 className="text-xl font-bold text-white">{jadwal.mapel ?? "—"}</h1>
@@ -235,11 +243,13 @@ export default async function PresensiPage({
                   </div>
                   {dates[0] && (
                     <p className="mt-1 text-xs text-white/50">
-                      {dates[0].toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                      {" "}–{" "}
-                      {dates[dates.length - 1]?.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                      {" "}· {anggota.length} siswa · {totalPertemuan} pertemuan
-                      {totalPertemuan > pastDates.length && ` (${totalPertemuan - pastDates.length} mendatang)`}
+                      {t("summary", {
+                        tanggalMulai: dates[0].toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }),
+                        tanggalSelesai: dates[dates.length - 1]?.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) ?? "",
+                        jumlahSiswa: anggota.length,
+                        jumlahPertemuan: totalPertemuan,
+                      })}
+                      {totalPertemuan > pastDates.length && t("upcomingSuffix", { count: totalPertemuan - pastDates.length })}
                     </p>
                   )}
                 </div>
@@ -250,7 +260,7 @@ export default async function PresensiPage({
                 <div className={`text-4xl font-black leading-none ${pctHadir >= 80 ? "text-emerald-400" : pctHadir >= 60 ? "text-amber-400" : "text-red-400"}`}>
                   {pctHadir}%
                 </div>
-                <div className="text-xs text-white/50 mt-0.5">kehadiran</div>
+                <div className="text-xs text-white/50 mt-0.5">{t("attendanceLabel")}</div>
                 <div className="mt-2 h-2 w-24 rounded-full bg-white/20 overflow-hidden ml-auto">
                   <div className={`h-2 rounded-full ${pctHadir >= 80 ? "bg-emerald-400" : pctHadir >= 60 ? "bg-amber-400" : "bg-red-400"}`}
                     style={{ width: `${pctHadir}%` }} />
@@ -262,11 +272,11 @@ export default async function PresensiPage({
           {/* Stats bar */}
           <div className="grid grid-cols-5 divide-x divide-gray-100 border-t border-gray-100">
             {[
-              { label: "Hadir",     count: hadirCount,     bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
-              { label: "Terlambat", count: terlambatCount, bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400" },
-              { label: "Izin",      count: izinCount,      bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-400" },
-              { label: "Sakit",     count: sakitCount,     bg: "bg-violet-50",  text: "text-violet-700",  dot: "bg-violet-400" },
-              { label: "Alpa",      count: alpaCount,      bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500" },
+              { label: t("statusHadir"),     count: hadirCount,     bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+              { label: t("statusTerlambat"), count: terlambatCount, bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400" },
+              { label: t("statusIzin"),      count: izinCount,      bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-400" },
+              { label: t("statusSakit"),     count: sakitCount,     bg: "bg-violet-50",  text: "text-violet-700",  dot: "bg-violet-400" },
+              { label: t("statusAlpa"),      count: alpaCount,      bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500" },
             ].map((s) => (
               <div key={s.label} className={`${s.bg} px-3 py-2.5 text-center`}>
                 <div className={`text-xl font-black ${s.text} leading-none`}>{s.count}</div>
@@ -282,25 +292,25 @@ export default async function PresensiPage({
         {/* Legend + hint */}
         <div className="flex flex-wrap items-center gap-4 rounded-xl bg-gray-50 px-4 py-2.5 text-xs text-gray-500">
           {[
-            { color: "bg-emerald-500", label: "Hadir" },
-            { color: "bg-amber-400",   label: "Terlambat" },
-            { color: "bg-sky-400",     label: "Izin" },
-            { color: "bg-violet-400",  label: "Sakit" },
-            { color: "bg-red-500",     label: "Alpa" },
-            { color: "border-2 border-amber-400 bg-amber-50 animate-pulse", label: "Belum → klik = Hadir" },
+            { color: "bg-emerald-500", label: t("statusHadir") },
+            { color: "bg-amber-400",   label: t("statusTerlambat") },
+            { color: "bg-sky-400",     label: t("statusIzin") },
+            { color: "bg-violet-400",  label: t("statusSakit") },
+            { color: "bg-red-500",     label: t("statusAlpa") },
+            { color: "border-2 border-amber-400 bg-amber-50 animate-pulse", label: t("legendBelum") },
           ].map((l) => (
             <div key={l.label} className="flex items-center gap-1.5">
               <div className={`h-3 w-3 shrink-0 rounded-full ${l.color}`} />
               <span>{l.label}</span>
             </div>
           ))}
-          <span className="text-gray-400 ml-auto">· Klik dot berwarna → ganti status</span>
+          <span className="text-gray-400 ml-auto">{t("legendHint")}</span>
         </div>
 
         {belumCount > 0 && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800 flex items-center gap-2">
             <div className="h-3 w-3 rounded-full bg-amber-400 animate-pulse shrink-0" />
-            <span><strong>{belumCount}</strong> sel belum diisi — klik dot kuning untuk tandai hadir, atau klik dot berwarna untuk pilih status lain.</span>
+            <span>{t.rich("unfilledNotice", { count: belumCount, b: (chunks) => <strong>{chunks}</strong> })}</span>
           </div>
         )}
 
@@ -311,7 +321,7 @@ export default async function PresensiPage({
               {/* Baris 1: Group by BULAN — jauh lebih jelas dari group-by-minggu */}
               <tr>
                 <th className="sticky left-0 z-20 border-b border-r border-gray-200 bg-gray-900 px-4 py-2.5 text-left text-xs font-semibold text-white min-w-[200px]">
-                  Siswa
+                  {t("colSiswa")}
                 </th>
                 {(() => {
                   const groups: { label: string; count: number; hasThisWeek: boolean }[] = [];
@@ -342,7 +352,7 @@ export default async function PresensiPage({
               {/* Baris 2: Tanggal sebenarnya dari jadwal (mis. Kam 18) */}
               <tr>
                 <th className="sticky left-0 z-20 border-b border-r border-gray-200 bg-gray-800 px-4 py-1.5 text-[10px] text-gray-400 font-medium text-left">
-                  No · Nama
+                  {t("colNoNama")}
                 </th>
                 {dates.map((d) => {
                   const isToday = isoDate(d) === isoDate(today);
@@ -409,7 +419,7 @@ export default async function PresensiPage({
           {anggota.length === 0 && (
             <div className="py-12 text-center text-gray-400">
               <div className="text-3xl">👥</div>
-              <p className="mt-2 text-sm">Rombel ini belum punya anggota.</p>
+              <p className="mt-2 text-sm">{t("noMembers")}</p>
             </div>
           )}
         </div>
@@ -480,16 +490,16 @@ export default async function PresensiPage({
       {/* Header */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Presensi Siswa</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="text-sm text-gray-500">
-            {isThisWeek ? "Minggu Ini · " : ""}{rangeLabel}
+            {isThisWeek ? t("thisWeekPrefix") : ""}{rangeLabel}
           </p>
         </div>
         {/* Week nav */}
         <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
           <Link href={`/presensi?week=${prevMonday}`} className="rounded-lg px-3 py-1.5 text-sm hover:bg-gray-100">←</Link>
           {!isThisWeek && (
-            <Link href="/presensi" className="rounded-lg px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50">Minggu Ini</Link>
+            <Link href="/presensi" className="rounded-lg px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50">{t("thisWeek")}</Link>
           )}
           <Link href={`/presensi?week=${nextMonday}`} className="rounded-lg px-3 py-1.5 text-sm hover:bg-gray-100">→</Link>
         </div>
@@ -499,8 +509,8 @@ export default async function PresensiPage({
       {allJadwal.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 py-16 text-center">
           <div className="text-4xl">📅</div>
-          <p className="mt-3 text-sm text-gray-500">Belum ada jadwal mengajar.</p>
-          <Link href="/jadwal" className="mt-3 inline-block rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800">Buat Jadwal</Link>
+          <p className="mt-3 text-sm text-gray-500">{t("noJadwalMengajar")}</p>
+          <Link href="/jadwal" className="mt-3 inline-block rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800">{t("createJadwal")}</Link>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
@@ -508,7 +518,7 @@ export default async function PresensiPage({
             <thead>
               <tr>
                 {/* Jam sidebar */}
-                <th className="bg-gray-900 text-white px-3 py-3 text-left text-xs font-semibold w-28">Jam</th>
+                <th className="bg-gray-900 text-white px-3 py-3 text-left text-xs font-semibold w-28">{t("colJam")}</th>
                 {HARI_ORDER.map((hariNama, idx) => {
                   const date = addDays(monday, idx);
                   const dateStr = isoDate(date);
@@ -523,7 +533,7 @@ export default async function PresensiPage({
                       <div className={`mt-0.5 text-base font-black ${isToday ? "text-white" : "text-gray-300"}`}>
                         {date.toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
                       </div>
-                      {isToday && <div className="mt-0.5 text-[9px] font-bold bg-white/20 rounded-full px-2">HARI INI</div>}
+                      {isToday && <div className="mt-0.5 text-[9px] font-bold bg-white/20 rounded-full px-2">{t("today")}</div>}
                     </th>
                   );
                 })}
@@ -531,7 +541,7 @@ export default async function PresensiPage({
             </thead>
             <tbody>
               {/* Istirahat 1 */}
-              <tr><td colSpan={6} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">☕ 10:00 – 10:15 (Istirahat)</td></tr>
+              <tr><td colSpan={6} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">{t("breakIstirahat1")}</td></tr>
               {JAM_MULAI.map((jam, jIdx) => (
                 <tr key={jam} className={jIdx % 2 === 0 ? "bg-white" : "bg-gray-50/40"}>
                   {/* Jam label */}
@@ -564,7 +574,7 @@ export default async function PresensiPage({
                                   <div className="opacity-50 text-[10px] truncate">{j.guru.namaGuru.split(" ").slice(-2).join(" ")}</div>
                                   {isToday && total > 0 && (
                                     <div className={`mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-bold ${allDone ? "bg-emerald-500 text-white" : "bg-amber-400 text-white animate-pulse"}`}>
-                                      {allDone ? "✓ Selesai" : `${belum} blm`}
+                                      {allDone ? t("done") : t("remaining", { count: belum })}
                                     </div>
                                   )}
                                 </Link>
@@ -578,7 +588,7 @@ export default async function PresensiPage({
                 </tr>
               ))}
               {/* Istirahat 2 */}
-              <tr><td colSpan={6} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">☕ 13:15 – 13:30 (Istirahat)</td></tr>
+              <tr><td colSpan={6} className="border border-gray-100 bg-amber-50 px-3 py-1 text-center text-xs text-amber-600 italic">{t("breakIstirahat2")}</td></tr>
             </tbody>
           </table>
         </div>

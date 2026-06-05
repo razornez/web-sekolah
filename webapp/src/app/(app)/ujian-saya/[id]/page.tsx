@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isStaff } from "@/lib/session";
 import { mulaiUjian } from "../actions";
@@ -16,6 +17,7 @@ export default async function KerjakanUjianPage({
   if (isStaff(user.role)) redirect("/ujian");
   const sekolahId = user.sekolahId ?? -1;
   const ujianId = Number((await params).id);
+  const t = await getTranslations("portal");
 
   const siswa = await prisma.siswa.findFirst({
     where: { userId: user.id, sekolahId },
@@ -46,10 +48,10 @@ export default async function KerjakanUjianPage({
   if (hasil?.status === "selesai") {
     return (
       <div className="space-y-4">
-        <Link href="/ujian-saya" className="text-sm text-gray-500 hover:text-gray-900">← Ujian Saya</Link>
+        <Link href="/ujian-saya" className="text-sm text-gray-500 hover:text-gray-900">{t("ujianBack")}</Link>
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">{ujian.judul}</h1>
-          <p className="text-gray-600">Skor Anda: <b className="text-xl">{hasil.skor ?? "-"}</b></p>
+          <p className="text-gray-600">{t("ujianYourScore")} <b className="text-xl">{hasil.skor ?? "-"}</b></p>
         </div>
         <ol className="space-y-3">
           {hasil.jawaban.map((j) => {
@@ -60,13 +62,13 @@ export default async function KerjakanUjianPage({
                 <div className="font-medium text-gray-900">{j.soal.nomor}. {j.soal.pertanyaan}</div>
                 {isPG ? (
                   <div className="mt-1">
-                    Jawaban: <b className={benar ? "text-green-700" : "text-red-600"}>{j.jawaban ?? "-"}</b>
-                    <span className="ml-2 text-gray-500">(kunci {j.soal.kunci ?? "-"})</span>
+                    {t("ujianAnswer")} <b className={benar ? "text-green-700" : "text-red-600"}>{j.jawaban ?? "-"}</b>
+                    <span className="ml-2 text-gray-500">{t("ujianKey", { kunci: j.soal.kunci ?? "-" })}</span>
                   </div>
                 ) : (
                   <div className="mt-1 text-gray-600">
                     <div className="whitespace-pre-line rounded bg-gray-50 p-2">{j.jawaban ?? "-"}</div>
-                    <div className="mt-1 text-xs text-gray-500">Nilai: {j.nilai ?? "menunggu penilaian"}</div>
+                    <div className="mt-1 text-xs text-gray-500">{t("ujianGrade", { nilai: j.nilai ?? t("ujianAwaitingGrade") })}</div>
                   </div>
                 )}
               </li>
@@ -81,19 +83,19 @@ export default async function KerjakanUjianPage({
   if (!hasil) {
     return (
       <div className="mx-auto max-w-lg space-y-4">
-        <Link href="/ujian-saya" className="text-sm text-gray-500 hover:text-gray-900">← Ujian Saya</Link>
+        <Link href="/ujian-saya" className="text-sm text-gray-500 hover:text-gray-900">{t("ujianBack")}</Link>
         <div className="rounded-lg border border-gray-200 bg-white p-6">
           <h1 className="text-xl font-semibold text-gray-900">{ujian.judul}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {ujian.mapel ?? "-"} · {ujian.soal.length} soal{ujian.durasiMenit ? ` · ${ujian.durasiMenit} menit` : ""}
+            {ujian.mapel ?? "-"} · {t("ujianSoalCount", { count: ujian.soal.length })}{ujian.durasiMenit ? ` · ${t("ujianDurasi", { menit: ujian.durasiMenit })}` : ""}
           </p>
           {ujian.deskripsi && <p className="mt-2 text-sm text-gray-600">{ujian.deskripsi}</p>}
           {ujian.durasiMenit && (
-            <p className="mt-2 text-sm text-amber-700">Setelah mulai, waktu berjalan dan jawaban dikumpulkan otomatis saat waktu habis.</p>
+            <p className="mt-2 text-sm text-amber-700">{t("ujianTimedAutoSubmit")}</p>
           )}
           <form action={mulaiUjian} className="mt-4">
             <input type="hidden" name="ujianId" value={ujian.id} />
-            <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">Mulai Ujian</button>
+            <button className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">{t("ujianStartExam")}</button>
           </form>
         </div>
       </div>
@@ -114,7 +116,7 @@ export default async function KerjakanUjianPage({
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">{ujian.judul}</h1>
-        <p className="text-sm text-gray-500">{ujian.soal.length} soal · jawab semua lalu kumpulkan.</p>
+        <p className="text-sm text-gray-500">{t("ujianAnswerAll", { count: ujian.soal.length })}</p>
       </div>
       <UjianRunner
         ujianId={ujian.id}

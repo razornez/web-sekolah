@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -7,12 +8,12 @@ import { deletePengumuman } from "./actions";
 
 const PER = 50;
 
-const KATEGORI_CONFIG: Record<string, { icon: string; label: string; bg: string; badge: string }> = {
-  umum:      { icon: "📢", label: "Umum",      bg: "bg-gray-50 border-gray-200",       badge: "bg-gray-100 text-gray-700" },
-  akademik:  { icon: "📚", label: "Akademik",  bg: "bg-blue-50 border-blue-200",        badge: "bg-blue-100 text-blue-700" },
-  keuangan:  { icon: "💰", label: "Keuangan",  bg: "bg-green-50 border-green-200",      badge: "bg-green-100 text-green-700" },
-  kegiatan:  { icon: "🎉", label: "Kegiatan",  bg: "bg-purple-50 border-purple-200",    badge: "bg-purple-100 text-purple-700" },
-  penting:   { icon: "🚨", label: "Penting",   bg: "bg-red-50 border-red-200",          badge: "bg-red-100 text-red-700" },
+const KATEGORI_CONFIG: Record<string, { icon: string; labelKey: string; bg: string; badge: string }> = {
+  umum:      { icon: "📢", labelKey: "katUmum",      bg: "bg-gray-50 border-gray-200",       badge: "bg-gray-100 text-gray-700" },
+  akademik:  { icon: "📚", labelKey: "katAkademik",  bg: "bg-blue-50 border-blue-200",        badge: "bg-blue-100 text-blue-700" },
+  keuangan:  { icon: "💰", labelKey: "katKeuangan",  bg: "bg-green-50 border-green-200",      badge: "bg-green-100 text-green-700" },
+  kegiatan:  { icon: "🎉", labelKey: "katKegiatan",  bg: "bg-purple-50 border-purple-200",    badge: "bg-purple-100 text-purple-700" },
+  penting:   { icon: "🚨", labelKey: "katPenting",   bg: "bg-red-50 border-red-200",          badge: "bg-red-100 text-red-700" },
 };
 const TARGET_BADGE: Record<string, string> = {
   semua: "bg-slate-100 text-slate-700", staf: "bg-orange-100 text-orange-700",
@@ -31,6 +32,7 @@ export default async function PengumumanPage({
   searchParams: Promise<{ q?: string; kategori?: string; target?: string; page?: string }>;
 }) {
   const sekolahId = await requireModule("pengumuman");
+  const t = await getTranslations("pengumuman");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const kategoriFilter = sp.kategori ?? "";
@@ -72,7 +74,7 @@ export default async function PengumumanPage({
   if (!kategoriFilter && !q) {
     // Pinned dulu
     const pinned = rows.filter(r => r.pinned);
-    if (pinned.length > 0) groups.push({ key: "__pinned", label: "Disematkan", icon: "📌", bg: "bg-amber-50 border-amber-200", rows: pinned });
+    if (pinned.length > 0) groups.push({ key: "__pinned", label: t("groupPinned"), icon: "📌", bg: "bg-amber-50 border-amber-200", rows: pinned });
 
     // Group sisanya by kategori
     const byKat = new Map<string, Row[]>();
@@ -81,10 +83,10 @@ export default async function PengumumanPage({
     }
     for (const [kat, katRows] of byKat) {
       const cfg = KATEGORI_CONFIG[kat] ?? KATEGORI_CONFIG.umum;
-      groups.push({ key: kat, label: cfg.label, icon: cfg.icon, bg: cfg.bg, rows: katRows });
+      groups.push({ key: kat, label: t(cfg.labelKey), icon: cfg.icon, bg: cfg.bg, rows: katRows });
     }
   } else {
-    groups.push({ key: "all", label: "Hasil Pencarian", icon: "🔍", bg: "bg-white border-gray-200", rows });
+    groups.push({ key: "all", label: t("groupSearchResult"), icon: "🔍", bg: "bg-white border-gray-200", rows });
   }
 
   const KATS = ["", "umum", "akademik", "keuangan", "kegiatan", "penting"];
@@ -95,12 +97,12 @@ export default async function PengumumanPage({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pengumuman</h1>
-          <p className="text-sm text-gray-500">{total.toLocaleString("id-ID")} pengumuman</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="text-sm text-gray-500">{t("count", { n: total.toLocaleString("id-ID") })}</p>
         </div>
         <Link href="/pengumuman/new" className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          Buat Pengumuman
+          {t("create")}
         </Link>
       </div>
 
@@ -117,7 +119,7 @@ export default async function PengumumanPage({
                 active ? "border-gray-900 bg-gray-900 text-white shadow-sm" : "border-gray-200 bg-white hover:border-gray-400"
               }`}>
               {cfg?.icon && <span>{cfg.icon}</span>}
-              <span>{k === "" ? "Semua" : cfg?.label ?? k}</span>
+              <span>{k === "" ? t("all") : cfg ? t(cfg.labelKey) : k}</span>
               <span className={`rounded-full px-1.5 text-[10px] font-bold ${active ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"}`}>
                 {cnt}
               </span>
@@ -132,20 +134,20 @@ export default async function PengumumanPage({
           <form className="flex flex-1 gap-2">
             <input type="hidden" name="kategori" value={kategoriFilter} />
             <input type="hidden" name="target" value={target} />
-            <input name="q" defaultValue={q} placeholder="Cari judul atau isi pengumuman…"
+            <input name="q" defaultValue={q} placeholder={t("searchPlaceholder")}
               className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900" />
-            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("search")}</button>
             {(q || kategoriFilter || target) && (
-              <Link href="/pengumuman" className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">Reset</Link>
+              <Link href="/pengumuman" className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">{t("reset")}</Link>
             )}
           </form>
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-gray-500">Target:</span>
-            {TGTS.map((t) => (
-              <Link key={t}
-                href={`/pengumuman?${new URLSearchParams({ q, kategori: kategoriFilter, target: t, page: "1" }).toString()}`}
-                className={`rounded-full border px-2.5 py-1 text-xs ${target === t ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
-                {t === "" ? "Semua" : t.charAt(0).toUpperCase() + t.slice(1)}
+            <span className="text-xs text-gray-500">{t("targetLabel")}</span>
+            {TGTS.map((tg) => (
+              <Link key={tg}
+                href={`/pengumuman?${new URLSearchParams({ q, kategori: kategoriFilter, target: tg, page: "1" }).toString()}`}
+                className={`rounded-full border px-2.5 py-1 text-xs ${target === tg ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 hover:bg-gray-50"}`}>
+                {tg === "" ? t("all") : tg.charAt(0).toUpperCase() + tg.slice(1)}
               </Link>
             ))}
           </div>
@@ -155,7 +157,7 @@ export default async function PengumumanPage({
       {/* Grouped list */}
       {rows.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-12 text-center">
-          <p className="text-sm text-gray-400">Tidak ada pengumuman.</p>
+          <p className="text-sm text-gray-400">{t("empty")}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -185,8 +187,8 @@ export default async function PengumumanPage({
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                              {p.pinned && <span className="text-amber-500 text-xs">📌 Disematkan</span>}
-                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${cfg.badge}`}>{cfg.label}</span>
+                              {p.pinned && <span className="text-amber-500 text-xs">{t("pinned")}</span>}
+                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${cfg.badge}`}>{t(cfg.labelKey)}</span>
                               <span className={`rounded-full px-2 py-0.5 text-xs ${TARGET_BADGE[p.target] ?? TARGET_BADGE.semua}`}>🎯 {p.target}</span>
                               <span className="text-xs text-gray-400">👁 {p.viewCount.toLocaleString("id-ID")}</span>
                             </div>
@@ -202,14 +204,14 @@ export default async function PengumumanPage({
                           </div>
                         </div>
                         <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-                          <Link href={`/pengumuman/${p.id}`} className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs hover:bg-gray-50">Detail</Link>
-                          <Link href={`/pengumuman/${p.id}/edit`} className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs hover:bg-gray-50">Edit</Link>
-                          <a href={`https://wa.me/?text=${encodeURIComponent(`${cfg.icon} *${p.judul}*\n\n${strip(p.isi, 200)}\n\n_Info lebih lanjut di aplikasi sekolah_`)}`}
+                          <Link href={`/pengumuman/${p.id}`} className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs hover:bg-gray-50">{t("detail")}</Link>
+                          <Link href={`/pengumuman/${p.id}/edit`} className="rounded-lg border border-gray-300 px-2.5 py-1 text-xs hover:bg-gray-50">{t("edit")}</Link>
+                          <a href={`https://wa.me/?text=${encodeURIComponent(`${cfg.icon} *${p.judul}*\n\n${strip(p.isi, 200)}\n\n_${t("waShareNote")}_`)}`}
                             target="_blank" rel="noopener noreferrer"
                             className="rounded-lg border border-green-200 px-2.5 py-1 text-xs text-green-700 hover:bg-green-50">
                             📱 WA
                           </a>
-                          <ConfirmDelete action={deletePengumuman} id={p.id} message={`Hapus "${p.judul}"?`} />
+                          <ConfirmDelete action={deletePengumuman} id={p.id} message={t("deleteConfirm", { judul: p.judul })} />
                         </div>
                       </div>
                     </div>
@@ -223,10 +225,10 @@ export default async function PengumumanPage({
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>Halaman {page} dari {totalPages} ({total} pengumuman)</span>
+          <span>{t("pageInfo", { page, total: totalPages, count: total })}</span>
           <div className="flex gap-2">
-            {page > 1 && <Link href={hp(page - 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">← Sebelumnya</Link>}
-            {page < totalPages && <Link href={hp(page + 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">Selanjutnya →</Link>}
+            {page > 1 && <Link href={hp(page - 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("prev")}</Link>}
+            {page < totalPages && <Link href={hp(page + 1)} className="rounded-lg border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("next")}</Link>}
           </div>
         </div>
       )}

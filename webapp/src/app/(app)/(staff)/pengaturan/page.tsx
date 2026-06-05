@@ -1,15 +1,16 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
-const MENU = [
-  { href: "/pengaturan/akademik", icon: "📅", title: "Tahun Ajaran & Periode", desc: "Kelola tahun ajaran, semester, tanggal mulai/selesai — dipakai presensi dan rapor." },
-];
-
-export default function PengaturanPage() {
+export default async function PengaturanPage() {
+  const t = await getTranslations("pengaturan");
+  const MENU = [
+    { href: "/pengaturan/akademik", icon: "📅", title: t("menuAkademikTitle"), desc: t("menuAkademikDesc") },
+  ];
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Pengaturan</h1>
-        <p className="text-sm text-gray-500">Konfigurasi sistem sekolah.</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+        <p className="text-sm text-gray-500">{t("subtitle")}</p>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MENU.map((m) => (

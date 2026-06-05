@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
@@ -48,6 +49,7 @@ export default async function EkstrakurikulerPage({
   searchParams: Promise<{ q?: string; arsip?: string }>;
 }) {
   const sekolahId = await requireModule("ekstrakurikuler");
+  const t = await getTranslations("ekstrakurikuler");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const showArsip = sp.arsip === "1";
@@ -70,13 +72,13 @@ export default async function EkstrakurikulerPage({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Ekstrakurikuler</h1>
-          <p className="text-sm text-gray-500">{rows.length} kegiatan {showArsip ? "(arsip)" : "aktif"}</p>
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">{t("title")}</h1>
+          <p className="text-sm text-gray-500">{showArsip ? t("countArchived", { n: rows.length }) : t("countActive", { n: rows.length })}</p>
         </div>
         <div className="flex gap-2">
           <Link href={showArsip ? "/ekstrakurikuler" : "/ekstrakurikuler?arsip=1"}
             className={`rounded-lg border px-3 py-2 text-sm ${showArsip ? "border-red-300 bg-red-50 text-red-700" : "border-gray-300 hover:bg-gray-50"}`}>
-            {showArsip ? "← Aktif" : "🗑 Arsip"}
+            {showArsip ? t("backToActive") : t("archive")}
           </Link>
         </div>
       </div>
@@ -85,24 +87,24 @@ export default async function EkstrakurikulerPage({
       {!showArsip && (
         <details className="group rounded-2xl border border-gray-200 bg-white shadow-sm">
           <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 select-none">
-            <span className="text-sm font-semibold text-gray-800">+ Tambah Ekstrakurikuler</span>
-            <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
-            <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
+            <span className="text-sm font-semibold text-gray-800">{t("addTitle")}</span>
+            <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">{t("open")}</span>
+            <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">{t("close")}</span>
           </summary>
           <form action={createEkstra} className="border-t border-gray-100 px-5 py-4 flex flex-wrap items-end gap-2 sm:gap-3">
             <div className="flex-1 min-w-48">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Nama *</label>
-              <input name="nama" required placeholder="Pramuka, Basket, Band…" className={`${inCls} w-full`} />
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldNama")}</label>
+              <input name="nama" required placeholder={t("placeholderNama")} className={`${inCls} w-full`} />
             </div>
             <div className="flex-1 min-w-48">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Pembina</label>
-              <GuruSelect sekolahId={sekolahId} name="pembinaGuruId" emptyLabel="— pilih pembina —" className={inCls} />
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldPembina")}</label>
+              <GuruSelect sekolahId={sekolahId} name="pembinaGuruId" emptyLabel={t("selectPembina")} className={inCls} />
             </div>
             <div className="flex-1 min-w-40">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Deskripsi</label>
-              <input name="deskripsi" placeholder="Opsional" className={`${inCls} w-full`} />
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t("fieldDeskripsi")}</label>
+              <input name="deskripsi" placeholder={t("placeholderDeskripsi")} className={`${inCls} w-full`} />
             </div>
-            <button className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">Simpan</button>
+            <button className="rounded-lg bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800">{t("save")}</button>
           </form>
         </details>
       )}
@@ -110,9 +112,9 @@ export default async function EkstrakurikulerPage({
       {/* Search */}
       <form className="flex flex-wrap gap-2">
         <input type="hidden" name="arsip" value={showArsip ? "1" : ""} />
-        <input name="q" defaultValue={q} placeholder="Cari nama ekstrakurikuler…"
+        <input name="q" defaultValue={q} placeholder={t("searchPlaceholder")}
           className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-gray-900 sm:max-w-xs" />
-        <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+        <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("search")}</button>
         {q && <Link href={`/ekstrakurikuler?arsip=${showArsip ? "1" : ""}`} className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100">✕</Link>}
       </form>
 
@@ -120,7 +122,7 @@ export default async function EkstrakurikulerPage({
       {rows.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 py-16 text-center">
           <div className="text-5xl">{showArsip ? "🗄" : "🎯"}</div>
-          <p className="mt-3 text-sm text-gray-500">{showArsip ? "Tidak ada arsip." : "Belum ada ekstrakurikuler."}</p>
+          <p className="mt-3 text-sm text-gray-500">{showArsip ? t("emptyArchive") : t("empty")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -146,7 +148,7 @@ export default async function EkstrakurikulerPage({
                 <div className="mt-3 flex items-center gap-3">
                   <div className="flex items-center gap-1.5 rounded-lg bg-white/60 px-2.5 py-1.5">
                     <span className="text-base font-black text-gray-900">{e._count.anggota}</span>
-                    <span className="text-xs text-gray-500">anggota</span>
+                    <span className="text-xs text-gray-500">{t("members")}</span>
                   </div>
                   {e.pembina && (
                     <div className="flex items-center gap-1.5 min-w-0">
@@ -167,20 +169,20 @@ export default async function EkstrakurikulerPage({
                 {e.deletedAt ? (
                   <form action={restoreEkstra}>
                     <input type="hidden" name="id" value={e.id} />
-                    <button className="text-xs text-green-700 hover:underline">↩ Pulihkan</button>
+                    <button className="text-xs text-green-700 hover:underline">{t("restore")}</button>
                   </form>
                 ) : (
                   <Link href={`/ekstrakurikuler/${e.id}`} className="text-xs text-gray-600 hover:text-indigo-700 hover:underline font-medium">
-                    Kelola Anggota →
+                    {t("manageMembers")}
                   </Link>
                 )}
                 <ConfirmForm
                   action={deleteEkstra}
-                  message={`Arsipkan "${e.nama}"? Data anggota tersimpan dan bisa dipulihkan kapan saja.`}
+                  message={t("confirmArchive", { nama: e.nama })}
                 >
                   <input type="hidden" name="id" value={e.id} />
                   <button className="text-xs text-red-500 hover:underline">
-                    {e.deletedAt ? "Hapus" : "🗑 Arsipkan"}
+                    {e.deletedAt ? t("delete") : t("archiveAction")}
                   </button>
                 </ConfirmForm>
               </div>

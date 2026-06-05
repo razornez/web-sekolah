@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isStaff } from "@/lib/session";
 import { PengumumanFeed } from "@/components/PengumumanFeed";
@@ -19,6 +20,7 @@ export default async function PortalPage() {
   const user = await getCurrentUser();
   if (isStaff(user.role)) redirect("/dashboard");
   const sekolahId = user.sekolahId ?? -1;
+  const t = await getTranslations("portal");
 
   if (user.role === "ortu") {
     const anak = await prisma.orangTuaWali.findMany({
@@ -39,11 +41,11 @@ export default async function PortalPage() {
     });
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold text-gray-900">Portal Orang Tua</h1>
-        <p className="text-gray-600">Selamat datang, {user.name}.</p>
-        <Card title="Anak / Wali">
+        <h1 className="text-2xl font-semibold text-gray-900">{t("ortuTitle")}</h1>
+        <p className="text-gray-600">{t("welcome", { name: user.name ?? "" })}</p>
+        <Card title={t("anakWali")}>
           {anak.length === 0 ? (
-            <p className="text-sm text-gray-400">Belum ada data anak tertaut.</p>
+            <p className="text-sm text-gray-400">{t("anakEmpty")}</p>
           ) : (
             <ul className="divide-y divide-gray-100 text-sm">
               {anak.map((a) => (
@@ -94,8 +96,8 @@ export default async function PortalPage() {
   if (!siswa) {
     return (
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold text-gray-900">Portal Siswa</h1>
-        <p className="text-gray-500">Data siswa tidak ditemukan untuk akun ini.</p>
+        <h1 className="text-2xl font-semibold text-gray-900">{t("siswaTitle")}</h1>
+        <p className="text-gray-500">{t("siswaNotFound")}</p>
       </div>
     );
   }
@@ -110,7 +112,7 @@ export default async function PortalPage() {
     <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Portal Siswa</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">{t("siswaTitle")}</h1>
           <p className="text-gray-600">
             {siswa.namaLengkap}
             {siswa.nisn ? ` · NISN ${siswa.nisn}` : ""}
@@ -118,23 +120,23 @@ export default async function PortalPage() {
           </p>
         </div>
         <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
-          Cetak Rapor
+          {t("cetakRapor")}
         </a>
       </div>
 
       {user.sekolahId != null && <PengumumanFeed sekolahId={user.sekolahId} audience="siswa" />}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <Card title="Nilai Terbaru">
+        <Card title={t("nilaiTerbaru")}>
           {siswa.nilaiRapor.length === 0 ? (
-            <p className="text-sm text-gray-400">Belum ada nilai.</p>
+            <p className="text-sm text-gray-400">{t("nilaiEmpty")}</p>
           ) : (
             <table className="w-full text-sm">
               <thead className="text-left text-gray-500">
                 <tr>
-                  <th className="py-1 font-medium">Mapel</th>
-                  <th className="py-1 font-medium">Periode</th>
-                  <th className="py-1 font-medium">Nilai</th>
+                  <th className="py-1 font-medium">{t("colMapel")}</th>
+                  <th className="py-1 font-medium">{t("colPeriode")}</th>
+                  <th className="py-1 font-medium">{t("colNilai")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -152,17 +154,17 @@ export default async function PortalPage() {
           )}
         </Card>
 
-        <Card title="Tagihan SPP">
+        <Card title={t("tagihanSpp")}>
           {siswa.tagihanSpp.length === 0 ? (
-            <p className="text-sm text-gray-400">Tidak ada tagihan.</p>
+            <p className="text-sm text-gray-400">{t("tagihanEmpty")}</p>
           ) : (
             <table className="w-full text-sm">
               <thead className="text-left text-gray-500">
                 <tr>
-                  <th className="py-1 font-medium">Jenis</th>
-                  <th className="py-1 font-medium">Periode</th>
-                  <th className="py-1 font-medium">Nominal</th>
-                  <th className="py-1 font-medium">Status</th>
+                  <th className="py-1 font-medium">{t("colJenis")}</th>
+                  <th className="py-1 font-medium">{t("colPeriode")}</th>
+                  <th className="py-1 font-medium">{t("colNominal")}</th>
+                  <th className="py-1 font-medium">{t("colStatus")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -183,14 +185,14 @@ export default async function PortalPage() {
           )}
         </Card>
 
-        <Card title="Rekap Kehadiran">
+        <Card title={t("rekapKehadiran")}>
           {siswa.kehadiran.length === 0 ? (
-            <p className="text-sm text-gray-400">Belum ada data presensi.</p>
+            <p className="text-sm text-gray-400">{t("presensiEmpty")}</p>
           ) : (
             <div className="flex flex-wrap gap-2 text-sm">
-              {["hadir", "izin", "sakit", "alpa", "terlambat"].map((s) => (
+              {(["hadir", "izin", "sakit", "alpa", "terlambat"] as const).map((s) => (
                 <span key={s} className="rounded bg-gray-100 px-2 py-1 text-gray-700">
-                  <b>{rekapHadir[s] ?? 0}</b> {s}
+                  <b>{rekapHadir[s] ?? 0}</b> {t(`status${s.charAt(0).toUpperCase()}${s.slice(1)}` as "statusHadir")}
                 </span>
               ))}
             </div>

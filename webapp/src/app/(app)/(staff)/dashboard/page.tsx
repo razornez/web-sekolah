@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { PengumumanFeed } from "@/components/PengumumanFeed";
@@ -24,6 +25,7 @@ function StatCard({ label, value, href, colorClass }: { label: string; value: nu
 
 // ── Admin / Kepsek / Operator ─────────────────────────────────────────────────
 async function DashboardAdmin({ sekolahId }: { sekolahId: number }) {
+  const t = await getTranslations("dashboard");
   const [siswa, guru, rombel, tagihanBelum, pelanggaran, ujian,
     genderG, statusG, rombelTop, sppG, hadirG] = await Promise.all([
     prisma.siswa.count({ where: { sekolahId } }),
@@ -41,24 +43,24 @@ async function DashboardAdmin({ sekolahId }: { sekolahId: number }) {
   return (
     <>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label="Siswa" value={siswa} href="/siswa" />
-        <StatCard label="Guru" value={guru} href="/guru" />
-        <StatCard label="Rombel" value={rombel} href="/rombel" />
-        <StatCard label="SPP Belum Lunas" value={tagihanBelum} href="/spp" colorClass="text-amber-600" />
-        <StatCard label="Pelanggaran" value={pelanggaran} href="/bk" colorClass="text-red-600" />
-        <StatCard label="Ujian" value={ujian} href="/ujian" />
+        <StatCard label={t("statSiswa")} value={siswa} href="/siswa" />
+        <StatCard label={t("statGuru")} value={guru} href="/guru" />
+        <StatCard label={t("statRombel")} value={rombel} href="/rombel" />
+        <StatCard label={t("statSppBelum")} value={tagihanBelum} href="/spp" colorClass="text-amber-600" />
+        <StatCard label={t("statPelanggaran")} value={pelanggaran} href="/bk" colorClass="text-red-600" />
+        <StatCard label={t("statUjian")} value={ujian} href="/ujian" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Donut title="Jenis Kelamin" data={[
-          { label: "Laki-laki", value: gCount(genderG, "jenisKelamin", "L"), color: "#3b82f6" },
-          { label: "Perempuan", value: gCount(genderG, "jenisKelamin", "P"), color: "#ec4899" },
-          { label: "Belum diisi", value: gCount(genderG, "jenisKelamin", null), color: "#9ca3af" },
+        <Donut title={t("chartGender")} data={[
+          { label: t("genderL"), value: gCount(genderG, "jenisKelamin", "L"), color: "#3b82f6" },
+          { label: t("genderP"), value: gCount(genderG, "jenisKelamin", "P"), color: "#ec4899" },
+          { label: t("genderNull"), value: gCount(genderG, "jenisKelamin", null), color: "#9ca3af" },
         ]} />
-        <BarList title="Status Siswa" data={(["aktif","lulus","pindah","keluar","alumni"] as const).map((s) => ({ label: s, value: gCount(statusG, "status", s) }))} barClass="bg-indigo-600" />
-        <BarList title="Status SPP" data={(["lunas","belum","cicil"] as const).map((s) => ({ label: s, value: gCount(sppG, "status", s) }))} barClass="bg-emerald-600" />
-        <BarList title="Rekap Kehadiran" data={(["hadir","izin","sakit","alpa","terlambat"] as const).map((s) => ({ label: s, value: gCount(hadirG, "status", s) }))} barClass="bg-amber-500" />
+        <BarList title={t("chartStatusSiswa")} data={(["aktif","lulus","pindah","keluar","alumni"] as const).map((s) => ({ label: s, value: gCount(statusG, "status", s) }))} barClass="bg-indigo-600" />
+        <BarList title={t("chartStatusSpp")} data={(["lunas","belum","cicil"] as const).map((s) => ({ label: s, value: gCount(sppG, "status", s) }))} barClass="bg-emerald-600" />
+        <BarList title={t("chartRekapKehadiran")} data={(["hadir","izin","sakit","alpa","terlambat"] as const).map((s) => ({ label: s, value: gCount(hadirG, "status", s) }))} barClass="bg-amber-500" />
         <div className="lg:col-span-2">
-          <BarList title="Siswa per Rombel" data={rombelTop.map((r) => ({ label: r.nama, value: r._count.anggota }))} barClass="bg-gray-900" />
+          <BarList title={t("chartSiswaPerRombel")} data={rombelTop.map((r) => ({ label: r.nama, value: r._count.anggota }))} barClass="bg-gray-900" />
         </div>
       </div>
     </>
@@ -67,8 +69,9 @@ async function DashboardAdmin({ sekolahId }: { sekolahId: number }) {
 
 // ── Guru ──────────────────────────────────────────────────────────────────────
 async function DashboardGuru({ sekolahId, userId }: { sekolahId: number; userId: string }) {
+  const t = await getTranslations("dashboard");
   const guru = await prisma.guru.findFirst({ where: { userId, sekolahId }, select: { id: true } });
-  if (!guru) return <p className="text-sm text-gray-500">Data guru tidak ditemukan.</p>;
+  if (!guru) return <p className="text-sm text-gray-500">{t("noGuru")}</p>;
   const [jadwal, tugasBelumNilai, tugasTotal, hasilUjian, jurnalTerbaru] = await Promise.all([
     prisma.jadwalGuru.findMany({ where: { guruId: guru.id, sekolahId }, include: { hari: { select: { nama: true, urutan: true } } }, orderBy: { hari: { urutan: "asc" } } }),
     prisma.pengumpulanTugas.count({ where: { tugas: { sekolahId, guruId: guru.id }, nilai: null } }),
@@ -79,32 +82,32 @@ async function DashboardGuru({ sekolahId, userId }: { sekolahId: number; userId:
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Jadwal Mengajar" value={jadwal.length} href="/jadwal" />
-        <StatCard label="Tugas Dibuat" value={tugasTotal} href="/tugas" />
-        <StatCard label="Belum Dinilai" value={tugasBelumNilai} href="/tugas" colorClass="text-amber-600" />
-        <StatCard label="Peserta Ujian" value={hasilUjian} href="/ujian" />
+        <StatCard label={t("statJadwalMengajar")} value={jadwal.length} href="/jadwal" />
+        <StatCard label={t("statTugasDibuat")} value={tugasTotal} href="/tugas" />
+        <StatCard label={t("statBelumDinilai")} value={tugasBelumNilai} href="/tugas" colorClass="text-amber-600" />
+        <StatCard label={t("statPesertaUjian")} value={hasilUjian} href="/ujian" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between">
-            <span>Jadwal Mengajar</span>
-            <Link href="/jadwal" className="text-xs text-gray-400 hover:text-gray-700">Kelola →</Link>
+            <span>{t("jadwalMengajar")}</span>
+            <Link href="/jadwal" className="text-xs text-gray-400 hover:text-gray-700">{t("manage")}</Link>
           </div>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500"><tr><th className="px-4 py-2 text-left font-medium">Hari</th><th className="px-4 py-2 text-left font-medium">Mapel</th><th className="px-4 py-2 text-left font-medium">Jam</th></tr></thead>
+            <thead className="bg-gray-50 text-xs text-gray-500"><tr><th className="px-4 py-2 text-left font-medium">{t("colHari")}</th><th className="px-4 py-2 text-left font-medium">{t("colMapel")}</th><th className="px-4 py-2 text-left font-medium">{t("colJam")}</th></tr></thead>
             <tbody className="divide-y divide-gray-100">
-              {jadwal.length === 0 && <tr><td colSpan={3} className="px-4 py-4 text-center text-gray-400">Belum ada jadwal.</td></tr>}
+              {jadwal.length === 0 && <tr><td colSpan={3} className="px-4 py-4 text-center text-gray-400">{t("emptyJadwal")}</td></tr>}
               {jadwal.map((j) => <tr key={j.id}><td className="px-4 py-2 text-gray-900">{j.hari.nama}</td><td className="px-4 py-2 text-gray-600">{j.mapel ?? "-"}</td><td className="px-4 py-2 text-gray-500">{j.jamMulai ?? "-"}{j.jamSelesai ? `–${j.jamSelesai}` : ""}</td></tr>)}
             </tbody>
           </table>
         </div>
         <div className="rounded-lg border border-gray-200 bg-white">
           <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between">
-            <span>Jurnal Terbaru</span>
-            <Link href="/jurnal" className="text-xs text-gray-400 hover:text-gray-700">+ Tambah →</Link>
+            <span>{t("jurnalTerbaru")}</span>
+            <Link href="/jurnal" className="text-xs text-gray-400 hover:text-gray-700">{t("addArrow")}</Link>
           </div>
           <ul className="divide-y divide-gray-100">
-            {jurnalTerbaru.length === 0 && <li className="px-4 py-4 text-sm text-gray-400">Belum ada jurnal.</li>}
+            {jurnalTerbaru.length === 0 && <li className="px-4 py-4 text-sm text-gray-400">{t("emptyJurnal")}</li>}
             {jurnalTerbaru.map((j) => <li key={j.id} className="px-4 py-2 text-sm"><div className="font-medium text-gray-900">{j.materi ?? "-"}</div><div className="text-xs text-gray-400">{j.kelas ?? "-"} · {fmt(j.tanggal)}</div></li>)}
           </ul>
         </div>
@@ -115,12 +118,13 @@ async function DashboardGuru({ sekolahId, userId }: { sekolahId: number; userId:
 
 // ── Wali Kelas ────────────────────────────────────────────────────────────────
 async function DashboardWalikelas({ sekolahId, userId }: { sekolahId: number; userId: string }) {
+  const t = await getTranslations("dashboard");
   const guru = await prisma.guru.findFirst({ where: { userId, sekolahId }, select: { id: true } });
   const rombel = guru ? await prisma.rombel.findFirst({
     where: { waliGuruId: guru.id, sekolahId },
     include: { tahunAjaran: { select: { tahun: true } }, anggota: { include: { siswa: { select: { id: true, namaLengkap: true } } }, orderBy: { nomorAbsen: "asc" } } },
   }) : null;
-  if (!rombel) return <div className="space-y-2"><p className="text-sm text-gray-500">Anda belum ditugaskan sebagai wali kelas.</p><PengumumanFeed sekolahId={sekolahId} audience="staf" /></div>;
+  if (!rombel) return <div className="space-y-2"><p className="text-sm text-gray-500">{t("noWalikelas")}</p><PengumumanFeed sekolahId={sekolahId} audience="staf" /></div>;
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const hdToday = await prisma.kehadiranSiswa.findMany({ where: { siswaId: { in: rombel.anggota.map((a) => a.siswa.id) }, tanggal: today }, select: { siswaId: true, status: true } });
@@ -131,8 +135,8 @@ async function DashboardWalikelas({ sekolahId, userId }: { sekolahId: number; us
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-gray-200 bg-white p-4 flex flex-wrap items-center justify-between gap-3">
-        <div><div className="text-lg font-semibold text-gray-900">{rombel.nama}</div><div className="text-sm text-gray-500">TA {rombel.tahunAjaran.tahun} · {rombel.anggota.length} siswa</div></div>
-        <Link href={`/rombel/${rombel.id}`} className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">Kelola Rombel →</Link>
+        <div><div className="text-lg font-semibold text-gray-900">{rombel.nama}</div><div className="text-sm text-gray-500">{t("taLabel")} {rombel.tahunAjaran.tahun} · {t("siswaCount", { n: rombel.anggota.length })}</div></div>
+        <Link href={`/rombel/${rombel.id}`} className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">{t("kelolaRombel")}</Link>
       </div>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {Object.entries(hdStats).map(([s, n]) => (
@@ -143,7 +147,7 @@ async function DashboardWalikelas({ sekolahId, userId }: { sekolahId: number; us
         ))}
       </div>
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Siswa & Status Hari Ini</div>
+        <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">{t("siswaStatusHariIni")}</div>
         <table className="w-full text-sm">
           <tbody className="divide-y divide-gray-100">
             {rombel.anggota.slice(0, 20).map((a) => {
@@ -152,7 +156,7 @@ async function DashboardWalikelas({ sekolahId, userId }: { sekolahId: number; us
             })}
           </tbody>
         </table>
-        {rombel.anggota.length > 20 && <div className="px-4 py-2 text-xs text-gray-400">+{rombel.anggota.length - 20} siswa lainnya</div>}
+        {rombel.anggota.length > 20 && <div className="px-4 py-2 text-xs text-gray-400">{t("moreSiswa", { n: rombel.anggota.length - 20 })}</div>}
       </div>
     </div>
   );
@@ -160,6 +164,7 @@ async function DashboardWalikelas({ sekolahId, userId }: { sekolahId: number; us
 
 // ── BK ────────────────────────────────────────────────────────────────────────
 async function DashboardBk({ sekolahId }: { sekolahId: number }) {
+  const t = await getTranslations("dashboard");
   const bulanIni = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   const [total, bulanIniCount, topSiswa, kasusRecent] = await Promise.all([
     prisma.kasusSiswa.count({ where: { sekolahId } }),
@@ -171,14 +176,14 @@ async function DashboardBk({ sekolahId }: { sekolahId: number }) {
   const nm = new Map(siswaNames.map((s) => [s.id, s.namaLengkap]));
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3"><StatCard label="Total Kasus" value={total} href="/bk" /><StatCard label="Bulan Ini" value={bulanIniCount} href="/bk" colorClass="text-amber-600" /></div>
+      <div className="grid grid-cols-2 gap-3"><StatCard label={t("statTotalKasus")} value={total} href="/bk" /><StatCard label={t("statBulanIni")} value={bulanIniCount} href="/bk" colorClass="text-amber-600" /></div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <BarList title="Poin Tertinggi" data={topSiswa.map((t) => ({ label: nm.get(t.siswaId) ?? "-", value: t._sum.poin ?? 0 }))} barClass="bg-red-500" suffix=" poin" />
+        <BarList title={t("chartPoinTertinggi")} data={topSiswa.map((ts) => ({ label: nm.get(ts.siswaId) ?? "-", value: ts._sum.poin ?? 0 }))} barClass="bg-red-500" suffix={t("poinSuffix")} />
         <div className="rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Kasus Terbaru</div>
+          <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">{t("kasusTerbaru")}</div>
           <ul className="divide-y divide-gray-100">
-            {kasusRecent.map((k) => <li key={k.id} className="px-4 py-2 text-sm"><div className="font-medium text-gray-900">{k.siswa?.namaLengkap ?? "-"}</div><div className="text-xs text-gray-500">{k.namaKasus} · {k.poin} poin · {fmt(k.tanggal)}</div></li>)}
-            {kasusRecent.length === 0 && <li className="px-4 py-4 text-sm text-gray-400">Belum ada kasus.</li>}
+            {kasusRecent.map((k) => <li key={k.id} className="px-4 py-2 text-sm"><div className="font-medium text-gray-900">{k.siswa?.namaLengkap ?? "-"}</div><div className="text-xs text-gray-500">{k.namaKasus} · {t("kasusPoin", { n: k.poin })} · {fmt(k.tanggal)}</div></li>)}
+            {kasusRecent.length === 0 && <li className="px-4 py-4 text-sm text-gray-400">{t("emptyKasus")}</li>}
           </ul>
         </div>
       </div>
@@ -188,6 +193,7 @@ async function DashboardBk({ sekolahId }: { sekolahId: number }) {
 
 // ── Bendahara ─────────────────────────────────────────────────────────────────
 async function DashboardBendahara({ sekolahId }: { sekolahId: number }) {
+  const t = await getTranslations("dashboard");
   const tahun = new Date().getFullYear();
   const [lunas, belum, cicil, recent] = await Promise.all([
     prisma.tagihanSpp.aggregate({ where: { sekolahId, tahun, status: "lunas" }, _sum: { nominal: true }, _count: true }),
@@ -198,17 +204,17 @@ async function DashboardBendahara({ sekolahId }: { sekolahId: number }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4"><div className="text-xl font-semibold text-green-700">{rupiah(lunas._sum.nominal ?? 0)}</div><div className="text-xs text-gray-500">Terbayar {tahun} ({lunas._count})</div></div>
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4"><div className="text-xl font-semibold text-amber-700">{rupiah(belum._sum.nominal ?? 0)}</div><div className="text-xs text-gray-500">Belum Lunas ({belum._count})</div></div>
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4"><div className="text-xl font-semibold text-blue-700">{rupiah(cicil._sum.nominal ?? 0)}</div><div className="text-xs text-gray-500">Cicilan ({cicil._count})</div></div>
+        <div className="rounded-lg border border-green-200 bg-green-50 p-4"><div className="text-xl font-semibold text-green-700">{rupiah(lunas._sum.nominal ?? 0)}</div><div className="text-xs text-gray-500">{t("terbayar", { tahun, n: lunas._count })}</div></div>
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4"><div className="text-xl font-semibold text-amber-700">{rupiah(belum._sum.nominal ?? 0)}</div><div className="text-xs text-gray-500">{t("belumLunas", { n: belum._count })}</div></div>
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4"><div className="text-xl font-semibold text-blue-700">{rupiah(cicil._sum.nominal ?? 0)}</div><div className="text-xs text-gray-500">{t("cicilan", { n: cicil._count })}</div></div>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Donut title={`Status SPP ${tahun}`} data={[{ label: "Lunas", value: lunas._count, color: "#22c55e" }, { label: "Belum", value: belum._count, color: "#f59e0b" }, { label: "Cicil", value: cicil._count, color: "#3b82f6" }]} />
+        <Donut title={t("chartStatusSppTahun", { tahun })} data={[{ label: t("sppLunas"), value: lunas._count, color: "#22c55e" }, { label: t("sppBelum"), value: belum._count, color: "#f59e0b" }, { label: t("sppCicil"), value: cicil._count, color: "#3b82f6" }]} />
         <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-          <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between"><span>Pembayaran Terbaru</span><Link href="/spp" className="text-xs text-gray-400 hover:text-gray-700">Lihat semua →</Link></div>
+          <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700 flex items-center justify-between"><span>{t("pembayaranTerbaru")}</span><Link href="/spp" className="text-xs text-gray-400 hover:text-gray-700">{t("lihatSemua")}</Link></div>
           <table className="w-full text-sm"><tbody className="divide-y divide-gray-100">
             {recent.map((p) => <tr key={p.id}><td className="px-4 py-2 text-gray-900">{p.tagihan.siswa.namaLengkap}</td><td className="px-4 py-2 text-gray-500 text-xs">{p.tagihan.jenis.nama}</td><td className="px-4 py-2 text-right font-medium text-green-700">{rupiah(p.jumlah)}</td></tr>)}
-            {recent.length === 0 && <tr><td colSpan={3} className="px-4 py-4 text-center text-gray-400">Belum ada pembayaran.</td></tr>}
+            {recent.length === 0 && <tr><td colSpan={3} className="px-4 py-4 text-center text-gray-400">{t("emptyPembayaran")}</td></tr>}
           </tbody></table>
         </div>
       </div>
@@ -218,6 +224,7 @@ async function DashboardBendahara({ sekolahId }: { sekolahId: number }) {
 
 // ── Perpustakaan ──────────────────────────────────────────────────────────────
 async function DashboardPerpustakaan({ sekolahId }: { sekolahId: number }) {
+  const t = await getTranslations("dashboard");
   const [totalBuku, dipinjam, overdue, recent] = await Promise.all([
     prisma.bukuPerpustakaan.count({ where: { sekolahId } }),
     prisma.pinjamanBuku.count({ where: { sekolahId, tanggalKembali: null } }),
@@ -226,13 +233,13 @@ async function DashboardPerpustakaan({ sekolahId }: { sekolahId: number }) {
   ]);
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3"><StatCard label="Total Judul" value={totalBuku} href="/perpustakaan" /><StatCard label="Dipinjam" value={dipinjam} href="/perpustakaan/pinjam" colorClass="text-amber-600" /><StatCard label="Overdue (>7hr)" value={overdue} colorClass="text-red-600" /></div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3"><StatCard label={t("statTotalJudul")} value={totalBuku} href="/perpustakaan" /><StatCard label={t("statDipinjam")} value={dipinjam} href="/perpustakaan/pinjam" colorClass="text-amber-600" /><StatCard label={t("statOverdue")} value={overdue} colorClass="text-red-600" /></div>
       <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">Pinjaman Aktif</div>
-        <table className="w-full text-sm"><thead className="bg-gray-50 text-xs text-gray-500"><tr><th className="px-4 py-2 text-left font-medium">Buku</th><th className="px-4 py-2 text-left font-medium">Peminjam</th><th className="px-4 py-2 text-left font-medium">Tanggal</th></tr></thead>
+        <div className="border-b border-gray-100 px-4 py-2 text-sm font-medium text-gray-700">{t("pinjamanAktif")}</div>
+        <table className="w-full text-sm"><thead className="bg-gray-50 text-xs text-gray-500"><tr><th className="px-4 py-2 text-left font-medium">{t("colBuku")}</th><th className="px-4 py-2 text-left font-medium">{t("colPeminjam")}</th><th className="px-4 py-2 text-left font-medium">{t("colTanggal")}</th></tr></thead>
           <tbody className="divide-y divide-gray-100">
             {recent.map((p) => <tr key={p.id} className={p.tanggalPinjam < new Date(Date.now() - 7 * 86400000) ? "bg-red-50" : ""}><td className="px-4 py-2 text-gray-900">{p.buku.judul}</td><td className="px-4 py-2 text-gray-600">{p.siswa?.namaLengkap ?? "-"}</td><td className="px-4 py-2 text-gray-500">{fmt(p.tanggalPinjam)}</td></tr>)}
-            {recent.length === 0 && <tr><td colSpan={3} className="px-4 py-4 text-center text-gray-400">Tidak ada pinjaman aktif.</td></tr>}
+            {recent.length === 0 && <tr><td colSpan={3} className="px-4 py-4 text-center text-gray-400">{t("emptyPinjaman")}</td></tr>}
           </tbody>
         </table>
       </div>
@@ -242,6 +249,7 @@ async function DashboardPerpustakaan({ sekolahId }: { sekolahId: number }) {
 
 // ── Kesiswaan ─────────────────────────────────────────────────────────────────
 async function DashboardKesiswaan({ sekolahId }: { sekolahId: number }) {
+  const t = await getTranslations("dashboard");
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const bulanIni = new Date(today.getFullYear(), today.getMonth(), 1);
   const [hdToday, kasusMonth, ppdbBaru, totalSiswa] = await Promise.all([
@@ -253,13 +261,13 @@ async function DashboardKesiswaan({ sekolahId }: { sekolahId: number }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Siswa Aktif" value={totalSiswa} href="/siswa" />
-        <StatCard label="Hadir Hari Ini" value={gCount(hdToday, "status", "hadir")} href="/presensi" colorClass="text-green-700" />
-        <StatCard label="Kasus Bulan Ini" value={kasusMonth} href="/bk" colorClass="text-red-600" />
-        <StatCard label="PPDB Menunggu" value={ppdbBaru} href="/ppdb" colorClass="text-amber-600" />
+        <StatCard label={t("statSiswaAktif")} value={totalSiswa} href="/siswa" />
+        <StatCard label={t("statHadirHariIni")} value={gCount(hdToday, "status", "hadir")} href="/presensi" colorClass="text-green-700" />
+        <StatCard label={t("statKasusBulanIni")} value={kasusMonth} href="/bk" colorClass="text-red-600" />
+        <StatCard label={t("statPpdbMenunggu")} value={ppdbBaru} href="/ppdb" colorClass="text-amber-600" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <BarList title="Kehadiran Hari Ini" data={(["hadir","izin","sakit","alpa","terlambat"] as const).map((s) => ({ label: s, value: gCount(hdToday, "status", s) }))} barClass="bg-indigo-600" />
+        <BarList title={t("chartKehadiranHariIni")} data={(["hadir","izin","sakit","alpa","terlambat"] as const).map((s) => ({ label: s, value: gCount(hdToday, "status", s) }))} barClass="bg-indigo-600" />
         <PengumumanFeed sekolahId={sekolahId} audience="staf" />
       </div>
     </div>
@@ -268,6 +276,7 @@ async function DashboardKesiswaan({ sekolahId }: { sekolahId: number }) {
 
 // ── Humas ─────────────────────────────────────────────────────────────────────
 async function DashboardHumas({ sekolahId }: { sekolahId: number }) {
+  const t = await getTranslations("dashboard");
   const [total, diterima, ditolak, pengumuman] = await Promise.all([
     prisma.pendaftaranPpdb.count({ where: { sekolahId } }),
     prisma.pendaftaranPpdb.count({ where: { sekolahId, status: "diterima" } }),
@@ -277,13 +286,13 @@ async function DashboardHumas({ sekolahId }: { sekolahId: number }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Total Pendaftar" value={total} href="/ppdb" />
-        <StatCard label="Diterima" value={diterima} href="/ppdb?status=diterima" colorClass="text-green-700" />
-        <StatCard label="Ditolak" value={ditolak} href="/ppdb?status=ditolak" colorClass="text-red-600" />
-        <StatCard label="Pengumuman" value={pengumuman} href="/pengumuman" />
+        <StatCard label={t("statTotalPendaftar")} value={total} href="/ppdb" />
+        <StatCard label={t("statDiterima")} value={diterima} href="/ppdb?status=diterima" colorClass="text-green-700" />
+        <StatCard label={t("statDitolak")} value={ditolak} href="/ppdb?status=ditolak" colorClass="text-red-600" />
+        <StatCard label={t("statPengumuman")} value={pengumuman} href="/pengumuman" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Donut title="Status PPDB" data={[{ label: "Diterima", value: diterima, color: "#22c55e" }, { label: "Ditolak", value: ditolak, color: "#ef4444" }, { label: "Lainnya", value: total - diterima - ditolak, color: "#9ca3af" }]} />
+        <Donut title={t("chartStatusPpdb")} data={[{ label: t("ppdbDiterima"), value: diterima, color: "#22c55e" }, { label: t("ppdbDitolak"), value: ditolak, color: "#ef4444" }, { label: t("ppdbLainnya"), value: total - diterima - ditolak, color: "#9ca3af" }]} />
         <PengumumanFeed sekolahId={sekolahId} audience="staf" />
       </div>
     </div>
@@ -292,6 +301,7 @@ async function DashboardHumas({ sekolahId }: { sekolahId: number }) {
 
 // ── Sarpras ───────────────────────────────────────────────────────────────────
 async function DashboardSarpras({ sekolahId }: { sekolahId: number }) {
+  const t = await getTranslations("dashboard");
   const [total, baik, rusak, byKat] = await Promise.all([
     prisma.sarpras.count({ where: { sekolahId } }),
     prisma.sarpras.count({ where: { sekolahId, kondisi: "Baik" } }),
@@ -304,13 +314,13 @@ async function DashboardSarpras({ sekolahId }: { sekolahId: number }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <StatCard label="Total Item" value={total} href="/sarpras" />
-        <StatCard label="Kondisi Baik" value={baik} colorClass="text-green-700" />
-        <StatCard label="Rusak" value={rusak} colorClass="text-red-600" />
+        <StatCard label={t("statTotalItem")} value={total} href="/sarpras" />
+        <StatCard label={t("statKondisiBaik")} value={baik} colorClass="text-green-700" />
+        <StatCard label={t("statRusak")} value={rusak} colorClass="text-red-600" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Donut title="Kondisi Sarpras" data={[{ label: "Baik", value: baik, color: "#22c55e" }, { label: "Rusak", value: rusak, color: "#ef4444" }, { label: "Lainnya", value: total - baik - rusak, color: "#9ca3af" }]} />
-        <BarList title="Item per Kategori" data={byKat.map((k) => ({ label: k.kategoriId ? (km.get(k.kategoriId) ?? "Lainnya") : "Tanpa Kategori", value: k._count }))} barClass="bg-gray-900" />
+        <Donut title={t("chartKondisiSarpras")} data={[{ label: t("sarprasBaik"), value: baik, color: "#22c55e" }, { label: t("sarprasRusak"), value: rusak, color: "#ef4444" }, { label: t("sarprasLainnya"), value: total - baik - rusak, color: "#9ca3af" }]} />
+        <BarList title={t("chartItemPerKategori")} data={byKat.map((k) => ({ label: k.kategoriId ? (km.get(k.kategoriId) ?? t("katLainnya")) : t("tanpaKategori"), value: k._count }))} barClass="bg-gray-900" />
       </div>
     </div>
   );
@@ -329,14 +339,17 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   const sekolahId = user.sekolahId ?? -1;
   const { role, id: userId } = user;
+  const t = await getTranslations("dashboard");
+  const tRoles = await getTranslations("roles");
+  const roleLabel = tRoles.has(role) ? tRoles(role) : (ROLE_LABELS[role] ?? role);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">Dashboard</h1>
+        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">{t("title")}</h1>
         <p className="text-sm text-gray-500">
-          Selamat datang, <span className="font-medium">{user.name}</span>
-          {" · "}<span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">{ROLE_LABELS[role] ?? role}</span>
+          {t("welcome")} <span className="font-medium">{user.name}</span>
+          {" · "}<span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">{roleLabel}</span>
         </p>
       </div>
 
@@ -351,8 +364,8 @@ export default async function DashboardPage() {
       {role === "sarpras" && <DashboardSarpras sekolahId={sekolahId} />}
       {role === "resepsionis" && (
         <div className="grid grid-cols-2 gap-4">
-          <StatCard label="Tamu Hari Ini" value={await prisma.tamu.count({ where: { sekolahId } })} href="/surat" />
-          <StatCard label="PPDB Menunggu" value={await prisma.pendaftaranPpdb.count({ where: { sekolahId, status: "baru" } })} href="/ppdb" />
+          <StatCard label={t("statTamuHariIni")} value={await prisma.tamu.count({ where: { sekolahId } })} href="/surat" />
+          <StatCard label={t("statPpdbMenunggu")} value={await prisma.pendaftaranPpdb.count({ where: { sekolahId, status: "baru" } })} href="/ppdb" />
         </div>
       )}
 

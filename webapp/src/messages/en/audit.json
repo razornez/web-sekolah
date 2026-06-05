@@ -1,0 +1,23 @@
+{
+  "audit": {
+    "title": "Audit Log",
+    "subtitle": "{n} entries · all write actions by staff",
+    "fieldAksi": "Action",
+    "all": "All",
+    "fieldEntitas": "Entity",
+    "filter": "Filter",
+    "searchUser": "Search user name",
+    "search": "Search",
+    "reset": "Reset",
+    "colWaktu": "Time",
+    "colUser": "User",
+    "colRole": "Role",
+    "colAksi": "Action",
+    "colEntitas": "Entity",
+    "colDetail": "Details",
+    "empty": "No logs yet.",
+    "pageInfo": "Page {page} of {total}",
+    "prev": "← Previous",
+    "next": "Next →"
+  }
+}

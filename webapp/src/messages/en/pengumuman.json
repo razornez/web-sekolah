@@ -1,0 +1,28 @@
+{
+  "pengumuman": {
+    "title": "Announcements",
+    "count": "{n} announcements",
+    "create": "Create Announcement",
+    "all": "All",
+    "katUmum": "General",
+    "katAkademik": "Academic",
+    "katKeuangan": "Finance",
+    "katKegiatan": "Events",
+    "katPenting": "Important",
+    "searchPlaceholder": "Search announcement title or content…",
+    "search": "Search",
+    "reset": "Reset",
+    "targetLabel": "Target:",
+    "groupPinned": "Pinned",
+    "groupSearchResult": "Search Results",
+    "empty": "No announcements.",
+    "pinned": "📌 Pinned",
+    "detail": "Detail",
+    "edit": "Edit",
+    "waShareNote": "More info in the school app",
+    "deleteConfirm": "Delete \"{judul}\"?",
+    "pageInfo": "Page {page} of {total} ({count} announcements)",
+    "prev": "← Previous",
+    "next": "Next →"
+  }
+}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { requireStaff } from "@/lib/session";
 import { addKasus, deleteKasus } from "./actions";
@@ -8,13 +9,13 @@ import { SiswaAvatar } from "@/components/SiswaAvatar";
 const inCls = "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 const fmtTgl = (d: Date) => d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 
-// Threshold poin pelanggaran → level sanksi
+// Threshold poin pelanggaran → level sanksi (label & desc diterjemahkan via key)
 const THRESHOLDS = [
-  { min: 0,  max: 25,  label: "Baik",            color: "bg-emerald-500", desc: "Peringatan lisan" },
-  { min: 26, max: 50,  label: "Perlu Perhatian",  color: "bg-amber-400",   desc: "Peringatan tertulis + panggil ortu" },
-  { min: 51, max: 75,  label: "Perlu Tindakan",   color: "bg-orange-500",  desc: "Skorsing 1–3 hari" },
-  { min: 76, max: 100, label: "Berbahaya",         color: "bg-red-500",     desc: "Skorsing + konferensi kasus" },
-  { min: 101, max: 9999, label: "Kritis",          color: "bg-red-900",     desc: "Potensi dikeluarkan" },
+  { min: 0,  max: 25,  labelKey: "levelBaik",            color: "bg-emerald-500", descKey: "levelBaikDesc" },
+  { min: 26, max: 50,  labelKey: "levelPerluPerhatian",  color: "bg-amber-400",   descKey: "levelPerluPerhatianDesc" },
+  { min: 51, max: 75,  labelKey: "levelPerluTindakan",   color: "bg-orange-500",  descKey: "levelPerluTindakanDesc" },
+  { min: 76, max: 100, labelKey: "levelBerbahaya",        color: "bg-red-500",     descKey: "levelBerbahayaDesc" },
+  { min: 101, max: 9999, labelKey: "levelKritis",         color: "bg-red-900",     descKey: "levelKritisDesc" },
 ];
 function getLevel(poin: number) {
   return THRESHOLDS.find(t => poin >= t.min && poin <= t.max) ?? THRESHOLDS[0];
@@ -26,6 +27,7 @@ export default async function BkPage({
   searchParams: Promise<{ q?: string; siswaId?: string }>;
 }) {
   const sekolahId = await requireStaff();
+  const t = await getTranslations("bk");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const siswaId = Number(sp.siswaId) || 0;
@@ -94,37 +96,37 @@ export default async function BkPage({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">BK — Pencatatan Pelanggaran</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="text-sm text-gray-500">
-            Sistem poin pelanggaran. Klik siswa untuk catat / lihat riwayat.
+            {t("subtitle")}
           </p>
         </div>
-        <Link href="/bk/kategori" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">Kelola Kategori</Link>
+        <Link href="/bk/kategori" className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50">{t("manageCategory")}</Link>
       </div>
 
       {/* Search siswa — collapsible, di atas overview */}
       <details className="group rounded-2xl border border-gray-200 bg-white shadow-sm" open={!!siswa || !!q}>
         <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 select-none">
-          <span className="text-sm font-semibold text-gray-800">🔍 Cari & Catat Pelanggaran Siswa</span>
-          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">Buka</span>
-          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">Tutup</span>
+          <span className="text-sm font-semibold text-gray-800">{t("searchTitle")}</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 group-open:hidden">{t("open")}</span>
+          <span className="rounded-md border border-gray-300 px-2.5 py-0.5 text-xs text-gray-500 hidden group-open:inline">{t("close")}</span>
         </summary>
         <div className="border-t border-gray-100 p-5 space-y-4">
           <form className="flex gap-2">
-            <SiswaAutocomplete name="q" defaultValue={q} placeholder="Cari siswa (nama / NISN)…" />
-            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">Cari</button>
+            <SiswaAutocomplete name="q" defaultValue={q} placeholder={t("searchPlaceholder")} />
+            <button className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-100">{t("search")}</button>
           </form>
 
           {q && !siswa && (
             <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 overflow-hidden">
-              {kandidat.length === 0 && <p className="px-4 py-3 text-sm text-gray-400">Tidak ada siswa cocok.</p>}
+              {kandidat.length === 0 && <p className="px-4 py-3 text-sm text-gray-400">{t("noMatch")}</p>}
               {kandidat.map((s) => (
                 <Link key={s.id} href={`/bk?siswaId=${s.id}`}
                   className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50">
                   <SiswaAvatar namaLengkap={s.namaLengkap} foto={s.foto} size="sm" />
                   <div>
                     <div className="text-sm font-medium text-gray-900">{s.namaLengkap}</div>
-                    {s.nisn && <div className="text-xs text-gray-400">NISN: {s.nisn}</div>}
+                    {s.nisn && <div className="text-xs text-gray-400">{t("nisn", { nisn: s.nisn })}</div>}
                   </div>
                 </Link>
               ))}
@@ -139,65 +141,65 @@ export default async function BkPage({
                 </div>
                 <div className="flex-1">
                   <div className="font-bold text-gray-900">{siswa.namaLengkap}</div>
-                  {siswa.nisn && <div className="text-xs text-gray-500">NISN: {siswa.nisn}</div>}
+                  {siswa.nisn && <div className="text-xs text-gray-500">{t("nisn", { nisn: siswa.nisn })}</div>}
                 </div>
                 <div className="text-right">
                   <div className={`text-3xl font-black text-white rounded-xl px-4 py-2 ${level.color}`}>{totalPoin}</div>
-                  <div className="text-xs text-gray-500 mt-1">poin akumulasi</div>
+                  <div className="text-xs text-gray-500 mt-1">{t("pointAccumulated")}</div>
                 </div>
                 <div className="text-right">
-                  <div className="font-bold text-gray-800">{level.label}</div>
-                  <div className="text-xs text-gray-500">{level.desc}</div>
-                  <Link href="/bk" className="mt-1 block text-xs text-gray-400 hover:text-gray-700">Ganti ↗</Link>
+                  <div className="font-bold text-gray-800">{t(level.labelKey)}</div>
+                  <div className="text-xs text-gray-500">{t(level.descKey)}</div>
+                  <Link href="/bk" className="mt-1 block text-xs text-gray-400 hover:text-gray-700">{t("change")}</Link>
                 </div>
               </div>
 
               <form action={addKasus} className="flex flex-wrap items-end gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4">
                 <input type="hidden" name="siswaId" value={siswa.id} />
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Kategori</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t("category")}</label>
                   <select name="kategoriId" className={inCls}>
-                    <option value="">- manual -</option>
+                    <option value="">{t("manual")}</option>
                     {kategori.map((k) => (
-                      <option key={k.id} value={k.id}>{k.nama} ({k.poin} poin)</option>
+                      <option key={k.id} value={k.id}>{t("categoryOption", { nama: k.nama, poin: k.poin })}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Pelanggaran</label>
-                  <input name="namaKasus" placeholder="Nama pelanggaran" className={`${inCls} w-44`} />
+                  <label className="block text-xs text-gray-500 mb-1">{t("violation")}</label>
+                  <input name="namaKasus" placeholder={t("violationPlaceholder")} className={`${inCls} w-44`} />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Poin</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t("point")}</label>
                   <input name="poin" type="number" min={0} defaultValue={0} className={`${inCls} w-20`} />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Tanggal</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t("date")}</label>
                   <input name="tanggal" type="date" defaultValue={today} className={inCls} />
                 </div>
                 <div className="flex-1 min-w-32">
-                  <label className="block text-xs text-gray-500 mb-1">Keterangan</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t("description")}</label>
                   <input name="keterangan" className={`${inCls} w-full`} />
                 </div>
-                <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">+ Catat</button>
+                <button className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">{t("record")}</button>
               </form>
 
               <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
                 <div className="border-b border-gray-100 bg-gray-50 px-4 py-2.5">
-                  <span className="text-sm font-semibold text-gray-700">Riwayat Pelanggaran ({kasus.length})</span>
+                  <span className="text-sm font-semibold text-gray-700">{t("historyTitle", { count: kasus.length })}</span>
                 </div>
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-left text-gray-500">
                     <tr>
-                      <th className="px-4 py-2 font-medium">Tanggal</th>
-                      <th className="px-4 py-2 font-medium">Pelanggaran</th>
-                      <th className="px-4 py-2 font-medium text-center">Poin</th>
-                      <th className="px-4 py-2 font-medium">Keterangan</th>
-                      <th className="px-4 py-2 font-medium text-right">Aksi</th>
+                      <th className="px-4 py-2 font-medium">{t("colTanggal")}</th>
+                      <th className="px-4 py-2 font-medium">{t("colPelanggaran")}</th>
+                      <th className="px-4 py-2 font-medium text-center">{t("colPoin")}</th>
+                      <th className="px-4 py-2 font-medium">{t("colKeterangan")}</th>
+                      <th className="px-4 py-2 font-medium text-right">{t("colAksi")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {kasus.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">Belum ada catatan pelanggaran.</td></tr>}
+                    {kasus.length === 0 && <tr><td colSpan={5} className="px-4 py-8 text-center text-gray-400">{t("emptyHistory")}</td></tr>}
                     {kasus.map((k) => (
                       <tr key={k.id} className="hover:bg-gray-50">
                         <td className="px-4 py-2 text-gray-600 whitespace-nowrap">{fmtTgl(k.tanggal)}</td>
@@ -212,7 +214,7 @@ export default async function BkPage({
                           <form action={deleteKasus}>
                             <input type="hidden" name="id" value={k.id} />
                             <input type="hidden" name="siswaId" value={siswa.id} />
-                            <button className="text-xs text-red-600 hover:underline">Hapus</button>
+                            <button className="text-xs text-red-600 hover:underline">{t("delete")}</button>
                           </form>
                         </td>
                       </tr>
@@ -227,16 +229,16 @@ export default async function BkPage({
 
       {/* Info poin */}
       <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm">
-        <p className="font-semibold text-indigo-800 mb-2">💡 Cara kerja sistem poin pelanggaran</p>
+        <p className="font-semibold text-indigo-800 mb-2">{t("infoTitle")}</p>
         <p className="text-indigo-700 text-xs mb-2">
-          Setiap pelanggaran memiliki nilai poin. Poin diakumulasi per siswa. Makin tinggi poin, makin serius sanksi:
+          {t("infoDesc")}
         </p>
         <div className="flex flex-wrap gap-2">
-          {THRESHOLDS.map(t => (
-            <div key={t.label} className="flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 shadow-sm">
-              <div className={`h-2.5 w-2.5 rounded-full ${t.color}`} />
-              <span className="text-xs font-medium text-gray-700">{t.min}–{t.max === 9999 ? "∞" : t.max}</span>
-              <span className="text-xs text-gray-500">{t.desc}</span>
+          {THRESHOLDS.map(th => (
+            <div key={th.labelKey} className="flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1.5 shadow-sm">
+              <div className={`h-2.5 w-2.5 rounded-full ${th.color}`} />
+              <span className="text-xs font-medium text-gray-700">{th.min}–{th.max === 9999 ? "∞" : th.max}</span>
+              <span className="text-xs text-gray-500">{t(th.descKey)}</span>
             </div>
           ))}
         </div>
@@ -247,9 +249,9 @@ export default async function BkPage({
         <div className="space-y-4 lg:col-span-2">
           {/* Top pelanggaran bar chart */}
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-4 text-sm font-semibold text-gray-800">📊 Jenis Pelanggaran Terbanyak</h2>
+            <h2 className="mb-4 text-sm font-semibold text-gray-800">{t("topViolationsTitle")}</h2>
             {topKategori.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-4">Belum ada catatan pelanggaran.</p>
+              <p className="text-sm text-gray-400 text-center py-4">{t("noRecords")}</p>
             ) : (
               <div className="space-y-2.5">
                 {topKategori.map((k) => {
@@ -268,7 +270,7 @@ export default async function BkPage({
                         </div>
                       </div>
                       <div className="shrink-0 text-xs text-gray-400 w-16 text-right">
-                        {(k as { _sum?: { poin?: number } })._sum?.poin ?? 0} poin
+                        {t("points", { n: (k as { _sum?: { poin?: number } })._sum?.poin ?? 0 })}
                       </div>
                     </div>
                   );
@@ -279,9 +281,9 @@ export default async function BkPage({
 
           {/* Recent */}
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-gray-800">🕐 Pelanggaran Terbaru</h2>
+            <h2 className="mb-3 text-sm font-semibold text-gray-800">{t("recentTitle")}</h2>
             {recentKasus.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-4">Belum ada catatan.</p>
+              <p className="text-sm text-gray-400 text-center py-4">{t("noRecordsShort")}</p>
             ) : (
               <div className="space-y-2">
                 {recentKasus.map(k => (
@@ -294,12 +296,12 @@ export default async function BkPage({
                         {k.siswa?.namaLengkap ?? "—"}
                       </Link>
                       {k.siswa?.id && (
-                        <Link href={`/siswa/${k.siswa.id}`} className="text-[10px] text-gray-400 hover:text-indigo-600 hover:underline">detail ↗</Link>
+                        <Link href={`/siswa/${k.siswa.id}`} className="text-[10px] text-gray-400 hover:text-indigo-600 hover:underline">{t("detail")}</Link>
                       )}
                       <div className="text-[10px] text-gray-500">{k.namaKasus} · {fmtTgl(k.tanggal)}</div>
                     </div>
                     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${k.poin >= 25 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
-                      {k.poin} poin
+                      {t("points", { n: k.poin })}
                     </span>
                   </div>
                 ))}
@@ -311,9 +313,9 @@ export default async function BkPage({
         {/* Kolom kanan: Ranking siswa */}
         <div className="space-y-4">
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-gray-800">🏷 Siswa Akumulasi Poin Tertinggi</h2>
+            <h2 className="mb-3 text-sm font-semibold text-gray-800">{t("rankingTitle")}</h2>
             {siswaKritis.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-4">—</p>
+              <p className="text-sm text-gray-400 text-center py-4">{t("rankingEmpty")}</p>
             ) : (
               <div className="space-y-2">
                 {siswaKritis.map((s, i) => {
@@ -328,7 +330,7 @@ export default async function BkPage({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="truncate text-xs font-semibold text-gray-900">{nama}</div>
-                        <div className={`text-[10px] ${lvl.color.replace("bg-", "text-").replace("-500", "-700").replace("-400", "-600")}`}>{lvl.label}</div>
+                        <div className={`text-[10px] ${lvl.color.replace("bg-", "text-").replace("-500", "-700").replace("-400", "-600")}`}>{t(lvl.labelKey)}</div>
                       </div>
                       <div className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-black text-white ${lvl.color}`}>
                         {poin}
@@ -343,7 +345,7 @@ export default async function BkPage({
           {/* Stat chips */}
           <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
             <div className="text-2xl font-black text-gray-900 leading-none">{totalKasus.toLocaleString("id-ID")}</div>
-            <div className="text-xs text-gray-500 mt-0.5">total catatan pelanggaran</div>
+            <div className="text-xs text-gray-500 mt-0.5">{t("totalRecords")}</div>
           </div>
         </div>
       </div>

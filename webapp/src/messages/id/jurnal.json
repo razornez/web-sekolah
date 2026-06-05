@@ -1,0 +1,21 @@
+{
+  "jurnal": {
+    "title": "Jurnal Mengajar Guru",
+    "fieldGuru": "Guru *",
+    "guruEmpty": "— pilih guru —",
+    "fieldTanggal": "Tanggal",
+    "fieldKelas": "Kelas",
+    "fieldMapel": "Mapel",
+    "mapelEmpty": "— pilih mapel —",
+    "fieldMateri": "Materi",
+    "addButton": "+ Catat",
+    "colTanggal": "Tanggal",
+    "colGuru": "Guru",
+    "colKelas": "Kelas",
+    "colMapel": "Mapel",
+    "colMateri": "Materi",
+    "colAksi": "Aksi",
+    "empty": "Belum ada jurnal.",
+    "deleteConfirm": "Hapus jurnal ini?"
+  }
+}

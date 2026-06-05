@@ -1,0 +1,28 @@
+{
+  "surat": {
+    "title": "Administrasi Surat",
+    "addSurat": "+ Tambah Surat",
+    "searchPlaceholder": "Cari perihal / nomor…",
+    "search": "Cari",
+    "reset": "Reset",
+    "colTanggal": "Tanggal",
+    "colNomor": "Nomor",
+    "colPerihal": "Perihal",
+    "colJenis": "Jenis",
+    "colAksi": "Aksi",
+    "empty": "Belum ada surat.",
+    "edit": "Edit",
+    "deleteConfirm": "Hapus surat \"{perihal}\"?",
+    "newTitle": "Tambah Surat",
+    "editTitle": "Edit Surat",
+    "fieldPerihal": "Perihal *",
+    "fieldTanggal": "Tanggal",
+    "fieldNomor": "Nomor",
+    "fieldJenis": "Jenis",
+    "jenisPlaceholder": "masuk / keluar",
+    "fieldIsi": "Isi",
+    "saving": "Menyimpan…",
+    "save": "Simpan",
+    "cancel": "Batal"
+  }
+}

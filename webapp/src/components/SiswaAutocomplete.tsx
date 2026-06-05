@@ -12,13 +12,14 @@
  *    Gunakan prop `idName` untuk nama hidden field (default: "siswaId").
  */
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 type Siswa = { id: number; namaLengkap: string; nisn: string | null };
 
 export function SiswaAutocomplete({
   name = "q",
   defaultValue = "",
-  placeholder = "Ketik nama siswa…",
+  placeholder,
   mode = "filter",
   idName = "siswaId",
   defaultId = "",
@@ -32,6 +33,7 @@ export function SiswaAutocomplete({
   defaultId?: string | number;
   className?: string;
 }) {
+  const t = useTranslations("common");
   const [query, setQuery] = useState(defaultValue);
   const [selectedId, setSelectedId] = useState(String(defaultId));
   const [results, setResults] = useState<Siswa[]>([]);
@@ -98,7 +100,7 @@ export function SiswaAutocomplete({
             if (!e.target.value) setOpen(false);
           }}
           onFocus={() => { setFocused(true); if (results.length > 0) setOpen(true); }}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("components.siswaSearchPlaceholder")}
           autoComplete="off"
           spellCheck={false}
           className={className}
@@ -129,7 +131,7 @@ export function SiswaAutocomplete({
 
       {/* Selected badge — mode select */}
       {mode === "select" && selectedId && (
-        <p className="mt-1 text-xs text-green-700">✓ Siswa dipilih</p>
+        <p className="mt-1 text-xs text-green-700">{t("components.siswaSelected")}</p>
       )}
 
       {/* Dropdown results */}
@@ -149,12 +151,12 @@ export function SiswaAutocomplete({
                 {s.nisn && <div className="text-xs text-gray-400">NISN: {s.nisn}</div>}
               </div>
               {mode === "select" && (
-                <span className="ml-auto text-xs text-indigo-500">Pilih →</span>
+                <span className="ml-auto text-xs text-indigo-500">{t("components.siswaChoose")}</span>
               )}
             </li>
           ))}
           {results.length === 0 && !loading && (
-            <li className="px-3 py-3 text-sm text-gray-400 text-center">Tidak ada siswa ditemukan</li>
+            <li className="px-3 py-3 text-sm text-gray-400 text-center">{t("components.siswaNotFound")}</li>
           )}
         </ul>
       )}

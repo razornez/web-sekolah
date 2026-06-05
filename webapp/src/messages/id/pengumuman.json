@@ -1,0 +1,28 @@
+{
+  "pengumuman": {
+    "title": "Pengumuman",
+    "count": "{n} pengumuman",
+    "create": "Buat Pengumuman",
+    "all": "Semua",
+    "katUmum": "Umum",
+    "katAkademik": "Akademik",
+    "katKeuangan": "Keuangan",
+    "katKegiatan": "Kegiatan",
+    "katPenting": "Penting",
+    "searchPlaceholder": "Cari judul atau isi pengumuman…",
+    "search": "Cari",
+    "reset": "Reset",
+    "targetLabel": "Target:",
+    "groupPinned": "Disematkan",
+    "groupSearchResult": "Hasil Pencarian",
+    "empty": "Tidak ada pengumuman.",
+    "pinned": "📌 Disematkan",
+    "detail": "Detail",
+    "edit": "Edit",
+    "waShareNote": "Info lebih lanjut di aplikasi sekolah",
+    "deleteConfirm": "Hapus \"{judul}\"?",
+    "pageInfo": "Halaman {page} dari {total} ({count} pengumuman)",
+    "prev": "← Sebelumnya",
+    "next": "Selanjutnya →"
+  }
+}
