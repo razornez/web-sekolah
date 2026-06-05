@@ -1,7 +1,7 @@
 {
   "pengumuman": {
     "title": "Announcements",
-    "count": "{n} announcements",
+    "count": "{n, plural, one {# announcement} other {# announcements}}",
     "create": "Create Announcement",
     "all": "All",
     "katUmum": "General",

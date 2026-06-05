@@ -1,7 +1,7 @@
 {
   "p5": {
     "title": "P5 Project",
-    "subtitle": "Pancasila Student Profile Strengthening Project — {n} projects",
+    "subtitle": "Pancasila Student Profile Strengthening Project — {n, plural, one {# project} other {# projects}}",
     "fieldTahunAjaran": "Academic Year",
     "selectPlaceholder": "- select -",
     "fieldTema": "Theme",

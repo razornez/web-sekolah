@@ -7,7 +7,7 @@
     "tip3": "Click a student's name to view/edit full details including biodata, grades, and login account.",
     "tip4": "The Delete button opens a confirmation page — data is not permanently deleted right away.",
     "tip5": "Archived students are kept on the Archive page and can be restored.",
-    "activeCount": "{n} active students",
+    "activeCount": "{n, plural, one {# active student} other {# active students}}",
     "archiveBadge": "{n} archived",
     "addStudent": "+ Add Student",
     "searchPlaceholder": "Search name, NISN, NIS…",
@@ -43,7 +43,6 @@
     "pageInfo": "Page {page} of {total}",
     "prev": "← Previous",
     "next": "Next →",
-
     "detailBackList": "← List",
     "detailEdit": "✏️ Edit",
     "detailRapor": "🖨 Report Card",
@@ -107,16 +106,13 @@
     "colPoin": "Points",
     "colKeterangan": "Notes",
     "totalPoin": "Total points: {total}",
-
     "editBackProfil": "← Student Profile",
     "editCetakRapor": "Print Report Card",
     "editHapus": "Delete",
-
     "newTitle": "Add Student",
-
     "arsipBackList": "← Student Data",
     "arsipTitle": "Student Archive",
-    "arsipSubtitle": "{n} students archived — can be restored anytime",
+    "arsipSubtitle": "{n, plural, one {# student archived — can be restored anytime} other {# students archived — can be restored anytime}}",
     "arsipEmptyTitle": "Archive is empty. No students have been archived.",
     "arsipColNama": "Name",
     "arsipColNisn": "NISN",
@@ -125,7 +121,6 @@
     "arsipColAksi": "Actions",
     "arsipPulihkan": "↩ Restore",
     "arsipFooter": "Archived students do not appear in the main list. To delete permanently, restore first then use the Permanent Delete option on the edit page.",
-
     "formDividerDataPribadi": "Personal Data",
     "formNamaLengkap": "Full Name",
     "formJenisKelamin": "Gender",

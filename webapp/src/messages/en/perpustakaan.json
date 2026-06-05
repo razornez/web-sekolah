@@ -6,7 +6,7 @@
     "tip2": "Use the 'Available' filter for books with all copies on the shelf.",
     "tip3": "Red book = overdue (borrowed more than 7 days, not yet returned).",
     "tip4": "Click + Borrow → the per-student lending page.",
-    "subtitle": "{judul} titles · {eksemplar} copies",
+    "subtitle": "{judul, plural, one {# title} other {# titles}} · {eksemplar, plural, one {# copy} other {# copies}}",
     "overdue": "Overdue",
     "borrowed": "Borrowed",
     "borrowBook": "Borrow Book",
@@ -28,7 +28,6 @@
     "pageInfo": "Page {page} of {total} ({judul} titles)",
     "prev": "← Previous",
     "next": "Next →",
-
     "detailBreadcrumb": "Library",
     "statEksemplar": "Copies",
     "statTersedia": "Available",
@@ -51,9 +50,8 @@
     "colTglPinjam": "Borrowed On",
     "colTglKembali": "Returned On",
     "colDurasiAktual": "Actual Duration",
-    "durationDays": "{n} days",
+    "durationDays": "{n, plural, one {# day} other {# days}}",
     "durationDaysLate": "{n} days (late)",
-
     "lendingTitle": "Book Lending",
     "lendingSubtitle": "Select a student to view and manage their loans.",
     "backToCatalog": "← Book Catalog",
@@ -84,7 +82,6 @@
     "durationDaysShort": "{n}d",
     "durationDaysShortLate": "{n}d ⚠",
     "neverBorrowed": "This student has never borrowed a book.",
-
     "addBookTitle": "Add Book",
     "formJudul": "Title *",
     "formPengarang": "Author",

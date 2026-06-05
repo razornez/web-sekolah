@@ -6,7 +6,7 @@
     "tip2": "Outgoing transfer: a student moving from this school to another school.",
     "tip3": "Use the Origin/Destination filter to find transfers from a specific school.",
     "tip4": "Click a student's name to view their profile and class details.",
-    "recordCount": "{n} transfer records",
+    "recordCount": "{n, plural, one {# transfer record} other {# transfer records}}",
     "formTitle": "📝 Record a New Transfer",
     "fieldSiswa": "Student *",
     "siswaPlaceholder": "Type the name of the transferring student…",

@@ -29,14 +29,13 @@
     "emptyRombel": "This class has no members yet.",
     "deskripsiPlaceholder": "The student understands…",
     "saveNilai": "💾 Save Grades",
-    "saveHint": "{n} students · grades are saved and updated automatically",
-
+    "saveHint": "{n, plural, one {# student} other {# students}} · grades are saved and updated automatically",
     "entriBack": "← Report Card Grades",
     "entriTitle": "Daily Grade Entry",
     "entriDescription": "Enter raw grades: daily tests, assignments, midterms, finals — the basis for report card calculation.",
     "fieldTipe": "Grade Type",
     "entriEmptyFilter": "Select a class, period, subject, and grade type.",
-    "siswaCount": "{n} students",
+    "siswaCount": "{n, plural, one {# student} other {# students}}",
     "colNilaiBaru": "New Grade",
     "colKeterangan": "Notes",
     "colRiwayat": "History",
@@ -44,7 +43,6 @@
     "ketPlaceholder": "test name…",
     "saveEntri": "💾 Save Grade Entry",
     "entriSaveHint": "Empty grades are not saved.",
-
     "tipeHarian": "Daily Test",
     "tipeTugas": "Assignment / Homework",
     "tipeUlangan": "Block Test",
@@ -54,7 +52,6 @@
     "tipeSumatifAkhir": "End-of-Semester Summative",
     "tipeFormatif": "Formative (not counted)",
     "tipePraktik": "Practical",
-
     "raporTitle": "Report Card — Extracurriculars & Notes",
     "raporDescription": "Complete page 2 of the report card (e-Rapor Merdeka) per student.",
     "raporBack": "← Subject Grade Entry",

@@ -1,7 +1,7 @@
 {
   "rombel": {
     "title": "Classes",
-    "summary": "{rombel} classes · {siswa} students",
+    "summary": "{rombel, plural, one {# class} other {# classes}} · {siswa, plural, one {# student} other {# students}}",
     "tanpaWali": "· ⚠ {n} without homeroom teacher",
     "addRombel": "Add Class",
     "addRombelPlus": "+ Add Class",
@@ -25,8 +25,8 @@
     "groupAktif": "Active",
     "groupAllRombel": "All Classes",
     "emptyFilter": "No classes match the filter yet.",
-    "groupCount": "{n} classes",
-    "groupSiswa": "{n} students",
+    "groupCount": "{n, plural, one {# class} other {# classes}}",
+    "groupSiswa": "{n, plural, one {# student} other {# students}}",
     "siswaLabel": "Students",
     "belumAdaWali": "⚠ No homeroom teacher yet",
     "kelola": "Manage",

@@ -11,7 +11,7 @@
     "all": "All",
     "emptyPrestasi": "No achievement records yet. Add one below.",
     "emptyBeasiswa": "No scholarship records yet. Add one below.",
-    "penerimaCount": "{n} recipients",
+    "penerimaCount": "{n, plural, one {# recipient} other {# recipients}}",
     "manage": "Manage →",
     "formAddPrestasi": "➕ Add New Achievement",
     "formAddBeasiswa": "➕ Add New Scholarship",
