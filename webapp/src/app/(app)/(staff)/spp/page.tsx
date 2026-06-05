@@ -57,18 +57,27 @@ export default async function SppPage({
       ])
     : [[], []];
 
-  const tahunIni = new Date().getFullYear();
+  const now = new Date();
+  const tahunIni = now.getFullYear();
+  const bulanIni = now.getMonth() + 1;
+  // Hanya tagihan yang sudah jatuh tempo (periode <= bulan berjalan) — abaikan tagihan masa depan
+  const dueFilter = {
+    OR: [
+      { tahun: { lt: tahunIni } },
+      { tahun: tahunIni, bulan: { lte: bulanIni } },
+    ],
+  };
 
   // Ringkasan + tunggakan terbaru (hanya saat belum pilih siswa)
   const overview = !siswa
     ? await (async () => {
         const [paid, unpaid, outstandingAgg, recent] = await Promise.all([
           prisma.tagihanSpp.count({ where: { sekolahId, status: "lunas" } }),
-          prisma.tagihanSpp.count({ where: { sekolahId, status: { not: "lunas" } } }),
-          prisma.tagihanSpp.aggregate({ where: { sekolahId, status: { not: "lunas" } }, _sum: { nominal: true } }),
+          prisma.tagihanSpp.count({ where: { sekolahId, status: { not: "lunas" }, ...dueFilter } }),
+          prisma.tagihanSpp.aggregate({ where: { sekolahId, status: { not: "lunas" }, ...dueFilter }, _sum: { nominal: true } }),
           prisma.tagihanSpp.findMany({
-            where: { sekolahId, status: { not: "lunas" } },
-            orderBy: [{ tahun: "desc" }, { bulan: "desc" }],
+            where: { sekolahId, status: { not: "lunas" }, ...dueFilter },
+            orderBy: [{ tahun: "asc" }, { bulan: "asc" }], // paling lama/menunggak dulu
             take: 15,
             include: { jenis: { select: { nama: true } }, siswa: { select: { id: true, namaLengkap: true, foto: true } } },
           }),

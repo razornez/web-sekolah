@@ -26,12 +26,18 @@ function StatCard({ label, value, href, colorClass }: { label: string; value: nu
 // ── Admin / Kepsek / Operator ─────────────────────────────────────────────────
 async function DashboardAdmin({ sekolahId }: { sekolahId: number }) {
   const t = await getTranslations("dashboard");
+  const now = new Date();
+  const thn = now.getFullYear();
+  const bln = now.getMonth() + 1;
+  // Tunggakan = tagihan belum lunas yang sudah jatuh tempo (abaikan tagihan masa depan).
+  // Definisi ini SAMA dgn halaman /spp agar angka konsisten (BUG-032/BUG-SPP-01).
+  const dueFilter = { OR: [{ tahun: { lt: thn } }, { tahun: thn, bulan: { lte: bln } }] };
   const [siswa, guru, rombel, tagihanBelum, pelanggaran, ujian,
     genderG, statusG, rombelTop, sppG, hadirG] = await Promise.all([
     prisma.siswa.count({ where: { sekolahId } }),
     prisma.guru.count({ where: { sekolahId } }),
     prisma.rombel.count({ where: { sekolahId } }),
-    prisma.tagihanSpp.count({ where: { sekolahId, status: { not: "lunas" } } }),
+    prisma.tagihanSpp.count({ where: { sekolahId, status: { not: "lunas" }, ...dueFilter } }),
     prisma.kasusSiswa.count({ where: { sekolahId } }),
     prisma.ujian.count({ where: { sekolahId } }),
     prisma.siswa.groupBy({ by: ["jenisKelamin"], where: { sekolahId }, _count: true }),
