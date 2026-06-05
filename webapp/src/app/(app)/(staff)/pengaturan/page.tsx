@@ -5,6 +5,7 @@ export default async function PengaturanPage() {
   const t = await getTranslations("pengaturan");
   const MENU = [
     { href: "/pengaturan/akademik", icon: "📅", title: t("menuAkademikTitle"), desc: t("menuAkademikDesc") },
+    { href: "/pengaturan/pengguna", icon: "👥", title: t("menuPenggunaTitle"), desc: t("menuPenggunaDesc") },
   ];
   return (
     <div className="space-y-5">
