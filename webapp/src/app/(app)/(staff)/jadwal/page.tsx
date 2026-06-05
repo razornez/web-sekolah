@@ -110,7 +110,7 @@ export default async function JadwalPage({ searchParams }: { searchParams: Promi
                             {cells.map((j) => (
                               <div key={j.id} className={`rounded-md border px-2 py-1.5 text-xs leading-tight ${colorMap[j.mapel ?? ""]??COLORS[0]}`}>
                                 <div className="font-semibold">{j.mapel??"-"}</div>
-                                <div className="opacity-75 mt-0.5 text-xs">{j.guru.namaGuru.split(" ").slice(-2).join(" ")}</div>
+                                <div className="opacity-75 mt-0.5 text-xs">{j.guru.namaGuru.split(" ").slice(0, 2).join(" ").replace(/,$/, "")}</div>
                                 {j.rombel && <div className="opacity-60 text-xs">{j.rombel.nama}</div>}
                               </div>
                             ))}

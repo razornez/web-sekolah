@@ -163,7 +163,7 @@ export default async function EkstrakurikulerPage({
                       </div>
                       <Link href={`/guru/${e.pembina.id}`}
                         className="truncate text-xs text-gray-600 hover:underline hover:text-indigo-600">
-                        {e.pembina.namaGuru.split(" ").slice(-2).join(" ")}
+                        {e.pembina.namaGuru.split(" ").slice(0, 2).join(" ").replace(/,$/, "")}
                       </Link>
                     </div>
                   )}

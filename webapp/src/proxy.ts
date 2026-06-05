@@ -9,6 +9,13 @@ import type { NextRequest } from "next/server";
  */
 const { auth } = NextAuth(authConfig);
 
+/** Deteksi locale dari Accept-Language (sama dgn src/i18n/locale.ts) */
+function detectLocale(req: NextRequest): "id" | "en" {
+  const accept = (req.headers.get("accept-language") ?? "").toLowerCase();
+  if (accept.startsWith("id") || accept.includes(",id") || accept.includes("id-id")) return "id";
+  return accept ? "en" : "id";
+}
+
 export default auth((req: NextRequest & { auth: { user?: unknown } | null }) => {
   const { nextUrl } = req;
   const path = nextUrl.pathname;
@@ -31,7 +38,19 @@ export default auth((req: NextRequest & { auth: { user?: unknown } | null }) => 
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next();
+
+  // Locale persistence: set cookie sekali bila belum ada agar locale KONSISTEN
+  // di semua request berikutnya (fix BUG-030 — locale tidak berpindah-pindah).
+  if (!req.cookies.get("locale")) {
+    res.cookies.set("locale", detectLocale(req), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+  }
+
+  return res;
 });
 
 export const config = {

@@ -571,7 +571,7 @@ export default async function PresensiPage({
                                   className={`block rounded-lg border px-2 py-1.5 text-xs leading-tight transition-all hover:shadow-sm hover:-translate-y-0.5 ${colorMap[j.mapel ?? ""] ?? MAPEL_COLORS[0]}`}>
                                   <div className="font-bold line-clamp-2">{j.mapel ?? "—"}</div>
                                   {j.rombel && <div className="opacity-70 text-[10px]">{j.rombel.nama}</div>}
-                                  <div className="opacity-50 text-[10px] truncate">{j.guru.namaGuru.split(" ").slice(-2).join(" ")}</div>
+                                  <div className="opacity-50 text-[10px] truncate">{j.guru.namaGuru.split(" ").slice(0, 2).join(" ").replace(/,$/, "")}</div>
                                   {isToday && total > 0 && (
                                     <div className={`mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-bold ${allDone ? "bg-emerald-500 text-white" : "bg-amber-400 text-white animate-pulse"}`}>
                                       {allDone ? t("done") : t("remaining", { count: belum })}
