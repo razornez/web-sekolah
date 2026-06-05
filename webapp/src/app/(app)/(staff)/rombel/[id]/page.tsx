@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { addAnggota, removeAnggota } from "../actions";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 import { SiswaAvatar } from "@/components/SiswaAvatar";
@@ -14,7 +14,7 @@ export default async function RombelDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ add?: string }>;
 }) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireModule("rombel");
   const t = await getTranslations("rombel");
   const { id } = await params;
   const rombelId = Number(id);

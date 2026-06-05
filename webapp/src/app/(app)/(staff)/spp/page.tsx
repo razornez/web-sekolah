@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { addTagihan, bayarTagihan, deleteTagihan } from "./actions";
 import { SiswaAutocomplete } from "@/components/SiswaAutocomplete";
 import { SiswaAvatar } from "@/components/SiswaAvatar";
@@ -15,7 +15,7 @@ export default async function SppPage({
 }: {
   searchParams: Promise<{ q?: string; siswaId?: string }>;
 }) {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireModule("spp");
   const t = await getTranslations("spp");
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();

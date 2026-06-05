@@ -1,7 +1,9 @@
 import { getTranslations } from "next-intl/server";
+import { requireModule } from "@/lib/permissions";
 import SuratForm from "../_components/SuratForm";
 
 export default async function NewSuratPage() {
+  await requireModule("surat");
   const t = await getTranslations("surat");
   return (
     <div className="space-y-4">

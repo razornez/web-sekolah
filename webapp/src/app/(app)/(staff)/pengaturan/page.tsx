@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { requireModule } from "@/lib/permissions";
 
 export default async function PengaturanPage() {
+  await requireModule("pengaturan"); // guard: hanya role dgn izin pengaturan (admin/operator/kepsek)
   const t = await getTranslations("pengaturan");
   const MENU = [
     { href: "/pengaturan/sekolah", icon: "🏫", title: t("menuSekolahTitle"), desc: t("menuSekolahDesc") },

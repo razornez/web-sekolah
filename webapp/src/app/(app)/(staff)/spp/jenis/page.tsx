@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { getSekolahId } from "@/lib/session";
+import { requireModule } from "@/lib/permissions";
 import { ConfirmDelete } from "@/components/ConfirmDelete";
 import { createJenis, updateJenis, deleteJenis } from "../actions";
 
@@ -9,7 +9,7 @@ const inCls =
   "rounded-md border border-gray-300 px-2 py-1 text-sm outline-none focus:border-gray-900";
 
 export default async function JenisPage() {
-  const sekolahId = await getSekolahId();
+  const sekolahId = await requireModule("spp");
   const t = await getTranslations("spp");
   const rows = await prisma.jenisPembayaran.findMany({
     where: { sekolahId },

@@ -30,7 +30,10 @@ Singkatan role: **AD** admin · **OP** operator · **KS** kepsek · **KU** kurik
 | Modul | URL | AD | OP | KS | KU | KSW | HM | GR | WK | BK | BN | PP | SP | RS |
 |---|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | Data Siswa | /siswa | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | — | — | — | — |
-| Data Guru | /guru | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | — | — | — |
+| Prestasi & Beasiswa | /prestasi | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | — | — | — | — |
+| Mutasi Siswa | /mutasi | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | — | — | — | — |
+| Kenaikan Kelas | /kenaikan-kelas | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | — | — | — | — | — |
+| Data Guru | /guru | ✅ | ✅ | ✅ | ✅ | — | — | — | — | — | — | — | — | — |
 | Rombel/Kelas | /rombel | ✅ | ✅ | ✅ | ✅ | ✅ | — | ✅ | ✅ | — | — | — | — | — |
 | Mata Pelajaran | /mapel | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | — | — | — | — | — | — |
 | Nilai/Rapor | /nilai | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | — | — | — | — | — |
@@ -61,3 +64,14 @@ Singkatan role: **AD** admin · **OP** operator · **KS** kepsek · **KU** kurik
 - **bendahara / perpustakaan / sarpras**: 1
 
 > Dashboard (`/dashboard`) dapat diakses semua staf (tanpa cek modul).
+
+### Catatan pemetaan modul (sub-fitur)
+Beberapa halaman berbagi izin modul induk (tidak punya key sendiri):
+- **/prestasi** & **/mutasi** → izin **`siswa`** (muncul untuk semua role yang punya akses Data Siswa)
+- **/kenaikan-kelas** → izin **`rombel`**
+- **/nilai/entri**, **/nilai/rapor** → izin **`nilai`**
+- **/presensi/input** → izin **`presensi`**
+- **/pengaturan/sekolah**, **/akademik**, **/pengguna** → izin **`pengaturan`**
+
+> **/guru** = halaman manajemen guru (CRUD), HANYA admin/operator/kepsek/kurikulum.
+> Role `guru` **tidak** punya akses ke /guru (tidak mengelola data guru).

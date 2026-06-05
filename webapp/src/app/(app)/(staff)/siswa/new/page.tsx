@@ -1,8 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { requireModule } from "@/lib/permissions";
 import SiswaForm from "../_components/SiswaForm";
 
 export default async function NewSiswaPage() {
+  await requireModule("siswa");
   const t = await getTranslations("siswa");
   const provinsiOpts = await prisma.refProvinsi.findMany({ orderBy: { nama: "asc" }, select: { kode: true, nama: true } });
   return (
