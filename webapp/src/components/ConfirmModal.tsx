@@ -73,15 +73,16 @@ export function ConfirmModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-modal-title"
+      onClick={onCancel}
     >
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onCancel}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
 
-      {/* Card */}
-      <div className="relative z-10 mx-4 w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl">
+      {/* Card — stopPropagation agar klik di dalam kartu tidak menutup modal */}
+      <div
+        className="relative z-10 mx-4 w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xl">
