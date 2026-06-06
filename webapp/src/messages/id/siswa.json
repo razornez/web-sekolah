@@ -43,7 +43,6 @@
     "pageInfo": "Halaman {page} dari {total}",
     "prev": "← Sebelumnya",
     "next": "Selanjutnya →",
-
     "detailBackList": "← Daftar",
     "detailEdit": "✏️ Edit",
     "detailRapor": "🖨 Rapor",
@@ -107,13 +106,10 @@
     "colPoin": "Poin",
     "colKeterangan": "Keterangan",
     "totalPoin": "Total poin: {total}",
-
     "editBackProfil": "← Profil Siswa",
     "editCetakRapor": "Cetak Rapor",
     "editHapus": "Hapus",
-
     "newTitle": "Tambah Siswa",
-
     "arsipBackList": "← Data Siswa",
     "arsipTitle": "Arsip Siswa",
     "arsipSubtitle": "{n} siswa diarsipkan — bisa dipulihkan kapan saja",
@@ -125,7 +121,6 @@
     "arsipColAksi": "Aksi",
     "arsipPulihkan": "↩ Pulihkan",
     "arsipFooter": "Siswa yang diarsipkan tidak muncul di daftar utama. Untuk hapus permanen, pulihkan dulu lalu gunakan opsi Hapus Permanen di halaman edit.",
-
     "formDividerDataPribadi": "Data Pribadi",
     "formNamaLengkap": "Nama Lengkap",
     "formJenisKelamin": "Jenis Kelamin",
@@ -179,6 +174,8 @@
     "tinggalWali": "Bersama wali",
     "tinggalKos": "Kos / indekos",
     "tinggalAsrama": "Asrama",
-    "tinggalPanti": "Panti asuhan"
+    "tinggalPanti": "Panti asuhan",
+    "exportData": "⬇ Ekspor Data",
+    "exportDataHint": "Unduh seluruh data siswa (JSON) — untuk permintaan akses data / GDPR"
   }
 }

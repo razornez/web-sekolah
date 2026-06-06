@@ -29,6 +29,9 @@ export default async function EditSiswaPage({ params }: { params: Promise<{ id: 
           <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
             {t("editCetakRapor")}
           </a>
+          <a href={`/siswa/${siswa.id}/export`} className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100" title={t("exportDataHint")}>
+            {t("exportData")}
+          </a>
           <Link href={`/siswa/${siswa.id}/delete`} className="rounded-md border border-red-300 px-3 py-2 text-sm text-red-700 hover:bg-red-50">
             {t("editHapus")}
           </Link>
