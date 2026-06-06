@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations";
+import { isRateLimited, recordFailedAttempt, clearAttempts } from "@/lib/rateLimit";
 
 const md5 = (s: string) => createHash("md5").update(s).digest("hex");
 
@@ -23,6 +24,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
         const { username, password, sekolah } = parsed.data;
 
+        // Anti brute-force: blokir setelah 5 gagal beruntun (15 menit).
+        const rlKey = `${(sekolah ?? "_").toLowerCase()}:${username.toLowerCase()}`;
+        if (isRateLimited(rlKey)) return null;
+
         const user = await prisma.user.findFirst({
           where: {
             username,
@@ -31,7 +36,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
           include: { sekolah: { select: { slug: true } } },
         });
-        if (!user) return null;
+        if (!user) { recordFailedAttempt(rlKey); return null; }
 
         // Verifikasi password. User warisan masih MD5 → cek md5, lalu upgrade ke bcrypt.
         let ok: boolean;
@@ -49,7 +54,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         } else {
           ok = await bcrypt.compare(password, user.passwordHash);
         }
-        if (!ok) return null;
+        if (!ok) { recordFailedAttempt(rlKey); return null; }
+
+        // Login sukses → reset hitungan rate-limit.
+        clearAttempts(rlKey);
 
         // Catat login terakhir (best-effort).
         await prisma.user
