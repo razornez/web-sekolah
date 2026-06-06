@@ -190,6 +190,11 @@ model Sekolah {
   kurikulumDefault Kurikulum @default(MERDEKA) @map("kurikulum_default")
   slug             String    @unique // untuk subdomain/tenant routing
 
+  // Self-service demo/trial: sekolah hasil registrasi mandiri = demo, auto-hapus
+  // setelah demoExpiresAt. Sekolah showcase (isDemo=false) TIDAK pernah dihapus.
+  isDemo        Boolean   @default(false) @map("is_demo")
+  demoExpiresAt DateTime? @map("demo_expires_at")
+
   // Profil (gabungan tabel `profil` lama)
   alamat        String?
   telepon       String?

@@ -47,12 +47,36 @@
     "compareUs": "Smart School",
     "compareOther": "Old Way / Other Apps",
     "compareRows": [
-      { "label": "Language", "us": "Indonesian + English auto", "other": "Usually single language" },
-      { "label": "Multi-school", "us": "One platform, isolated data", "other": "Separate install per school" },
-      { "label": "Curriculum", "us": "Merdeka & K13 ready", "other": "Often a single curriculum" },
-      { "label": "Role access", "us": "RBAC per module, audited", "other": "Uniform access / little control" },
-      { "label": "Devices", "us": "Responsive phone–desktop", "other": "Often desktop only" },
-      { "label": "Installation", "us": "Web-based, no install", "other": "Manual install & updates" }
+      {
+        "label": "Language",
+        "us": "Indonesian + English auto",
+        "other": "Usually single language"
+      },
+      {
+        "label": "Multi-school",
+        "us": "One platform, isolated data",
+        "other": "Separate install per school"
+      },
+      {
+        "label": "Curriculum",
+        "us": "Merdeka & K13 ready",
+        "other": "Often a single curriculum"
+      },
+      {
+        "label": "Role access",
+        "us": "RBAC per module, audited",
+        "other": "Uniform access / little control"
+      },
+      {
+        "label": "Devices",
+        "us": "Responsive phone–desktop",
+        "other": "Often desktop only"
+      },
+      {
+        "label": "Installation",
+        "us": "Web-based, no install",
+        "other": "Manual install & updates"
+      }
     ],
     "pricingTitle": "Simple pricing, scaled to your school",
     "pricingSubtitle": "Start free. Upgrade anytime. No hidden fees.",
@@ -66,7 +90,12 @@
         "desc": "Great for small schools going digital.",
         "cta": "Start Free",
         "popular": false,
-        "features": ["1 school", "Up to 50 students", "Core modules (students, grades, attendance)", "Community support"]
+        "features": [
+          "1 school",
+          "Up to 50 students",
+          "Core modules (students, grades, attendance)",
+          "Community support"
+        ]
       },
       {
         "name": "School",
@@ -75,7 +104,13 @@
         "desc": "For active schools needing all modules.",
         "cta": "Try 14 Days",
         "popular": true,
-        "features": ["1 school", "Up to 1,500 students", "All modules (24+)", "Digital & printable report cards", "Priority email support"]
+        "features": [
+          "1 school",
+          "Up to 1,500 students",
+          "All modules (24+)",
+          "Digital & printable report cards",
+          "Priority email support"
+        ]
       },
       {
         "name": "Foundation",
@@ -84,18 +119,42 @@
         "desc": "Many schools under one foundation.",
         "cta": "Contact Us",
         "popular": false,
-        "features": ["Multi-school", "Unlimited students", "All modules + feature priority", "Dedicated support (SLA)", "Data migration assistance"]
+        "features": [
+          "Multi-school",
+          "Unlimited students",
+          "All modules + feature priority",
+          "Dedicated support (SLA)",
+          "Data migration assistance"
+        ]
       }
     ],
     "faqTitle": "Frequently asked questions",
     "faqSubtitle": "Still have questions? Reach us via the registration page.",
     "faqItems": [
-      { "q": "Do I need to install anything or run my own server?", "a": "No. Smart School is web-based — just open it in a browser from a phone, tablet, or computer. Data is stored securely in the cloud." },
-      { "q": "Is each school's data separate?", "a": "Yes. The system is multi-tenant: every school's data is fully isolated and only accessible to that school's users per their role." },
-      { "q": "Does it support Kurikulum Merdeka and K13?", "a": "Yes, both are supported. Report cards can be printed in the format your school chooses." },
-      { "q": "Is English available?", "a": "Yes. The app is bilingual (Indonesian & English) and auto-adapts — ideal for national-plus / international schools." },
-      { "q": "How do we migrate our old data?", "a": "On paid plans, we help migrate your students, teachers, and grades from spreadsheets or your old system." },
-      { "q": "Is there a free trial?", "a": "Yes. The School plan has a 14-day free trial, and the Free plan can be used forever for small schools." }
+      {
+        "q": "Do I need to install anything or run my own server?",
+        "a": "No. Smart School is web-based — just open it in a browser from a phone, tablet, or computer. Data is stored securely in the cloud."
+      },
+      {
+        "q": "Is each school's data separate?",
+        "a": "Yes. The system is multi-tenant: every school's data is fully isolated and only accessible to that school's users per their role."
+      },
+      {
+        "q": "Does it support Kurikulum Merdeka and K13?",
+        "a": "Yes, both are supported. Report cards can be printed in the format your school chooses."
+      },
+      {
+        "q": "Is English available?",
+        "a": "Yes. The app is bilingual (Indonesian & English) and auto-adapts — ideal for national-plus / international schools."
+      },
+      {
+        "q": "How do we migrate our old data?",
+        "a": "On paid plans, we help migrate your students, teachers, and grades from spreadsheets or your old system."
+      },
+      {
+        "q": "Is there a free trial?",
+        "a": "Yes. The School plan has a 14-day free trial, and the Free plan can be used forever for small schools."
+      }
     ],
     "ctaTitle": "Ready to modernize your school administration?",
     "ctaSubtitle": "Register your school now and experience managing everything in one place.",
@@ -106,7 +165,7 @@
     "footerLegal": "Legal",
     "footerHak": "All rights reserved",
     "regTitle": "Register Your School",
-    "regSubtitle": "Fill in the form below — our team will contact you to activate your school account.",
+    "regSubtitle": "Create your school account now — instant access, free for 24 hours.",
     "regNamaSekolah": "School Name",
     "regJenjang": "Level",
     "regJumlahSiswa": "Estimated Number of Students",
@@ -117,12 +176,17 @@
     "regKota": "City / Regency",
     "regPaket": "Plan of Interest",
     "regCatatan": "Notes (optional)",
-    "regSubmit": "Submit Registration",
+    "regSubmit": "Create Account & Sign In",
     "regSubmitting": "Sending…",
     "regBackHome": "← Back to home",
     "regSuccessTitle": "Registration Sent! 🎉",
     "regSuccessDesc": "Thank you. Our team will contact you within 1–2 business days for activation.",
     "regSuccessHome": "Back to Home",
-    "regErrorRequired": "Please complete school name, contact person, and a contact (email/phone)."
+    "regErrorRequired": "Please complete school name, contact person, and a contact (email/phone).",
+    "regUsername": "Username (for login)",
+    "regPassword": "Password (min 6 characters)",
+    "regDemoNote": "🎁 Free 24-hour trial — demo account & data are auto-deleted after 24 hours. Upgrade to keep them permanently.",
+    "regUsernameTaken": "Invalid username.",
+    "regPasswordShort": "Password must be at least 6 characters."
   }
 }

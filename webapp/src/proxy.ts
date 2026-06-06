@@ -25,6 +25,7 @@ export default auth((req: NextRequest & { auth: { user?: unknown } | null }) => 
     path.startsWith("/api/auth") ||
     path.startsWith("/api/siswa") ||
     path === "/api/health" ||
+    path.startsWith("/api/cron/") ||
     path.startsWith("/_next") ||
     path.startsWith("/uploads") ||
     path === "/favicon.ico" ||

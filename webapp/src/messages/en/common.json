@@ -142,7 +142,10 @@
     },
     "deleteConfirmTitle": "Confirm Delete",
     "deleteConfirmYes": "Yes, Delete",
-    "ok": "OK"
+    "ok": "OK",
+    "demoBannerText": "Demo Mode — data auto-deletes in {h} hours.",
+    "demoBannerExpired": "Demo Mode — your trial has ended.",
+    "demoUpgrade": "Upgrade"
   },
   "roles": {
     "admin": "Admin",

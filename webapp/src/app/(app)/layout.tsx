@@ -5,6 +5,7 @@ import { isStaff } from "@/lib/session";
 import { canAccess, type ModuleKey } from "@/lib/permissions";
 import { R, PORTAL } from "@/lib/routes";
 import { AppShell } from "./AppShell";
+import { DemoBanner } from "@/components/DemoBanner";
 
 // navKey = key di messages "nav.*", icon opsional prefix
 const STAFF_NAV: { href: string; navKey: string; key?: ModuleKey; icon?: string }[] = [
@@ -73,6 +74,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       user={{ name: user.name, role: user.role }}
       signOutAction={handleSignOut}
     >
+      <DemoBanner sekolahId={user.sekolahId} />
       {children}
     </AppShell>
   );

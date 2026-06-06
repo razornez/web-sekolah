@@ -142,7 +142,10 @@
     },
     "deleteConfirmTitle": "Konfirmasi Hapus",
     "deleteConfirmYes": "Ya, Hapus",
-    "ok": "OK"
+    "ok": "OK",
+    "demoBannerText": "Mode Demo — data otomatis terhapus dalam {h} jam.",
+    "demoBannerExpired": "Mode Demo — masa demo telah berakhir.",
+    "demoUpgrade": "Upgrade"
   },
   "roles": {
     "admin": "Admin",
