@@ -187,6 +187,202 @@
     "regPassword": "Password (min 6 karakter)",
     "regDemoNote": "🎁 Coba gratis 24 jam — akun & data demo otomatis terhapus setelah 24 jam. Upgrade untuk menyimpan permanen.",
     "regUsernameTaken": "Username tidak valid.",
-    "regPasswordShort": "Password minimal 6 karakter."
+    "regPasswordShort": "Password minimal 6 karakter.",
+    "navJadwalDemo": "Jadwalkan Demo",
+    "trustedTitle": "Telah dipercaya berbagai instansi pendidikan",
+    "trustedItems": [
+      "SMA Nusantara",
+      "SMP Harapan Bangsa",
+      "SD Cendekia",
+      "MA Al-Falah",
+      "SMK Bina Karya",
+      "SMA Tunas Mulia",
+      "SMP Pelita Ilmu",
+      "TK Ceria"
+    ],
+    "testiTitle": "Apa kata mereka",
+    "testiSubtitle": "Cerita dari sekolah yang lebih rapi sejak pakai Smart School.",
+    "testiItems": [
+      {
+        "name": "Budi Santoso, M.Pd.",
+        "role": "Kepala Sekolah",
+        "school": "SMA Nusantara",
+        "quote": "Administrasi yang dulu makan waktu berhari-hari kini selesai dalam hitungan menit. Rapor digital sangat membantu guru."
+      },
+      {
+        "name": "Siti Rahmawati, S.Pd.",
+        "role": "Wali Kelas",
+        "school": "SMP Harapan Bangsa",
+        "quote": "Input nilai dan presensi jadi mudah, bisa dari HP. Orang tua pun bisa pantau anak langsung."
+      },
+      {
+        "name": "Andi Pratama",
+        "role": "Operator Sekolah",
+        "school": "SMK Bina Karya",
+        "quote": "PPDB sampai keuangan dalam satu sistem. Tidak perlu lagi banyak aplikasi terpisah."
+      },
+      {
+        "name": "Dewi Lestari, S.E.",
+        "role": "Bendahara",
+        "school": "MA Al-Falah",
+        "quote": "Rekap tunggakan SPP real-time. Laporan keuangan jauh lebih akurat dan cepat."
+      }
+    ],
+    "lmsTitle": "LMS & Ujian Online (CBT)",
+    "lmsSubtitle": "Pembelajaran digital lengkap — dari materi sampai ujian dengan penilaian otomatis.",
+    "lmsItems": [
+      {
+        "icon": "📚",
+        "title": "Materi Terstruktur",
+        "desc": "Penyajian materi pembelajaran digital yang lengkap, rapi, dan mudah diikuti siswa."
+      },
+      {
+        "icon": "📤",
+        "title": "Distribusi Otomatis",
+        "desc": "Materi dan tugas dikirim terjadwal dengan notifikasi otomatis ke siswa."
+      },
+      {
+        "icon": "📝",
+        "title": "Ujian Online (CBT)",
+        "desc": "Dilengkapi auto grading (penilaian otomatis) dan bank soal yang aman untuk ujian."
+      },
+      {
+        "icon": "✅",
+        "title": "Penilaian Praktis",
+        "desc": "Memudahkan pengumpulan tugas dan penilaian harian secara digital tanpa kertas."
+      },
+      {
+        "icon": "💬",
+        "title": "Diskusi Terintegrasi",
+        "desc": "Ruang tanya jawab dua arah guru–siswa dalam satu platform."
+      },
+      {
+        "icon": "📈",
+        "title": "Laporan & Monitoring",
+        "desc": "Pantau aktivitas belajar siswa real-time dan akses laporan nilai dengan mudah."
+      }
+    ],
+    "parentTitle": "Aplikasi untuk Orang Tua",
+    "parentSubtitle": "Pantau dan kelola seluruh aktivitas anak — akademik, keuangan, hingga uang saku — secara real-time.",
+    "parentItems": [
+      {
+        "icon": "🧒",
+        "title": "Pantau Aktivitas & Kehadiran",
+        "desc": "Cek kehadiran harian dan aktivitas belajar anak secara real-time."
+      },
+      {
+        "icon": "🗓",
+        "title": "Jadwal & Tugas Terupdate",
+        "desc": "Lihat jadwal pelajaran, tugas, PR, dan capaian belajar anak."
+      },
+      {
+        "icon": "💳",
+        "title": "Top Up & Pantau Uang Saku",
+        "desc": "Isi saldo dan pantau penggunaan uang saku anak secara aman."
+      },
+      {
+        "icon": "📨",
+        "title": "Administrasi & Perizinan",
+        "desc": "Ajukan izin, lihat pengumuman, dan update sekolah langsung dari HP."
+      },
+      {
+        "icon": "💰",
+        "title": "Tagihan & Pembayaran",
+        "desc": "Bayar SPP, kegiatan, dan tagihan sekolah lainnya tanpa antri."
+      },
+      {
+        "icon": "📢",
+        "title": "Informasi Sekolah",
+        "desc": "Berita dan pengumuman penting langsung dari sekolah di genggaman."
+      }
+    ],
+    "cardTitle": "Satu Kartu untuk Semua Akses",
+    "cardSubtitle": "Satu kartu pintar untuk seluruh layanan sekolah.",
+    "cardItems": [
+      {
+        "icon": "🪪",
+        "title": "Identitas & Presensi",
+        "desc": "Tap kartu untuk absensi siswa & pegawai otomatis."
+      },
+      {
+        "icon": "🛒",
+        "title": "Cashless Kantin & Koperasi",
+        "desc": "Bayar dengan saldo uang saku, tanpa uang tunai."
+      },
+      {
+        "icon": "📕",
+        "title": "Perpustakaan",
+        "desc": "Peminjaman buku cukup dengan satu tap kartu."
+      }
+    ],
+    "matrixTitle": "Bandingkan fitur per paket",
+    "matrixFitur": "Fitur",
+    "matrixRows": [
+      {
+        "f": "Jumlah siswa",
+        "free": "≤ 50",
+        "school": "≤ 1.500",
+        "foundation": "Tak terbatas"
+      },
+      {
+        "f": "Modul inti (siswa, nilai, presensi)",
+        "free": "✓",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "Semua modul (24+)",
+        "free": "—",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "LMS & CBT",
+        "free": "—",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "Aplikasi Orang Tua",
+        "free": "—",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "Rapor digital & cetak",
+        "free": "Dasar",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "Multi-sekolah",
+        "free": "—",
+        "school": "—",
+        "foundation": "✓"
+      },
+      {
+        "f": "Dukungan",
+        "free": "Komunitas",
+        "school": "Email prioritas",
+        "foundation": "Khusus (SLA)"
+      }
+    ],
+    "jdTitle": "Jadwalkan Demo",
+    "jdSubtitle": "Pilih waktu yang cocok, tim kami akan memandu Anda keliling fitur Smart School.",
+    "jdNama": "Nama Anda",
+    "jdSekolah": "Nama Sekolah",
+    "jdEmail": "Email",
+    "jdTelepon": "No. WhatsApp / Telepon",
+    "jdTanggal": "Tanggal Diinginkan",
+    "jdJam": "Jam Diinginkan",
+    "jdCatatan": "Catatan (opsional)",
+    "jdSubmit": "Kirim Permintaan Demo",
+    "jdSubmitting": "Mengirim…",
+    "jdSuccessTitle": "Permintaan Demo Terkirim! 📅",
+    "jdSuccessDesc": "Terima kasih. Tim kami akan menghubungi untuk konfirmasi jadwal demo Anda.",
+    "jdSuccessHome": "Kembali ke Beranda",
+    "jdError": "Mohon isi nama, sekolah, dan kontak (email/telepon).",
+    "jdAtauInstan": "Atau langsung coba sendiri:",
+    "jdCobaInstan": "Coba Gratis Sekarang"
   }
 }

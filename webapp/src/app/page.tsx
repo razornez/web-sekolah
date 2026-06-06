@@ -19,6 +19,9 @@ const MODULES = [
 type Plan = { name: string; price: string; period: string; desc: string; cta: string; popular: boolean; features: string[] };
 type Row = { label: string; us: string; other: string };
 type Faq = { q: string; a: string };
+type Highlight = { icon: string; title: string; desc: string };
+type Testi = { name: string; role: string; school: string; quote: string };
+type MatrixRow = { f: string; free: string; school: string; foundation: string };
 
 export default async function LandingPage() {
   const t = await getTranslations("landing");
@@ -43,6 +46,12 @@ export default async function LandingPage() {
   const compareRows = t.raw("compareRows") as Row[];
   const plans = t.raw("pricingPlans") as Plan[];
   const faqItems = t.raw("faqItems") as Faq[];
+  const trustedItems = t.raw("trustedItems") as string[];
+  const testiItems = t.raw("testiItems") as Testi[];
+  const lmsItems = t.raw("lmsItems") as Highlight[];
+  const parentItems = t.raw("parentItems") as Highlight[];
+  const cardItems = t.raw("cardItems") as Highlight[];
+  const matrixRows = t.raw("matrixRows") as MatrixRow[];
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -58,10 +67,13 @@ export default async function LandingPage() {
             <a href="#harga" className="hover:text-gray-900">{t("navHarga")}</a>
             <a href="#faq" className="hover:text-gray-900">{t("navFaq")}</a>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <LanguageSwitcher />
             <Link href={loggedIn ? "/dashboard" : "/login"} className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 sm:block">
               {loggedIn ? t("navDashboard") : t("navMasuk")}
+            </Link>
+            <Link href="/jadwal-demo" className="hidden rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 md:block">
+              {t("navJadwalDemo")}
             </Link>
             <Link href="/daftar-sekolah" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
               {t("navDaftar")}
@@ -111,6 +123,21 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── Trusted-by ── */}
+      <section className="border-b border-gray-100 bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-10">
+          <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400">{t("trustedTitle")}</p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+            {trustedItems.map((name) => (
+              <div key={name} className="flex items-center gap-2 text-gray-400 grayscale transition hover:text-gray-600 hover:grayscale-0">
+                <span className="text-xl">🏫</span>
+                <span className="text-sm font-bold">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Features ── */}
       <section id="fitur" className="mx-auto max-w-6xl px-4 py-20">
         <div className="mx-auto max-w-2xl text-center">
@@ -127,6 +154,68 @@ export default async function LandingPage() {
               <p className="mt-2 text-sm leading-relaxed text-gray-500">{f.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── Highlight: LMS & CBT ── */}
+      <section className="bg-gradient-to-br from-indigo-50 to-white py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-indigo-600">LMS & CBT</span>
+            <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{t("lmsTitle")}</h2>
+            <p className="mt-3 text-gray-500">{t("lmsSubtitle")}</p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {lmsItems.map((h) => (
+              <div key={h.title} className="rounded-2xl border border-indigo-100 bg-white p-6 shadow-sm">
+                <div className="text-3xl">{h.icon}</div>
+                <h3 className="mt-3 text-base font-bold">{h.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{h.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Highlight: Aplikasi Orang Tua ── */}
+      <section className="py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-rose-500">Parent App</span>
+            <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{t("parentTitle")}</h2>
+            <p className="mt-3 text-gray-500">{t("parentSubtitle")}</p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {parentItems.map((h) => (
+              <div key={h.title} className="flex gap-4 rounded-2xl border border-gray-200 bg-white p-5">
+                <div className="text-2xl">{h.icon}</div>
+                <div>
+                  <h3 className="text-base font-bold">{h.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-500">{h.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Highlight: Satu Kartu ── */}
+      <section className="bg-gray-900 py-20 text-white">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-amber-400">Smart Card</span>
+            <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{t("cardTitle")}</h2>
+            <p className="mt-3 text-gray-300">{t("cardSubtitle")}</p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {cardItems.map((h) => (
+              <div key={h.title} className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                <div className="text-3xl">{h.icon}</div>
+                <h3 className="mt-3 text-base font-bold">{h.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-gray-300">{h.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -224,6 +313,58 @@ export default async function LandingPage() {
           ))}
         </div>
         <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-gray-400">{t("pricingNote")}</p>
+
+        {/* Feature matrix per plan */}
+        <div className="mx-auto mt-12 max-w-4xl">
+          <h3 className="mb-5 text-center text-lg font-bold text-gray-900">{t("matrixTitle")}</h3>
+          <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50 text-gray-500">
+                  <th className="px-4 py-3 text-left font-semibold">{t("matrixFitur")}</th>
+                  <th className="px-4 py-3 text-center font-semibold">Gratis</th>
+                  <th className="px-4 py-3 text-center font-semibold text-indigo-700">Sekolah</th>
+                  <th className="px-4 py-3 text-center font-semibold">Yayasan</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {matrixRows.map((r) => (
+                  <tr key={r.f} className="hover:bg-gray-50/50">
+                    <td className="px-4 py-3 text-gray-700">{r.f}</td>
+                    <td className="px-4 py-3 text-center text-gray-500">{r.free}</td>
+                    <td className="px-4 py-3 text-center font-medium text-indigo-700">{r.school}</td>
+                    <td className="px-4 py-3 text-center text-gray-700">{r.foundation}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonial ── */}
+      <section className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold sm:text-4xl">{t("testiTitle")}</h2>
+          <p className="mt-3 text-gray-500">{t("testiSubtitle")}</p>
+        </div>
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {testiItems.map((tt) => (
+            <figure key={tt.name} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="text-amber-400">★★★★★</div>
+              <blockquote className="mt-3 text-sm leading-relaxed text-gray-700">“{tt.quote}”</blockquote>
+              <figcaption className="mt-4 flex items-center gap-3 border-t border-gray-100 pt-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
+                  {tt.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-gray-900">{tt.name}</div>
+                  <div className="text-xs text-gray-500">{tt.role} · {tt.school}</div>
+                </div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </section>
 
       {/* ── FAQ ── */}
@@ -252,10 +393,16 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h2 className="text-3xl font-bold sm:text-4xl">{t("ctaTitle")}</h2>
           <p className="mt-3 text-indigo-100">{t("ctaSubtitle")}</p>
-          <Link href="/daftar-sekolah"
-            className="mt-8 inline-block rounded-xl bg-white px-8 py-3.5 text-sm font-bold text-indigo-700 shadow-lg transition-transform hover:-translate-y-0.5">
-            {t("ctaButton")} →
-          </Link>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/daftar-sekolah"
+              className="inline-block rounded-xl bg-white px-8 py-3.5 text-sm font-bold text-indigo-700 shadow-lg transition-transform hover:-translate-y-0.5">
+              {t("ctaButton")} →
+            </Link>
+            <Link href="/jadwal-demo"
+              className="inline-block rounded-xl border border-white/40 px-8 py-3.5 text-sm font-semibold text-white hover:bg-white/10">
+              {t("navJadwalDemo")}
+            </Link>
+          </div>
         </div>
       </section>
 

@@ -1916,6 +1916,8 @@ model PendaftaranSekolah {
   kota        String?
   paket       String?
   catatan     String?
+  tipe        String    @default("registrasi") // registrasi | jadwal_demo | yayasan
+  jadwalAt    DateTime? @map("jadwal_at") // waktu demo yang diminta (untuk tipe jadwal_demo)
   status      String   @default("baru") // baru | dihubungi | aktif | ditolak
   createdAt   DateTime @default(now()) @map("created_at")
 

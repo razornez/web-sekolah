@@ -187,6 +187,202 @@
     "regPassword": "Password (min 6 characters)",
     "regDemoNote": "🎁 Free 24-hour trial — demo account & data are auto-deleted after 24 hours. Upgrade to keep them permanently.",
     "regUsernameTaken": "Invalid username.",
-    "regPasswordShort": "Password must be at least 6 characters."
+    "regPasswordShort": "Password must be at least 6 characters.",
+    "navJadwalDemo": "Schedule Demo",
+    "trustedTitle": "Trusted by educational institutions",
+    "trustedItems": [
+      "Nusantara High",
+      "Harapan Bangsa JHS",
+      "Cendekia Elementary",
+      "Al-Falah Islamic",
+      "Bina Karya Vocational",
+      "Tunas Mulia High",
+      "Pelita Ilmu JHS",
+      "Ceria Kindergarten"
+    ],
+    "testiTitle": "What they say",
+    "testiSubtitle": "Stories from schools that got more organized with Smart School.",
+    "testiItems": [
+      {
+        "name": "Budi Santoso, M.Pd.",
+        "role": "Principal",
+        "school": "Nusantara High",
+        "quote": "Admin work that used to take days now takes minutes. Digital report cards are a huge help for teachers."
+      },
+      {
+        "name": "Siti Rahmawati, S.Pd.",
+        "role": "Homeroom Teacher",
+        "school": "Harapan Bangsa JHS",
+        "quote": "Entering grades and attendance is easy, even from a phone. Parents can monitor their kids directly."
+      },
+      {
+        "name": "Andi Pratama",
+        "role": "School Operator",
+        "school": "Bina Karya Vocational",
+        "quote": "From admissions to finance in one system. No more juggling separate apps."
+      },
+      {
+        "name": "Dewi Lestari, S.E.",
+        "role": "Treasurer",
+        "school": "Al-Falah Islamic",
+        "quote": "Real-time tuition arrears recap. Financial reports are far more accurate and fast."
+      }
+    ],
+    "lmsTitle": "LMS & Online Exams (CBT)",
+    "lmsSubtitle": "Complete digital learning — from materials to exams with automatic grading.",
+    "lmsItems": [
+      {
+        "icon": "📚",
+        "title": "Structured Materials",
+        "desc": "Complete, tidy digital learning materials that are easy for students to follow."
+      },
+      {
+        "icon": "📤",
+        "title": "Auto Distribution",
+        "desc": "Materials and assignments delivered on schedule with automatic notifications."
+      },
+      {
+        "icon": "📝",
+        "title": "Online Exams (CBT)",
+        "desc": "With auto grading and a secure question bank for school exams."
+      },
+      {
+        "icon": "✅",
+        "title": "Practical Grading",
+        "desc": "Easy paperless assignment collection and daily grading."
+      },
+      {
+        "icon": "💬",
+        "title": "Integrated Discussion",
+        "desc": "Two-way teacher–student Q&A space in one platform."
+      },
+      {
+        "icon": "📈",
+        "title": "Reports & Monitoring",
+        "desc": "Track student learning activity in real time and access grade reports easily."
+      }
+    ],
+    "parentTitle": "Parent App",
+    "parentSubtitle": "Monitor and manage all your child activities — academics, finance, and pocket money — in real time.",
+    "parentItems": [
+      {
+        "icon": "🧒",
+        "title": "Activity & Attendance",
+        "desc": "Check daily attendance and learning activity in real time."
+      },
+      {
+        "icon": "🗓",
+        "title": "Schedule & Assignments",
+        "desc": "See class schedule, assignments, homework, and learning progress."
+      },
+      {
+        "icon": "💳",
+        "title": "Top Up & Track Pocket Money",
+        "desc": "Top up balance and safely monitor your child pocket money usage."
+      },
+      {
+        "icon": "📨",
+        "title": "Admin & Permits",
+        "desc": "Submit leave, see announcements, and school updates from your phone."
+      },
+      {
+        "icon": "💰",
+        "title": "Bills & Payments",
+        "desc": "Pay tuition, activities, and other school bills without queuing."
+      },
+      {
+        "icon": "📢",
+        "title": "School Info",
+        "desc": "Important news and announcements straight from school."
+      }
+    ],
+    "cardTitle": "One Card for All Access",
+    "cardSubtitle": "One smart card for every school service.",
+    "cardItems": [
+      {
+        "icon": "🪪",
+        "title": "ID & Attendance",
+        "desc": "Tap the card for automatic student & staff attendance."
+      },
+      {
+        "icon": "🛒",
+        "title": "Cashless Canteen",
+        "desc": "Pay with pocket-money balance, no cash needed."
+      },
+      {
+        "icon": "📕",
+        "title": "Library",
+        "desc": "Borrow books with a single card tap."
+      }
+    ],
+    "matrixTitle": "Compare features per plan",
+    "matrixFitur": "Feature",
+    "matrixRows": [
+      {
+        "f": "Number of students",
+        "free": "≤ 50",
+        "school": "≤ 1,500",
+        "foundation": "Unlimited"
+      },
+      {
+        "f": "Core modules (students, grades, attendance)",
+        "free": "✓",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "All modules (24+)",
+        "free": "—",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "LMS & CBT",
+        "free": "—",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "Parent App",
+        "free": "—",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "Digital & printable report cards",
+        "free": "Basic",
+        "school": "✓",
+        "foundation": "✓"
+      },
+      {
+        "f": "Multi-school",
+        "free": "—",
+        "school": "—",
+        "foundation": "✓"
+      },
+      {
+        "f": "Support",
+        "free": "Community",
+        "school": "Priority email",
+        "foundation": "Dedicated (SLA)"
+      }
+    ],
+    "jdTitle": "Schedule a Demo",
+    "jdSubtitle": "Pick a time that works — our team will walk you through Smart School.",
+    "jdNama": "Your Name",
+    "jdSekolah": "School Name",
+    "jdEmail": "Email",
+    "jdTelepon": "WhatsApp / Phone",
+    "jdTanggal": "Preferred Date",
+    "jdJam": "Preferred Time",
+    "jdCatatan": "Notes (optional)",
+    "jdSubmit": "Send Demo Request",
+    "jdSubmitting": "Sending…",
+    "jdSuccessTitle": "Demo Request Sent! 📅",
+    "jdSuccessDesc": "Thank you. Our team will contact you to confirm your demo schedule.",
+    "jdSuccessHome": "Back to Home",
+    "jdError": "Please fill name, school, and a contact (email/phone).",
+    "jdAtauInstan": "Or try it yourself right away:",
+    "jdCobaInstan": "Try Free Now"
   }
 }
