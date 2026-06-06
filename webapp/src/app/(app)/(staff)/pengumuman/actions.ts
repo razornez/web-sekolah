@@ -75,9 +75,15 @@ export async function deletePengumuman(formData: FormData) {
   revalidatePath("/pengumuman");
 }
 
-/** Increment view count — dipanggil client-side dari detail page */
+/** Increment view count — dipanggil client-side dari detail page (scoped ke tenant) */
 export async function incrementView(id: number) {
   try {
-    await prisma.pengumuman.update({ where: { id }, data: { viewCount: { increment: 1 } } });
+    const user = await getCurrentUser();
+    if (user.sekolahId == null) return;
+    // updateMany dgn {id, sekolahId} agar tidak bisa bump view sekolah lain
+    await prisma.pengumuman.updateMany({
+      where: { id, sekolahId: user.sekolahId },
+      data: { viewCount: { increment: 1 } },
+    });
   } catch { /* best-effort */ }
 }

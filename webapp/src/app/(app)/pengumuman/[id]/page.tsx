@@ -13,11 +13,15 @@ const strip = (html: string, n = 250) => { const t = html.replace(/<[^>]+>/g, " 
 export default async function PengumumanDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();
   const { id } = await params;
-  const p = await prisma.pengumuman.findUnique({
-    where: { id: Number(id) },
+  // Tenant isolation: scope ke sekolah pengguna agar tidak bisa baca pengumuman sekolah lain.
+  const p = await prisma.pengumuman.findFirst({
+    where: { id: Number(id), sekolahId: user.sekolahId ?? -1 },
     include: { sekolah: { select: { nama: true } }, author: { select: { namaLengkap: true, role: true } } },
   });
   if (!p) notFound();
+
+  // Pengumuman bertarget "staf" tidak boleh dibuka oleh end-user (siswa/ortu).
+  if (p.target === "staf" && !isStaff(user.role)) notFound();
 
   const waText = `📢 *${p.judul}*\n\n${strip(p.isi)}\n\n— ${p.sekolah.nama}`;
   const staffView = isStaff(user.role);
