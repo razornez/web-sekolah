@@ -1,0 +1,31 @@
+{
+  "legal": {
+    "privacyTitle": "Kebijakan Privasi",
+    "privacyUpdated": "Terakhir diperbarui: Juni 2026",
+    "privacyIntro": "Kebijakan ini menjelaskan bagaimana Smart School mengumpulkan, menggunakan, dan melindungi data pribadi pengguna (sekolah, guru, siswa, dan orang tua). Kami berkomitmen menjaga kerahasiaan dan keamanan data sesuai praktik perlindungan data yang berlaku.",
+    "privacyS1Title": "1. Data yang Dikumpulkan",
+    "privacyS1": "Kami mengumpulkan data identitas (nama, NISN/NIP, tanggal lahir), kontak (alamat, telepon, email), data akademik (nilai, kehadiran, pelanggaran), dan data administrasi (pembayaran SPP) yang diperlukan untuk menjalankan layanan manajemen sekolah.",
+    "privacyS2Title": "2. Penggunaan Data",
+    "privacyS2": "Data digunakan semata-mata untuk operasional sekolah: pencatatan akademik, pelaporan rapor, presensi, administrasi keuangan, dan komunikasi resmi. Data tidak dijual atau disewakan ke pihak ketiga.",
+    "privacyS3Title": "3. Penyimpanan & Keamanan",
+    "privacyS3": "Data disimpan terisolasi per sekolah (multi-tenant). Akses dibatasi berdasarkan peran (RBAC) dan diaudit. Kata sandi disimpan ter-enkripsi (hash). Koneksi dilindungi HTTPS di lingkungan produksi.",
+    "privacyS4Title": "4. Hak Pengguna",
+    "privacyS4": "Pengguna berhak mengakses, memperbaiki, dan meminta penghapusan data pribadinya. Sekolah (sebagai pengelola data) dapat mengekspor data siswa dalam format terstruktur dan menghapus data atas permintaan yang sah.",
+    "privacyS5Title": "5. Kontak",
+    "privacyS5": "Untuk pertanyaan terkait privasi atau permintaan hak data, hubungi admin/operator sekolah Anda atau penyelenggara layanan.",
+    "termsTitle": "Syarat & Ketentuan",
+    "termsUpdated": "Terakhir diperbarui: Juni 2026",
+    "termsIntro": "Dengan menggunakan Smart School, Anda menyetujui syarat dan ketentuan berikut.",
+    "termsS1Title": "1. Penggunaan Layanan",
+    "termsS1": "Layanan ini ditujukan untuk pengelolaan administrasi sekolah oleh pengguna yang berwenang. Setiap pengguna bertanggung jawab atas kerahasiaan akun dan kata sandinya.",
+    "termsS2Title": "2. Akun & Akses",
+    "termsS2": "Akses diberikan sesuai peran (admin, guru, wali kelas, siswa, orang tua, dll). Dilarang mengakses atau mencoba mengakses data di luar wewenang yang diberikan.",
+    "termsS3Title": "3. Penggunaan yang Dilarang",
+    "termsS3": "Dilarang menyalahgunakan layanan untuk aktivitas ilegal, mengunggah konten berbahaya, atau mengganggu integritas sistem dan data sekolah lain.",
+    "termsS4Title": "4. Ketersediaan & Tanggung Jawab",
+    "termsS4": "Kami berupaya menjaga ketersediaan layanan, namun tidak menjamin bebas gangguan. Sekolah bertanggung jawab atas keakuratan data yang diinput.",
+    "termsS5Title": "5. Perubahan",
+    "termsS5": "Syarat ini dapat diperbarui sewaktu-waktu. Perubahan signifikan akan diberitahukan melalui aplikasi.",
+    "backToLogin": "← Kembali ke halaman masuk"
+  }
+}

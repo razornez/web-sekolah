@@ -1,0 +1,31 @@
+{
+  "legal": {
+    "privacyTitle": "Privacy Policy",
+    "privacyUpdated": "Last updated: June 2026",
+    "privacyIntro": "This policy explains how Smart School collects, uses, and protects personal data of its users (schools, teachers, students, and parents). We are committed to keeping data confidential and secure in line with applicable data protection practices.",
+    "privacyS1Title": "1. Data We Collect",
+    "privacyS1": "We collect identity data (name, student/staff ID, date of birth), contact data (address, phone, email), academic data (grades, attendance, violations), and administrative data (tuition payments) needed to operate the school management service.",
+    "privacyS2Title": "2. How We Use Data",
+    "privacyS2": "Data is used solely for school operations: academic records, report cards, attendance, financial administration, and official communication. Data is never sold or rented to third parties.",
+    "privacyS3Title": "3. Storage & Security",
+    "privacyS3": "Data is stored isolated per school (multi-tenant). Access is restricted by role (RBAC) and audited. Passwords are stored encrypted (hashed). Connections are protected by HTTPS in production.",
+    "privacyS4Title": "4. Your Rights",
+    "privacyS4": "Users have the right to access, correct, and request deletion of their personal data. The school (as data controller) can export student data in a structured format and delete data upon legitimate request.",
+    "privacyS5Title": "5. Contact",
+    "privacyS5": "For privacy questions or data rights requests, contact your school's admin/operator or the service provider.",
+    "termsTitle": "Terms & Conditions",
+    "termsUpdated": "Last updated: June 2026",
+    "termsIntro": "By using Smart School, you agree to the following terms and conditions.",
+    "termsS1Title": "1. Use of Service",
+    "termsS1": "This service is intended for school administration by authorized users. Each user is responsible for the confidentiality of their account and password.",
+    "termsS2Title": "2. Accounts & Access",
+    "termsS2": "Access is granted by role (admin, teacher, homeroom teacher, student, parent, etc.). Accessing or attempting to access data beyond your authorization is prohibited.",
+    "termsS3Title": "3. Prohibited Use",
+    "termsS3": "Misusing the service for illegal activity, uploading malicious content, or compromising the integrity of the system and other schools' data is prohibited.",
+    "termsS4Title": "4. Availability & Liability",
+    "termsS4": "We strive to maintain availability but do not guarantee uninterrupted service. Schools are responsible for the accuracy of the data they enter.",
+    "termsS5Title": "5. Changes",
+    "termsS5": "These terms may be updated at any time. Significant changes will be notified within the app.",
+    "backToLogin": "← Back to sign in"
+  }
+}

@@ -61,6 +61,11 @@ export default async function LoginPage({
         <p className="mt-6 text-center text-xs text-gray-400">
           © {new Date().getFullYear()} {tApp("brand")} · {t("footer")}
         </p>
+        <p className="mt-2 text-center text-xs text-gray-400">
+          <a href="/privacy" className="hover:text-gray-200 hover:underline">Privacy</a>
+          <span className="mx-2">·</span>
+          <a href="/terms" className="hover:text-gray-200 hover:underline">Terms</a>
+        </p>
       </div>
     </main>
   );

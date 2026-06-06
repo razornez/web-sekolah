@@ -35,6 +35,7 @@ const MODULES = [
   "ujian",
   "prestasi",
   "portal",
+  "legal",
 ] as const;
 
 export default getRequestConfig(async () => {
