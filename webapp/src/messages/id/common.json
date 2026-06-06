@@ -8,7 +8,7 @@
     "loginSubtitle": "Masuk ke akun Anda untuk melanjutkan",
     "schoolCode": "Kode Sekolah",
     "schoolCodePlaceholder": "mis. smartschool",
-    "schoolCodeHint": "Kosongkan jika tidak yakin",
+    "schoolCodeHint": "Kosongkan jika username Anda unik — sistem mendeteksi sekolah otomatis.",
     "username": "Username",
     "usernamePlaceholder": "Masukkan username",
     "password": "Password",
@@ -29,7 +29,8 @@
     "forgotStep3": "Admin akan menerbitkan password sementara.",
     "forgotStep4": "Login dengan password sementara, lalu segera ganti.",
     "backToLogin": "← Kembali ke halaman masuk",
-    "needHelp": "Butuh bantuan?"
+    "needHelp": "Butuh bantuan?",
+    "optional": "opsional"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -145,7 +146,8 @@
     "ok": "OK",
     "demoBannerText": "Mode Demo — data otomatis terhapus dalam {h} jam.",
     "demoBannerExpired": "Mode Demo — masa demo telah berakhir.",
-    "demoUpgrade": "Upgrade"
+    "demoUpgrade": "Upgrade",
+    "kodeSekolahLabel": "Kode sekolah"
   },
   "roles": {
     "admin": "Admin",

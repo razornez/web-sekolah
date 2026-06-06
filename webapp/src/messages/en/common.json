@@ -8,7 +8,7 @@
     "loginSubtitle": "Sign in to your account to continue",
     "schoolCode": "School Code",
     "schoolCodePlaceholder": "e.g. smartschool",
-    "schoolCodeHint": "Leave blank if unsure",
+    "schoolCodeHint": "Leave blank if your username is unique — the school is detected automatically.",
     "username": "Username",
     "usernamePlaceholder": "Enter your username",
     "password": "Password",
@@ -29,7 +29,8 @@
     "forgotStep3": "The admin will issue a temporary password.",
     "forgotStep4": "Sign in with the temporary password, then change it immediately.",
     "backToLogin": "← Back to sign in",
-    "needHelp": "Need help?"
+    "needHelp": "Need help?",
+    "optional": "optional"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -145,7 +146,8 @@
     "ok": "OK",
     "demoBannerText": "Demo Mode — data auto-deletes in {h} hours.",
     "demoBannerExpired": "Demo Mode — your trial has ended.",
-    "demoUpgrade": "Upgrade"
+    "demoUpgrade": "Upgrade",
+    "kodeSekolahLabel": "School code"
   },
   "roles": {
     "admin": "Admin",

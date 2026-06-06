@@ -97,6 +97,7 @@
     "schoolMisi": "Misi",
     "schoolSave": "Simpan Identitas",
     "schoolBack": "Batal",
-    "schoolSaved": "Identitas sekolah tersimpan"
+    "schoolSaved": "Identitas sekolah tersimpan",
+    "schoolSlug": "Kode Sekolah (untuk login)"
   }
 }

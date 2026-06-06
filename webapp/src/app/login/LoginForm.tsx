@@ -85,7 +85,7 @@ export function LoginForm({
       {/* Kode Sekolah */}
       <div className="space-y-1">
         <label htmlFor="sekolah" className="text-sm font-medium text-gray-700">
-          {t("schoolCode")}
+          {t("schoolCode")} <span className="font-normal text-gray-400">({t("optional")})</span>
         </label>
         <input
           id="sekolah"

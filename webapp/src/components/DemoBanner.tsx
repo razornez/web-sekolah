@@ -10,7 +10,7 @@ export async function DemoBanner({ sekolahId }: { sekolahId: number | null | und
   if (sekolahId == null) return null;
   const sekolah = await prisma.sekolah.findUnique({
     where: { id: sekolahId },
-    select: { isDemo: true, demoExpiresAt: true },
+    select: { isDemo: true, demoExpiresAt: true, slug: true },
   });
   if (!sekolah?.isDemo) return null;
 
@@ -22,6 +22,10 @@ export async function DemoBanner({ sekolahId }: { sekolahId: number | null | und
   return (
     <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-amber-500 px-4 py-2 text-center text-sm font-medium text-white">
       <span>⏳ {expired ? t("demoBannerExpired") : t("demoBannerText", { h: hoursLeft })}</span>
+      {/* Kode sekolah — agar user tahu kode login mereka (penting saat login ulang) */}
+      <span className="rounded-md bg-white/20 px-2 py-0.5 text-xs">
+        {t("kodeSekolahLabel")}: <b className="font-mono">{sekolah.slug}</b>
+      </span>
       <Link href="/daftar-sekolah" className="rounded-md bg-white/20 px-2.5 py-0.5 text-xs font-semibold hover:bg-white/30">
         {t("demoUpgrade")}
       </Link>

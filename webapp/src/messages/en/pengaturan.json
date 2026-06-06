@@ -97,6 +97,7 @@
     "schoolMisi": "Mission",
     "schoolSave": "Save Identity",
     "schoolBack": "Cancel",
-    "schoolSaved": "School identity saved"
+    "schoolSaved": "School identity saved",
+    "schoolSlug": "School Code (for login)"
   }
 }
