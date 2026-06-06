@@ -20,6 +20,7 @@ export default auth((req: NextRequest & { auth: { user?: unknown } | null }) => 
     path === "/lupa-password" ||
     path === "/privacy" ||
     path === "/terms" ||
+    path === "/daftar-sekolah" ||
     path.startsWith("/daftar/") ||
     path.startsWith("/api/auth") ||
     path.startsWith("/api/siswa") ||

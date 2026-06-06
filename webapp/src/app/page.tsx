@@ -16,6 +16,10 @@ const MODULES = [
   "🎯 Ekstrakurikuler", "📣 Pengumuman", "🧪 P5", "🗳 OSIS", "🎓 Kelulusan", "📋 Audit",
 ];
 
+type Plan = { name: string; price: string; period: string; desc: string; cta: string; popular: boolean; features: string[] };
+type Row = { label: string; us: string; other: string };
+type Faq = { q: string; a: string };
+
 export default async function LandingPage() {
   const t = await getTranslations("landing");
   const tApp = await getTranslations("app");
@@ -36,6 +40,9 @@ export default async function LandingPage() {
     { title: t("why3Title"), desc: t("why3Desc") },
     { title: t("why4Title"), desc: t("why4Desc") },
   ];
+  const compareRows = t.raw("compareRows") as Row[];
+  const plans = t.raw("pricingPlans") as Plan[];
+  const faqItems = t.raw("faqItems") as Faq[];
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -45,18 +52,19 @@ export default async function LandingPage() {
           <div className="flex items-center gap-2 text-lg font-bold">
             <span className="text-2xl">🏫</span> {tApp("brand")}
           </div>
-          <div className="hidden items-center gap-6 text-sm font-medium text-gray-600 md:flex">
+          <div className="hidden items-center gap-6 text-sm font-medium text-gray-600 lg:flex">
             <a href="#fitur" className="hover:text-gray-900">{t("navFitur")}</a>
             <a href="#modul" className="hover:text-gray-900">{t("navModul")}</a>
-            <a href="#kenapa" className="hover:text-gray-900">{t("whyTitle")}</a>
+            <a href="#harga" className="hover:text-gray-900">{t("navHarga")}</a>
+            <a href="#faq" className="hover:text-gray-900">{t("navFaq")}</a>
           </div>
           <div className="flex items-center gap-3">
             <LanguageSwitcher />
-            <Link
-              href={loggedIn ? "/dashboard" : "/login"}
-              className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
-            >
+            <Link href={loggedIn ? "/dashboard" : "/login"} className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 sm:block">
               {loggedIn ? t("navDashboard") : t("navMasuk")}
+            </Link>
+            <Link href="/daftar-sekolah" className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+              {t("navDaftar")}
             </Link>
           </div>
         </nav>
@@ -75,8 +83,7 @@ export default async function LandingPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base text-gray-300 sm:text-lg">{t("heroSubtitle")}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href={loggedIn ? "/dashboard" : "/login"}
-              className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-gray-900 shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-gray-100">
+            <Link href="/daftar-sekolah" className="rounded-xl bg-white px-6 py-3 text-sm font-bold text-gray-900 shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-gray-100">
               {t("heroCtaPrimary")} →
             </Link>
             <a href="#fitur" className="rounded-xl border border-white/20 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10">
@@ -151,12 +158,101 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── Compare ── */}
+      <section className="bg-gray-50 py-20">
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold sm:text-4xl">{t("compareTitle")}</h2>
+            <p className="mt-3 text-gray-500">{t("compareSubtitle")}</p>
+          </div>
+          <div className="mt-10 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-gray-400"></th>
+                  <th className="px-4 py-4 text-left text-sm font-bold text-indigo-700">✓ {t("compareUs")}</th>
+                  <th className="px-4 py-4 text-left text-sm font-medium text-gray-400">{t("compareOther")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {compareRows.map((r) => (
+                  <tr key={r.label} className="hover:bg-gray-50/50">
+                    <td className="px-4 py-3 font-medium text-gray-700">{r.label}</td>
+                    <td className="px-4 py-3 text-gray-900"><span className="mr-1 text-green-600">✓</span>{r.us}</td>
+                    <td className="px-4 py-3 text-gray-400">{r.other}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Pricing ── */}
+      <section id="harga" className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold sm:text-4xl">{t("pricingTitle")}</h2>
+          <p className="mt-3 text-gray-500">{t("pricingSubtitle")}</p>
+        </div>
+        <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {plans.map((p) => (
+            <div key={p.name}
+              className={`relative flex flex-col rounded-2xl border bg-white p-7 ${p.popular ? "border-indigo-500 shadow-xl ring-1 ring-indigo-500" : "border-gray-200 shadow-sm"}`}>
+              {p.popular && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white">
+                  {t("pricingPopular")}
+                </span>
+              )}
+              <h3 className="text-lg font-bold text-gray-900">{p.name}</h3>
+              <div className="mt-3 flex items-end gap-1">
+                <span className="text-3xl font-black text-gray-900">{p.price}</span>
+                <span className="mb-1 text-sm text-gray-400">{p.period}</span>
+              </div>
+              <p className="mt-2 text-sm text-gray-500">{p.desc}</p>
+              <ul className="mt-5 flex-1 space-y-2.5">
+                {p.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                    <span className="mt-0.5 text-green-600">✓</span><span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/daftar-sekolah"
+                className={`mt-6 rounded-xl py-2.5 text-center text-sm font-bold transition-colors ${p.popular ? "bg-gray-900 text-white hover:bg-gray-800" : "border border-gray-300 text-gray-900 hover:bg-gray-50"}`}>
+                {p.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+        <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-gray-400">{t("pricingNote")}</p>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section id="faq" className="bg-gray-50 py-20">
+        <div className="mx-auto max-w-3xl px-4">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold sm:text-4xl">{t("faqTitle")}</h2>
+            <p className="mt-3 text-gray-500">{t("faqSubtitle")}</p>
+          </div>
+          <div className="mt-10 space-y-3">
+            {faqItems.map((item) => (
+              <details key={item.q} className="group rounded-xl border border-gray-200 bg-white">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-gray-900">
+                  {item.q}
+                  <span className="shrink-0 text-gray-400 transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <div className="border-t border-gray-100 px-5 py-4 text-sm leading-relaxed text-gray-600">{item.a}</div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section className="bg-gradient-to-br from-indigo-600 to-violet-700 text-white">
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h2 className="text-3xl font-bold sm:text-4xl">{t("ctaTitle")}</h2>
           <p className="mt-3 text-indigo-100">{t("ctaSubtitle")}</p>
-          <Link href={loggedIn ? "/dashboard" : "/login"}
+          <Link href="/daftar-sekolah"
             className="mt-8 inline-block rounded-xl bg-white px-8 py-3.5 text-sm font-bold text-indigo-700 shadow-lg transition-transform hover:-translate-y-0.5">
             {t("ctaButton")} →
           </Link>
@@ -171,12 +267,19 @@ export default async function LandingPage() {
               <div className="flex items-center gap-2 text-lg font-bold">🏫 {tApp("brand")}</div>
               <p className="mt-3 text-sm text-gray-500">{t("footerTagline")}</p>
             </div>
-            <div className="flex gap-16">
+            <div className="flex flex-wrap gap-12">
               <div>
                 <div className="text-xs font-bold uppercase tracking-wide text-gray-400">{t("footerProduk")}</div>
                 <ul className="mt-3 space-y-2 text-sm text-gray-600">
                   <li><a href="#fitur" className="hover:text-gray-900">{t("navFitur")}</a></li>
-                  <li><a href="#modul" className="hover:text-gray-900">{t("navModul")}</a></li>
+                  <li><a href="#harga" className="hover:text-gray-900">{t("navHarga")}</a></li>
+                  <li><a href="#faq" className="hover:text-gray-900">{t("navFaq")}</a></li>
+                </ul>
+              </div>
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wide text-gray-400">{t("footerPerusahaan")}</div>
+                <ul className="mt-3 space-y-2 text-sm text-gray-600">
+                  <li><Link href="/daftar-sekolah" className="hover:text-gray-900">{t("navDaftar")}</Link></li>
                   <li><Link href="/login" className="hover:text-gray-900">{t("navMasuk")}</Link></li>
                 </ul>
               </div>

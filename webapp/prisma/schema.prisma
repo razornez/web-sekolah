@@ -1896,3 +1896,24 @@ model TemplatRapor {
 
   @@map("templat_rapor")
 }
+
+// Lead pendaftaran sekolah dari landing page (platform-level, sebelum tenant dibuat).
+// Tidak ber-sekolahId karena sekolah belum ada; diproses superadmin platform.
+model PendaftaranSekolah {
+  id          Int      @id @default(autoincrement())
+  namaSekolah String   @map("nama_sekolah")
+  jenjang     String?
+  jumlahSiswa String?  @map("jumlah_siswa")
+  namaPic     String   @map("nama_pic")
+  jabatan     String?
+  email       String?
+  telepon     String?
+  kota        String?
+  paket       String?
+  catatan     String?
+  status      String   @default("baru") // baru | dihubungi | aktif | ditolak
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([status])
+  @@map("pendaftaran_sekolah")
+}
