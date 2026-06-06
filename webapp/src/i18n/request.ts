@@ -36,6 +36,7 @@ const MODULES = [
   "prestasi",
   "portal",
   "legal",
+  "landing",
 ] as const;
 
 export default getRequestConfig(async () => {

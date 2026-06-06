@@ -15,6 +15,7 @@ export default auth((req: NextRequest & { auth: { user?: unknown } | null }) => 
   const session = req.auth;
 
   const isPublic =
+    path === "/" ||
     path === "/login" ||
     path === "/lupa-password" ||
     path === "/privacy" ||
