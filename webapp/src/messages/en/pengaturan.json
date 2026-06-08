@@ -98,6 +98,8 @@
     "schoolSave": "Save Identity",
     "schoolBack": "Cancel",
     "schoolSaved": "School identity saved",
-    "schoolSlug": "School Code (for login)"
+    "schoolSlug": "School Code (for login)",
+    "menuEmailTitle": "Email",
+    "menuEmailDesc": "Manage email templates and view delivery logs."
   }
 }

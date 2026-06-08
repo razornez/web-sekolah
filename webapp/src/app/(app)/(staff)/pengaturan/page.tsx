@@ -9,6 +9,7 @@ export default async function PengaturanPage() {
     { href: "/pengaturan/sekolah", icon: "🏫", title: t("menuSekolahTitle"), desc: t("menuSekolahDesc") },
     { href: "/pengaturan/akademik", icon: "📅", title: t("menuAkademikTitle"), desc: t("menuAkademikDesc") },
     { href: "/pengaturan/pengguna", icon: "👥", title: t("menuPenggunaTitle"), desc: t("menuPenggunaDesc") },
+    { href: "/pengaturan/email/template", icon: "✉️", title: t("menuEmailTitle"), desc: t("menuEmailDesc") },
   ];
   return (
     <div className="space-y-5">

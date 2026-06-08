@@ -98,6 +98,8 @@
     "schoolSave": "Simpan Identitas",
     "schoolBack": "Batal",
     "schoolSaved": "Identitas sekolah tersimpan",
-    "schoolSlug": "Kode Sekolah (untuk login)"
+    "schoolSlug": "Kode Sekolah (untuk login)",
+    "menuEmailTitle": "Email",
+    "menuEmailDesc": "Kelola template email dan lihat log pengiriman."
   }
 }
