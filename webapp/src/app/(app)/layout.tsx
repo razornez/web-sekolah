@@ -52,6 +52,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session?.user) redirect("/login");
   const user = session.user;
 
+  // Superadmin tidak punya tenant — langsung ke panel admin
+  if (user.role === "superadmin") redirect("/admin");
+
   const t = await getTranslations("nav");
 
   const source = isStaff(user.role)

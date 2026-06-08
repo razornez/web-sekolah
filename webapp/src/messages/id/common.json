@@ -164,7 +164,8 @@
     "sarpras": "Sarpras",
     "resepsionis": "Resepsionis",
     "siswa": "Siswa",
-    "ortu": "Orang Tua"
+    "ortu": "Orang Tua",
+    "superadmin": "Super Admin"
   },
   "language": {
     "label": "Bahasa",

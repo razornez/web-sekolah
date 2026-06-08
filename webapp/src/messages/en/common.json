@@ -164,7 +164,8 @@
     "sarpras": "Facilities",
     "resepsionis": "Receptionist",
     "siswa": "Student",
-    "ortu": "Parent"
+    "ortu": "Parent",
+    "superadmin": "Super Admin"
   },
   "language": {
     "label": "Language",
