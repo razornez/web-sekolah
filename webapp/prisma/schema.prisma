@@ -273,6 +273,7 @@ model Sekolah {
   entriNilai       EntriNilai[]
   komponenNilai    KomponenNilai[]
   templatRapor     TemplatRapor[]
+  emailLogs        EmailLog[]
 
   @@map("sekolah")
 }
@@ -1923,4 +1924,70 @@ model PendaftaranSekolah {
 
   @@index([status])
   @@map("pendaftaran_sekolah")
+}
+
+// =============================================================================
+// EMAIL PLATFORM (superadmin) — konfigurasi, template, log
+// =============================================================================
+
+/// Konfigurasi provider email platform (satu baris aktif).
+model EmailConfig {
+  id           Int       @id @default(autoincrement())
+  provider     String    @default("smtp") // "smtp" | "resend"
+  smtpHost     String?   @map("smtp_host")
+  smtpPort     Int?      @map("smtp_port")
+  smtpSecure   Boolean   @default(true) @map("smtp_secure")
+  smtpUser     String?   @map("smtp_user")
+  smtpPassEnc  String?   @map("smtp_pass_enc")  // AES-256-GCM encrypted
+  resendKeyEnc String?   @map("resend_key_enc") // AES-256-GCM encrypted
+  fromEmail    String    @default("") @map("from_email")
+  fromName     String    @default("") @map("from_name")
+  isActive     Boolean   @default(false) @map("is_active")
+  lastTestedAt DateTime? @map("last_tested_at")
+  lastTestOk   Boolean?  @map("last_test_ok")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("email_config")
+}
+
+/// Template email platform — di-seed saat deploy, dapat diedit superadmin.
+model EmailTemplate {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  name        String
+  description String?
+  category    String   // "auth"|"saas"|"ppdb"|"spp"|"presensi"|"nilai"|"tugas"|"bk"|"sistem"
+  subject     String
+  bodyHtml    String   @db.Text
+  bodyText    String?  @db.Text
+  variables   Json     // [{name, description, example}]
+  isEnabled   Boolean  @default(true) @map("is_enabled")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  logs EmailLog[]
+
+  @@map("email_template")
+}
+
+/// Log setiap email yang dikirim (atau gagal dikirim).
+model EmailLog {
+  id          Int       @id @default(autoincrement())
+  templateKey String?   @map("template_key")
+  sekolahId   Int?      @map("sekolah_id")
+  toEmail     String    @map("to_email")
+  toName      String?   @map("to_name")
+  subject     String
+  bodyHtml    String?   @db.Text @map("body_html")
+  status      String    @default("pending") // "pending"|"sent"|"failed"
+  errorMsg    String?   @map("error_msg")
+  sentAt      DateTime? @map("sent_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  sekolah  Sekolah?       @relation(fields: [sekolahId], references: [id], onDelete: SetNull)
+  template EmailTemplate? @relation(fields: [templateKey], references: [key], onDelete: SetNull)
+
+  @@index([status])
+  @@index([sekolahId])
+  @@index([createdAt])
+  @@map("email_log")
 }
