@@ -32,11 +32,13 @@ export function isStaff(role: string): boolean {
 
 /**
  * Guard back-office: hanya staf. Siswa/ortu diarahkan ke /portal.
+ * Superadmin diarahkan ke /admin (tidak punya sekolahId).
  * Mengembalikan sekolahId (tenant) sekaligus.
  */
 export async function requireStaff(): Promise<number> {
   const user = await getCurrentUser();
   if (END_USER_ROLES.includes(user.role)) redirect("/portal");
+  if (user.role === "superadmin") redirect("/admin");
   if (user.sekolahId == null) redirect("/dashboard?error=pilih-sekolah");
   return user.sekolahId;
 }

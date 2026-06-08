@@ -28,7 +28,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const rlKey = `${(sekolah ?? "_").toLowerCase()}:${username.toLowerCase()}`;
         if (isRateLimited(rlKey)) return null;
 
-        const user = await prisma.user.findFirst({
+        // Cari user: jika kode sekolah diisi, filter ke tenant tersebut.
+        // Jika tidak ditemukan (atau superadmin yang tidak ber-sekolah), coba tanpa filter tenant.
+        let user = await prisma.user.findFirst({
           where: {
             username,
             isActive: true,
@@ -36,6 +38,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           },
           include: { sekolah: { select: { slug: true } } },
         });
+
+        // Fallback untuk superadmin: tidak punya sekolah, kode sekolah diabaikan.
+        if (!user && sekolah) {
+          user = await prisma.user.findFirst({
+            where: { username, isActive: true, role: "superadmin" },
+            include: { sekolah: { select: { slug: true } } },
+          });
+        }
+
         if (!user) { recordFailedAttempt(rlKey); return null; }
 
         // Verifikasi password. User warisan masih MD5 → cek md5, lalu upgrade ke bcrypt.
