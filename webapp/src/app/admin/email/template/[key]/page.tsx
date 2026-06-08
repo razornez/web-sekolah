@@ -9,7 +9,7 @@ export default async function TemplateEditorPage({ params }: { params: Promise<{
   if (user.role !== "superadmin") redirect("/dashboard");
 
   const { key } = await params;
-  const template = await prisma.emailTemplate.findUnique({ where: { key } });
+  const template = await prisma.emailTemplate.findFirst({ where: { key, sekolahId: null } });
   if (!template) notFound();
 
   const data = {

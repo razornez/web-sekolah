@@ -18,15 +18,34 @@ function render(template: string, vars: Record<string, string>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
 }
 
+/** Config tenant dulu, fallback ke platform default (sekolahId=null). */
+async function resolveConfig(sekolahId?: number) {
+  if (sekolahId) {
+    const tenantCfg = await prisma.emailConfig.findUnique({ where: { sekolahId } });
+    if (tenantCfg?.isActive) return tenantCfg;
+  }
+  return prisma.emailConfig.findFirst({ where: { sekolahId: null, isActive: true } });
+}
+
+/** Template tenant dulu, fallback ke platform default (sekolahId=null). */
+async function resolveTemplate(key: string, sekolahId?: number) {
+  if (sekolahId) {
+    const tenantTpl = await prisma.emailTemplate.findFirst({ where: { key, sekolahId } });
+    if (tenantTpl?.isEnabled) return tenantTpl;
+  }
+  return prisma.emailTemplate.findFirst({ where: { key, sekolahId: null } });
+}
+
 /**
  * Kirim email menggunakan template dari DB.
+ * Lookup per-tenant dulu, fallback ke platform default.
  * Jika config tidak aktif atau template disabled → no-op (tidak error).
  */
 export async function sendEmail(opts: SendEmailOptions): Promise<SendEmailResult> {
   try {
     const [config, template] = await Promise.all([
-      prisma.emailConfig.findFirst({ where: { isActive: true } }),
-      prisma.emailTemplate.findUnique({ where: { key: opts.templateKey } }),
+      resolveConfig(opts.sekolahId),
+      resolveTemplate(opts.templateKey, opts.sekolahId),
     ]);
 
     if (!config) return { ok: false, error: "Email config not active" };

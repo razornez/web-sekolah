@@ -7,8 +7,8 @@ export default async function TenantPage() {
   if (user.role !== "superadmin") redirect("/dashboard");
 
   const schools = await prisma.sekolah.findMany({
-    orderBy: { createdAt: "desc" },
-    select: { id: true, nama: true, jenjang: true, slug: true, isDemo: true, demoExpiresAt: true, createdAt: true },
+    orderBy: [{ isDemo: "asc" }, { nama: "asc" }],
+    select: { id: true, nama: true, jenjang: true, slug: true, npsn: true, isDemo: true, demoExpiresAt: true, createdAt: true },
   });
 
   return (
@@ -24,7 +24,8 @@ export default async function TenantPage() {
             <tr>
               <th className="px-4 py-3 text-left font-semibold text-gray-600">Nama Sekolah</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-600">Jenjang</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-600">Slug</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-600">Kode / Key</th>
+              <th className="px-4 py-3 text-left font-semibold text-gray-600">NPSN</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-600">Tipe</th>
               <th className="px-4 py-3 text-left font-semibold text-gray-600">Terdaftar</th>
             </tr>
@@ -34,7 +35,10 @@ export default async function TenantPage() {
               <tr key={s.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 font-medium text-gray-900">{s.nama}</td>
                 <td className="px-4 py-3 text-gray-600">{s.jenjang}</td>
-                <td className="px-4 py-3 font-mono text-xs text-gray-500">{s.slug}</td>
+                <td className="px-4 py-3">
+                  <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-indigo-700">{s.slug}</code>
+                </td>
+                <td className="px-4 py-3 font-mono text-xs text-gray-500">{s.npsn ?? <span className="italic text-gray-300">—</span>}</td>
                 <td className="px-4 py-3">
                   {s.isDemo ? (
                     <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
@@ -50,7 +54,7 @@ export default async function TenantPage() {
               </tr>
             ))}
             {schools.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">Belum ada sekolah.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-sm text-gray-400">Belum ada sekolah.</td></tr>
             )}
           </tbody>
         </table>

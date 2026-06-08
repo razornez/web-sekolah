@@ -1,28 +1,22 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/session";
-import { redirect } from "next/navigation";
+import { requireModule } from "@/lib/permissions";
+import { requireStaff, getCurrentUser } from "@/lib/session";
 import { encryptSecret, decryptSecret } from "@/lib/email-crypto";
 import { sendEmail } from "@/lib/mailer";
 
-async function requireSuperadmin() {
-  const user = await getCurrentUser();
-  if (user.role !== "superadmin") redirect("/dashboard");
-  return user;
-}
-
 export async function saveEmailConfig(_prev: unknown, fd: FormData) {
-  await requireSuperadmin();
+  await requireModule("pengaturan");
+  const sekolahId = await requireStaff();
 
   const provider = fd.get("provider") as string;
   const fromEmail = (fd.get("fromEmail") as string).trim();
   const fromName = (fd.get("fromName") as string).trim();
   const isActive = fd.get("isActive") === "1";
 
-  const existing = await prisma.emailConfig.findFirst({ where: { sekolahId: null } });
+  const existing = await prisma.emailConfig.findUnique({ where: { sekolahId } });
 
-  // Encrypt secrets — hapus dari DB jika kosong, pertahankan nilai lama jika field dikosongkan
   const rawSmtpPass = fd.get("smtpPass") as string;
   const rawResendKey = fd.get("resendKey") as string;
 
@@ -48,16 +42,18 @@ export async function saveEmailConfig(_prev: unknown, fd: FormData) {
   if (existing) {
     await prisma.emailConfig.update({ where: { id: existing.id }, data });
   } else {
-    await prisma.emailConfig.create({ data: { ...data, sekolahId: null } });
+    await prisma.emailConfig.create({ data: { ...data, sekolahId } });
   }
 
   return { ok: true, message: "Konfigurasi berhasil disimpan." };
 }
 
 export async function testEmailConfig(_prev: unknown, _fd: FormData) {
-  const user = await requireSuperadmin();
+  await requireModule("pengaturan");
+  const sekolahId = await requireStaff();
+  const user = await getCurrentUser();
 
-  if (!user.email) return { ok: false, message: "Akun superadmin tidak memiliki email." };
+  if (!user.email) return { ok: false, message: "Akun Anda tidak memiliki email terdaftar." };
 
   const result = await sendEmail({
     templateKey: "reset_password",
@@ -68,19 +64,17 @@ export async function testEmailConfig(_prev: unknown, _fd: FormData) {
       expiredAt: "dalam 1 jam",
       namaAplikasi: "Smart School",
     },
+    sekolahId,
   });
 
-  if (!result.ok) {
-    return { ok: false, message: `Gagal: ${result.error}` };
-  }
+  if (!result.ok) return { ok: false, message: `Gagal: ${result.error}` };
 
-  await prisma.emailConfig.updateMany({ where: { sekolahId: null }, data: { lastTestedAt: new Date(), lastTestOk: true } });
+  await prisma.emailConfig.updateMany({ where: { sekolahId }, data: { lastTestedAt: new Date(), lastTestOk: true } });
   return { ok: true, message: "Email test berhasil dikirim ke " + user.email };
 }
 
-export async function getEmailConfigDecrypted() {
-  await requireSuperadmin();
-  const cfg = await prisma.emailConfig.findFirst({ where: { sekolahId: null } });
+export async function getEmailConfigDecrypted(sekolahId: number) {
+  const cfg = await prisma.emailConfig.findUnique({ where: { sekolahId } });
   if (!cfg) return null;
   return {
     ...cfg,

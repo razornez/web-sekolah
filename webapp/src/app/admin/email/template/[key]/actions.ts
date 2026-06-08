@@ -20,10 +20,10 @@ export async function saveTemplate(_prev: unknown, fd: FormData) {
   const bodyText = (fd.get("bodyText") as string).trim() || null;
   const isEnabled = fd.get("isEnabled") === "1";
 
-  await prisma.emailTemplate.update({
-    where: { key },
-    data: { subject, bodyHtml, bodyText, isEnabled },
-  });
+  const tpl = await prisma.emailTemplate.findFirst({ where: { key, sekolahId: null } });
+  if (tpl) {
+    await prisma.emailTemplate.update({ where: { id: tpl.id }, data: { subject, bodyHtml, bodyText, isEnabled } });
+  }
 
   return { ok: true, message: "Template berhasil disimpan." };
 }
@@ -32,7 +32,7 @@ export async function sendTestTemplate(_prev: unknown, fd: FormData) {
   const user = await requireSuperadmin();
 
   const key = fd.get("key") as string;
-  const template = await prisma.emailTemplate.findUnique({ where: { key } });
+  const template = await prisma.emailTemplate.findFirst({ where: { key, sekolahId: null } });
   if (!template) return { ok: false, message: "Template tidak ditemukan." };
 
   // Buat sample variables dari daftar yang tersedia

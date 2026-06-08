@@ -325,11 +325,15 @@ const TEMPLATES = [
 async function seedTemplates() {
   console.log("Seeding email templates...");
   for (const t of TEMPLATES) {
-    await prisma.emailTemplate.upsert({
-      where: { key: t.key },
-      update: { name: t.name, description: t.description, category: t.category, subject: t.subject, bodyHtml: t.bodyHtml, variables: t.variables },
-      create: { ...t, variables: t.variables },
-    });
+    const existing = await prisma.emailTemplate.findFirst({ where: { key: t.key, sekolahId: null } });
+    if (existing) {
+      await prisma.emailTemplate.update({
+        where: { id: existing.id },
+        data: { name: t.name, description: t.description, category: t.category, subject: t.subject, bodyHtml: t.bodyHtml, variables: t.variables },
+      });
+    } else {
+      await prisma.emailTemplate.create({ data: { ...t, sekolahId: null, variables: t.variables } });
+    }
     console.log(`  ✓ ${t.key}`);
   }
   console.log(`Done. ${TEMPLATES.length} templates seeded.`);

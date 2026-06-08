@@ -273,6 +273,8 @@ model Sekolah {
   entriNilai       EntriNilai[]
   komponenNilai    KomponenNilai[]
   templatRapor     TemplatRapor[]
+  emailConfig      EmailConfig?
+  emailTemplates   EmailTemplate[]
   emailLogs        EmailLog[]
 
   @@map("sekolah")
@@ -1927,12 +1929,15 @@ model PendaftaranSekolah {
 }
 
 // =============================================================================
-// EMAIL PLATFORM (superadmin) — konfigurasi, template, log
+// EMAIL — konfigurasi, template, log (per-tenant + platform default)
+// sekolahId = null  → platform default (dikelola superadmin)
+// sekolahId = X     → override/konfigurasi milik sekolah X
 // =============================================================================
 
-/// Konfigurasi provider email platform (satu baris aktif).
+/// Konfigurasi provider email. Satu baris per tenant; sekolahId=null = platform default.
 model EmailConfig {
   id           Int       @id @default(autoincrement())
+  sekolahId    Int?      @unique @map("sekolah_id") // null = platform default
   provider     String    @default("smtp") // "smtp" | "resend"
   smtpHost     String?   @map("smtp_host")
   smtpPort     Int?      @map("smtp_port")
@@ -1947,13 +1952,16 @@ model EmailConfig {
   lastTestOk   Boolean?  @map("last_test_ok")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
+  sekolah      Sekolah?  @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+
   @@map("email_config")
 }
 
-/// Template email platform — di-seed saat deploy, dapat diedit superadmin.
+/// Template email. sekolahId=null = default platform; sekolahId=X = override tenant X.
 model EmailTemplate {
   id          Int      @id @default(autoincrement())
-  key         String   @unique
+  key         String
+  sekolahId   Int?     @map("sekolah_id") // null = platform default
   name        String
   description String?
   category    String   // "auth"|"saas"|"ppdb"|"spp"|"presensi"|"nilai"|"tugas"|"bk"|"sistem"
@@ -1964,15 +1972,16 @@ model EmailTemplate {
   isEnabled   Boolean  @default(true) @map("is_enabled")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  logs EmailLog[]
+  sekolah     Sekolah? @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
 
+  @@unique([key, sekolahId], name: "key_sekolahId")
   @@map("email_template")
 }
 
 /// Log setiap email yang dikirim (atau gagal dikirim).
 model EmailLog {
   id          Int       @id @default(autoincrement())
-  templateKey String?   @map("template_key")
+  templateKey String?   @map("template_key") // referensi deskriptif, bukan FK
   sekolahId   Int?      @map("sekolah_id")
   toEmail     String    @map("to_email")
   toName      String?   @map("to_name")
@@ -1983,8 +1992,7 @@ model EmailLog {
   sentAt      DateTime? @map("sent_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
-  sekolah  Sekolah?       @relation(fields: [sekolahId], references: [id], onDelete: SetNull)
-  template EmailTemplate? @relation(fields: [templateKey], references: [key], onDelete: SetNull)
+  sekolah  Sekolah? @relation(fields: [sekolahId], references: [id], onDelete: SetNull)
 
   @@index([status])
   @@index([sekolahId])
