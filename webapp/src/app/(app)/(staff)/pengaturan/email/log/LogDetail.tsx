@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface LogEntry {
   id: number;
@@ -11,6 +12,7 @@ interface LogEntry {
 }
 
 export function LogDetail({ log }: { log: LogEntry }) {
+  const t = useTranslations("pengaturan");
   const [open, setOpen] = useState(false);
 
   return (
@@ -20,7 +22,7 @@ export function LogDetail({ log }: { log: LogEntry }) {
         onClick={() => setOpen(true)}
         className="rounded-lg border border-gray-200 px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
       >
-        Detail
+        {t("emailLogDetailBtn")}
       </button>
 
       {open && (
@@ -32,7 +34,7 @@ export function LogDetail({ log }: { log: LogEntry }) {
           >
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
               <div>
-                <h3 className="font-semibold text-gray-900">Detail Email #{log.id}</h3>
+                <h3 className="font-semibold text-gray-900">{t("emailLogDetailTitle", { id: log.id })}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{log.subject}</p>
               </div>
               <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-700 text-xl leading-none">×</button>
@@ -40,19 +42,19 @@ export function LogDetail({ log }: { log: LogEntry }) {
             <div className="p-5 space-y-4">
               {log.status === "failed" && log.errorMsg && (
                 <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                  <b>Error:</b> {log.errorMsg}
+                  <b>{t("emailLogDetailError")}</b> {log.errorMsg}
                 </div>
               )}
               {log.bodyHtml ? (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Preview Body</p>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("emailLogDetailBodyTitle")}</p>
                   <div
                     className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm"
                     dangerouslySetInnerHTML={{ __html: log.bodyHtml }}
                   />
                 </div>
               ) : (
-                <p className="text-sm text-gray-400 italic">Body tidak tersimpan.</p>
+                <p className="text-sm text-gray-400 italic">{t("emailLogDetailNoBody")}</p>
               )}
             </div>
           </div>
