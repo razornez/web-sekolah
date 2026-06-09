@@ -68,14 +68,17 @@ body {
    ============================================================ */
 .ak-shell {
   display: grid;
-  grid-template-columns: 116px 1fr;
+  /* minmax(0,1fr): izinkan kolom konten menyusut < lebar intrinsik → cegah halaman "meledak" lebar di mobile */
+  grid-template-columns: 116px minmax(0, 1fr);
   min-height: 100vh;
   gap: 0;
+  max-width: 100%;
 }
 .ak-main {
   padding: 24px 32px 40px;
   min-width: 0;
   position: relative;
+  overflow-x: hidden; /* konten lebar (tabel) tetap punya scroll-wrapper sendiri */
 }
 
 /* ============================================================
