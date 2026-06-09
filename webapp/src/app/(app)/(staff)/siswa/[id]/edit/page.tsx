@@ -1,21 +1,25 @@
 import { notFound } from "next/navigation";
+import { getTranslations, getLocale } from "next-intl/server";
 import { requireModule } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { FotoUpload } from "@/components/FotoUpload";
 import { AccountPanel } from "@/components/AccountPanel";
 import { SiswaEditForm, type EditInitial } from "../../_revamp/SiswaEditForm";
 
-function rel(d: Date): string {
+type T = Awaited<ReturnType<typeof getTranslations<"siswa">>>;
+function rel(d: Date, t: T, locale: string): string {
   const days = Math.floor((Date.now() - d.getTime()) / 86400000);
-  if (days <= 0) return "hari ini";
-  if (days === 1) return "kemarin";
-  if (days < 7) return `${days} hari lalu`;
-  if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
-  return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  if (days <= 0) return t("edit.relToday");
+  if (days === 1) return t("edit.relYesterday");
+  if (days < 7) return t("edit.relDays", { n: days });
+  if (days < 30) return t("edit.relWeeks", { n: Math.floor(days / 7) });
+  return d.toLocaleDateString(locale, { day: "2-digit", month: "short", year: "numeric" });
 }
 
 export default async function EditSiswaPage({ params }: { params: Promise<{ id: string }> }) {
   const sekolahId = await requireModule("siswa");
+  const t = await getTranslations("siswa");
+  const locale = await getLocale();
   const { id } = await params;
   const sid = Number(id);
   const s = await prisma.siswa.findFirst({
@@ -50,8 +54,8 @@ export default async function EditSiswaPage({ params }: { params: Promise<{ id: 
     ibu_nama: v(ibu?.nama), ibu_pekerjaan: v(ibu?.pekerjaan), ibu_pendidikan: v(ibu?.pendidikan), ibu_hp: v(ibu?.noHp),
   };
   const kelas = s.anggotaRombel[0]?.rombel?.nama ?? "—";
-  const updatedInfo = audit[0] ? `Diperbarui ${rel(audit[0].createdAt)} oleh ${audit[0].userName}` : "Belum pernah diubah";
-  const auditFmt = audit.map((a) => ({ aksi: a.aksi, detail: a.detail ?? "", userName: a.userName, when: rel(a.createdAt) }));
+  const updatedInfo = audit[0] ? t("edit.updatedBy", { when: rel(audit[0].createdAt, t, locale), who: audit[0].userName }) : t("edit.neverUpdated");
+  const auditFmt = audit.map((a) => ({ aksi: a.aksi, detail: a.detail ?? "", userName: a.userName, when: rel(a.createdAt, t, locale) }));
 
   return (
     <div>
