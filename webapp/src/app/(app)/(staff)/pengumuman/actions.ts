@@ -144,12 +144,33 @@ export async function updatePengumuman(
   const pinned = formData.get("pinned") === "on";
   const prioritas = formData.get("prioritas") === "on";
   const butuhBalasan = formData.get("butuhBalasan") === "on";
+  const channels = formData.getAll("channels").map(String).filter((c): c is KirimChannel => (CHANNELS as string[]).includes(c));
+  const reminderHoursRaw = Number(formData.get("reminderHours"));
+  const reminderHours = Number.isFinite(reminderHoursRaw) && reminderHoursRaw > 0 ? Math.floor(reminderHoursRaw) : null;
 
-  await prisma.pengumuman.update({ where: { id }, data: { judul, isi, target, kategori, pinned, prioritas, butuhBalasan } });
+  await prisma.pengumuman.update({ where: { id }, data: { judul, isi, target, kategori, pinned, prioritas, butuhBalasan, channels, reminderHours } });
   await auditLog({ aksi: "update", entitas: "pengumuman", entitasId: id, detail: `Update pengumuman: ${judul}` });
   revalidatePath("/pengumuman");
   revalidatePath(`/pengumuman/${id}`);
   redirect(`/pengumuman/${id}`);
+}
+
+/** Arsipkan: sembunyikan dari papan publik (reversibel). Dipanggil dari halaman edit. */
+export async function arsipPengumuman(id: number): Promise<void> {
+  const sekolahId = await requireModule("pengumuman");
+  await prisma.pengumuman.updateMany({ where: { id, sekolahId }, data: { arsip: true } });
+  await auditLog({ aksi: "update", entitas: "pengumuman", entitasId: id, detail: `Arsipkan pengumuman #${id}` });
+  revalidatePath("/pengumuman");
+  redirect("/pengumuman");
+}
+
+/** Hapus permanen + redirect (dipanggil dari halaman edit). */
+export async function hapusPengumuman(id: number): Promise<void> {
+  const sekolahId = await requireModule("pengumuman");
+  await prisma.pengumuman.deleteMany({ where: { id, sekolahId } });
+  await auditLog({ aksi: "delete", entitas: "pengumuman", entitasId: id, detail: `Hapus pengumuman #${id}` });
+  revalidatePath("/pengumuman");
+  redirect("/pengumuman");
 }
 
 export async function deletePengumuman(formData: FormData) {

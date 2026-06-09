@@ -72,7 +72,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
 
   const [rows, readGroups, readTipeGroups, catGroups] = await Promise.all([
     prisma.pengumuman.findMany({
-      where: { sekolahId },
+      where: { sekolahId, arsip: false },
       orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
       take: 120,
       select: {
@@ -84,7 +84,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
     }),
     prisma.pengumumanBaca.groupBy({ by: ["pengumumanId"], where: { pengumuman: { sekolahId } }, _count: { _all: true } }),
     prisma.pengumumanBaca.groupBy({ by: ["pengumumanId", "tipe"], where: { pengumuman: { sekolahId } }, _count: { _all: true } }),
-    prisma.pengumuman.groupBy({ by: ["kategori"], where: { sekolahId }, _count: { _all: true } }),
+    prisma.pengumuman.groupBy({ by: ["kategori"], where: { sekolahId, arsip: false }, _count: { _all: true } }),
   ]);
 
   const readMap = new Map<number, number>(readGroups.map((r) => [r.pengumumanId, r._count._all]));

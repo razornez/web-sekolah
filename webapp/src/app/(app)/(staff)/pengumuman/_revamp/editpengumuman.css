@@ -1,0 +1,145 @@
+/* Halaman Edit Pengumuman — Akadewa. Scoped #ak-peng-edit. Pakai token --ak-*. */
+#ak-peng-edit { display: block; }
+#ak-peng-edit .crumb { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--ak-muted); margin-bottom: 14px; }
+#ak-peng-edit .crumb a { color: var(--ak-ink-3); }
+#ak-peng-edit .crumb a:hover { color: var(--ak-ink); }
+#ak-peng-edit .crumb .sep { color: var(--ak-soft); }
+#ak-peng-edit .crumb b { color: var(--ak-ink); }
+
+#ak-peng-edit .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; font-weight: 700; font-size: 13px; border-radius: 12px; border: 0; cursor: pointer; transition: transform .12s, background .15s; text-decoration: none; }
+#ak-peng-edit .btn-ghost { background: var(--ak-surface-2); color: var(--ak-ink-2); border: 1px solid var(--ak-rule-2); }
+#ak-peng-edit .btn-ghost:hover { background: var(--ak-bg-2); }
+#ak-peng-edit .btn-save { background: var(--ak-mint-deep); color: #fff; box-shadow: 0 6px 18px -6px rgba(46,161,113,0.5); }
+#ak-peng-edit .btn-save:hover { background: #1F7E4F; transform: translateY(-1px); }
+#ak-peng-edit .btn-save:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+/* HEADER */
+#ak-peng-edit .edit-h { background: var(--ak-surface); border-radius: 22px; padding: 18px 24px; margin-bottom: 18px; box-shadow: var(--ak-shadow); border: 1px solid var(--ak-rule); display: grid; grid-template-columns: 56px 1fr auto; gap: 18px; align-items: center; position: sticky; top: 12px; z-index: 50; }
+#ak-peng-edit .edit-h .ic { width: 56px; height: 56px; border-radius: 16px; background: var(--ak-sun); color: var(--ak-sun-deep); display: flex; align-items: center; justify-content: center; }
+#ak-peng-edit .edit-h .info { min-width: 0; }
+#ak-peng-edit .badge-mode { display: inline-flex; align-items: center; gap: 6px; background: var(--ak-sun); color: var(--ak-sun-deep); font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 100px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+#ak-peng-edit .badge-mode::before { content: ""; width: 6px; height: 6px; background: var(--ak-sun-deep); border-radius: 50%; animation: ak-blink 2.4s ease-in-out infinite; }
+#ak-peng-edit .edit-h h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--ak-ink); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ak-peng-edit .edit-h .meta { font-size: 12px; color: var(--ak-muted); font-weight: 600; margin-top: 2px; }
+#ak-peng-edit .edit-h .meta b { color: var(--ak-ink-2); }
+#ak-peng-edit .edit-h .actions { display: flex; gap: 8px; }
+
+/* SHELL */
+#ak-peng-edit .edit-shell { display: grid; grid-template-columns: 1fr 340px; gap: 18px; align-items: start; }
+#ak-peng-edit .card { background: var(--ak-surface); border: 1px solid var(--ak-rule); border-radius: 22px; padding: 22px 26px; box-shadow: var(--ak-shadow-sm); margin-bottom: 14px; }
+#ak-peng-edit .card h3 { margin: 0 0 14px; font-size: 14px; font-weight: 800; letter-spacing: -0.005em; color: var(--ak-ink); display: inline-flex; align-items: center; gap: 8px; }
+
+/* FIELDS */
+#ak-peng-edit .field { margin-bottom: 14px; position: relative; }
+#ak-peng-edit .field > label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ak-muted); margin-bottom: 6px; }
+#ak-peng-edit .field > label .hint { color: var(--ak-soft); font-weight: 600; letter-spacing: 0; text-transform: none; }
+#ak-peng-edit .field input[type=text], #ak-peng-edit .field select { width: 100%; padding: 11px 14px; background: var(--ak-surface-2); border: 2px solid transparent; border-radius: 12px; font-family: inherit; font-size: 14px; color: var(--ak-ink); font-weight: 500; outline: 0; transition: border-color .15s, background .15s; }
+#ak-peng-edit .field input[type=text]:focus, #ak-peng-edit .field select:focus { border-color: var(--ak-primary); background: #fff; }
+#ak-peng-edit .field.changed input[type=text], #ak-peng-edit .field.changed select { background: rgba(255,230,158,0.3); border-color: var(--ak-sun-deep); }
+#ak-peng-edit .field.changed::after { content: "● Diubah"; position: absolute; top: 0; right: 0; font-size: 10px; font-weight: 800; color: var(--ak-sun-deep); letter-spacing: 0.05em; }
+#ak-peng-edit .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* category pick */
+#ak-peng-edit .pick-row { display: flex; flex-wrap: wrap; gap: 6px; }
+#ak-peng-edit .pick-row button { padding: 9px 14px; background: var(--ak-surface-2); border: 2px solid transparent; border-radius: 12px; cursor: pointer; font-size: 12.5px; font-weight: 700; color: var(--ak-ink-2); display: inline-flex; align-items: center; gap: 6px; }
+#ak-peng-edit .pick-row button.selected { background: var(--ak-surface); border-color: var(--ak-primary); color: var(--ak-ink); }
+
+/* target chips */
+#ak-peng-edit .target-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+#ak-peng-edit .target-chips button { padding: 7px 12px; background: var(--ak-surface-2); border: 0; border-radius: 100px; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--ak-ink-2); }
+#ak-peng-edit .target-chips button.selected { background: var(--ak-primary); color: #fff; }
+
+/* tandai chips */
+#ak-peng-edit .tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+#ak-peng-edit .tag-row button { padding: 8px 14px; font-size: 12.5px; font-weight: 700; border-radius: 12px; border: 1px solid var(--ak-rule-2); background: var(--ak-surface-2); color: var(--ak-ink-2); cursor: pointer; }
+#ak-peng-edit .tag-row button.on { background: var(--ak-ink); color: #fff; border-color: var(--ak-ink); }
+
+/* channel chips */
+#ak-peng-edit .chan-row { display: flex; gap: 6px; flex-wrap: wrap; }
+#ak-peng-edit .chan-row button { padding: 8px 14px; font-size: 12px; font-weight: 700; border-radius: 10px; border: 1px solid var(--ak-rule-2); background: var(--ak-surface-2); color: var(--ak-ink-2); cursor: pointer; }
+#ak-peng-edit .chan-row button.on { background: var(--ak-mint); color: var(--ak-mint-deep); border-color: transparent; }
+
+/* ANALYTICS RAIL */
+#ak-peng-edit .analytics-rail { position: sticky; top: 110px; display: flex; flex-direction: column; gap: 14px; }
+#ak-peng-edit .reach-card { background: linear-gradient(160deg, var(--ak-ink) 0%, #2D2A4F 100%); border-radius: 22px; padding: 22px 22px 20px; color: #fff; position: relative; overflow: hidden; }
+#ak-peng-edit .reach-card::before { content: ""; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,230,158,0.2), transparent 60%); }
+#ak-peng-edit .reach-card .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 4px; position: relative; z-index: 2; }
+#ak-peng-edit .reach-card .big { font-size: 48px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: var(--ak-sun); font-variant-numeric: tabular-nums; margin-bottom: 4px; position: relative; z-index: 2; }
+#ak-peng-edit .reach-card .big small { font-size: 18px; color: rgba(255,255,255,0.5); margin-left: 4px; font-weight: 700; }
+#ak-peng-edit .reach-card .d { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 18px; position: relative; z-index: 2; }
+#ak-peng-edit .reach-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; display: flex; position: relative; z-index: 2; margin-bottom: 12px; }
+#ak-peng-edit .reach-legend { display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 2; }
+#ak-peng-edit .reach-legend .lg { display: grid; grid-template-columns: 14px 1fr auto; gap: 10px; align-items: center; font-size: 11.5px; color: rgba(255,255,255,0.7); font-weight: 600; }
+#ak-peng-edit .reach-legend .sw { width: 12px; height: 12px; border-radius: 4px; }
+#ak-peng-edit .reach-legend b { color: #fff; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* reads */
+#ak-peng-edit .reads-card { background: var(--ak-surface); border: 1px solid var(--ak-rule); border-radius: 22px; padding: 22px 22px 18px; box-shadow: var(--ak-shadow-sm); }
+#ak-peng-edit .reads-card h3 { margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--ak-ink); display: flex; align-items: center; gap: 8px; }
+#ak-peng-edit .reads-card h3 .live { margin-left: auto; font-size: 9.5px; font-weight: 800; color: var(--ak-mint-deep); letter-spacing: 0.1em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
+#ak-peng-edit .reads-card h3 .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ak-mint-deep); box-shadow: 0 0 0 2.5px rgba(46,161,113,0.2); animation: ak-blink 2.4s ease-in-out infinite; }
+#ak-peng-edit .reads-list { display: flex; flex-direction: column; gap: 8px; }
+#ak-peng-edit .read-row { display: grid; grid-template-columns: 32px 1fr auto; gap: 10px; align-items: center; padding: 8px; border-radius: 10px; transition: background .15s; }
+#ak-peng-edit .read-row:hover { background: var(--ak-surface-2); }
+#ak-peng-edit .read-av { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+#ak-peng-edit .read-av.lav { background: var(--ak-lav); color: var(--ak-lav-deep); }
+#ak-peng-edit .read-av.peach { background: var(--ak-peach); color: var(--ak-peach-deep); }
+#ak-peng-edit .read-av.mint { background: var(--ak-mint); color: var(--ak-mint-deep); }
+#ak-peng-edit .read-av.pink { background: var(--ak-pink); color: var(--ak-pink-deep); }
+#ak-peng-edit .read-av.sky { background: var(--ak-sky); color: var(--ak-sky-deep); }
+#ak-peng-edit .read-info { line-height: 1.3; min-width: 0; }
+#ak-peng-edit .read-info .nm { font-size: 12.5px; font-weight: 700; color: var(--ak-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#ak-peng-edit .read-info .s { font-size: 11px; color: var(--ak-muted); font-weight: 600; margin-top: 1px; }
+#ak-peng-edit .read-time { font-size: 11px; font-weight: 700; color: var(--ak-muted); white-space: nowrap; }
+#ak-peng-edit .read-row .ch { color: var(--ak-mint-deep); margin-right: 2px; }
+#ak-peng-edit .reads-empty { font-size: 12px; color: var(--ak-muted); text-align: center; padding: 14px 0; }
+
+/* pending */
+#ak-peng-edit .pending-card { background: var(--ak-peach); border-radius: 16px; padding: 16px 18px; border-left: 3px solid var(--ak-peach-deep); }
+#ak-peng-edit .pending-card h4 { margin: 0 0 4px; font-size: 13px; font-weight: 800; color: var(--ak-peach-deep); }
+#ak-peng-edit .pending-card p { margin: 0 0 12px; font-size: 12px; color: var(--ak-ink-2); font-weight: 500; line-height: 1.45; }
+#ak-peng-edit .pending-card .btn-wa { background: var(--ak-ink); color: #fff; width: 100%; justify-content: center; padding: 9px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer; text-decoration: none; }
+#ak-peng-edit .pending-card .btn-wa:hover { background: var(--ak-peach-deep); }
+
+/* danger */
+#ak-peng-edit .danger-card { background: linear-gradient(160deg, #2D1F1F 0%, #1A1830 100%); border-radius: 22px; padding: 22px 22px 20px; border: 1px solid rgba(224,118,80,0.3); color: #fff; position: relative; overflow: hidden; }
+#ak-peng-edit .danger-card::before { content: ""; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(224,118,80,0.25), transparent 60%); }
+#ak-peng-edit .danger-card h3 { margin: 0 0 4px; font-size: 13px; font-weight: 800; color: var(--ak-peach); display: flex; align-items: center; gap: 8px; position: relative; z-index: 2; }
+#ak-peng-edit .danger-card .sub { font-size: 11.5px; color: rgba(255,255,255,0.6); margin-bottom: 14px; font-weight: 500; position: relative; z-index: 2; }
+#ak-peng-edit .danger-actions { display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 2; }
+#ak-peng-edit .danger-actions button { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 12.5px; display: flex; align-items: center; gap: 10px; transition: background .15s; text-align: left; cursor: pointer; width: 100%; }
+#ak-peng-edit .danger-actions button:hover { background: rgba(255,255,255,0.1); }
+#ak-peng-edit .danger-actions .archive { background: rgba(217,165,60,0.15); border-color: rgba(217,165,60,0.3); }
+#ak-peng-edit .danger-actions .archive:hover { background: rgba(217,165,60,0.25); }
+#ak-peng-edit .danger-actions .del { background: rgba(224,118,80,0.15); border-color: rgba(224,118,80,0.3); }
+#ak-peng-edit .danger-actions .del:hover { background: rgba(224,118,80,0.3); }
+#ak-peng-edit .danger-actions .e { font-size: 16px; }
+#ak-peng-edit .danger-actions .sm { font-size: 10.5px; color: rgba(255,255,255,0.5); font-weight: 600; }
+
+/* save bar */
+#ak-peng-edit .save-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(160%); background: var(--ak-ink); color: #fff; border-radius: 100px; padding: 10px 12px 10px 22px; display: flex; align-items: center; gap: 14px; box-shadow: 0 16px 36px -8px rgba(26,24,48,0.5); z-index: 80; transition: transform .35s cubic-bezier(.4,1.1,.4,1); }
+#ak-peng-edit .save-bar.show { transform: translateX(-50%) translateY(0); }
+#ak-peng-edit .save-bar .ct { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+#ak-peng-edit .save-bar .ct b { color: var(--ak-sun); }
+#ak-peng-edit .save-bar .ct .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ak-sun); box-shadow: 0 0 0 3px rgba(255,230,158,0.3); animation: ak-blink 2.4s ease-in-out infinite; }
+#ak-peng-edit .save-bar .sep { width: 1px; height: 22px; background: rgba(255,255,255,0.18); }
+#ak-peng-edit .save-bar button { padding: 8px 16px; border-radius: 100px; font-weight: 700; font-size: 12.5px; border: 0; cursor: pointer; }
+#ak-peng-edit .save-bar button.discard { background: transparent; color: rgba(255,255,255,0.7); }
+#ak-peng-edit .save-bar button.discard:hover { color: #fff; }
+#ak-peng-edit .save-bar button.save { background: var(--ak-mint-deep); color: #fff; }
+#ak-peng-edit .save-bar button.save:hover { background: #1F7E4F; }
+
+/* rich editor wrapper (Tiptap) */
+#ak-peng-edit .rich-wrap.changed > div { border-color: var(--ak-sun-deep) !important; background: rgba(255,230,158,0.18); border-radius: 12px; }
+
+@media (max-width: 1180px) {
+  #ak-peng-edit .edit-shell { grid-template-columns: 1fr; }
+  #ak-peng-edit .analytics-rail { position: static; }
+  #ak-peng-edit .edit-h { position: static; }
+}
+@media (max-width: 720px) {
+  #ak-peng-edit .grid-2 { grid-template-columns: 1fr; }
+  #ak-peng-edit .edit-h { grid-template-columns: 48px 1fr; }
+  #ak-peng-edit .edit-h .actions { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { #ak-peng-edit * { animation: none !important; } }
