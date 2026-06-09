@@ -200,7 +200,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
           <div className="chart-card">
             <h3>{t("detail.chartBakat")}</h3><div className="sub">{t("detail.chartBakatSub")}</div>
             <RadarChart data={s.radar} />
-            {s.radarTags.length > 0 && <div className="radar-tags">{s.radarTags.map((tg) => <span key={tg}>{tg}</span>)}</div>}
+            {s.radarTags.length > 0 && <div className="radar-tags">{s.radarTags.map((tg) => <span key={tg}>{t(`detail.${tg}`)}</span>)}</div>}
           </div>
         </div>
       </div>
@@ -214,7 +214,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
               <div key={i} className={`tnode ${j.status}`}>
                 <div className="ty">{j.year} {j.semester}</div>
                 <div className="tdot">{j.status === "past" ? "✓" : j.status === "current" ? "★" : i + 1}</div>
-                <div className="tk">{j.rombel}</div>
+                <div className="tk">{j.status === "future" && j.note ? `🎓 ${t("detail.lulus")}` : j.rombel}</div>
                 <div className="ts">{
                   j.status === "current" ? `${t("detail.saatIni")} · ${t("detail.journeyRata", { r: j.rata ?? 0 })}`
                     : j.status === "future" ? (j.note ? `${t("detail.target")} ${j.note}` : t("detail.akanDatang"))

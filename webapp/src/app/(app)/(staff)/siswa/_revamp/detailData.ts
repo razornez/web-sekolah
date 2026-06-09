@@ -148,14 +148,14 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
 
   const radar = RADAR_AXES.map((a) => { const v = axisAgg.get(a.key); return { axis: a.key, value: v && v.n ? Math.round(v.sum / v.n) : 0 }; });
   const axVal = (k: string) => radar.find((r) => r.axis === k)?.value ?? 0;
-  const radarTags: string[] = [];
-  if (Math.max(axVal("Sains"), axVal("Matematika")) >= 85) radarTags.push("STEM dominan");
-  if (axVal("Bahasa") >= 85) radarTags.push("Verbal kuat");
-  if (axVal("Sains") >= 88) radarTags.push("Jalur olimpiade sains");
-  if (axVal("Seni") >= 85) radarTags.push("Kreatif");
-  if (axVal("Olahraga") >= 85) radarTags.push("Atletis");
-  if (axVal("Sosial") >= 85 && radarTags.length < 2) radarTags.push("Peka sosial");
-  if (!radarTags.length) radarTags.push("Profil seimbang");
+  const radarTags: string[] = []; // berisi KEY i18n (diterjemahkan di page)
+  if (Math.max(axVal("Sains"), axVal("Matematika")) >= 85) radarTags.push("tagStem");
+  if (axVal("Bahasa") >= 85) radarTags.push("tagVerbal");
+  if (axVal("Sains") >= 88) radarTags.push("tagOlimpiade");
+  if (axVal("Seni") >= 85) radarTags.push("tagKreatif");
+  if (axVal("Olahraga") >= 85) radarTags.push("tagAtletis");
+  if (axVal("Sosial") >= 85 && radarTags.length < 2) radarTags.push("tagSosial");
+  if (!radarTags.length) radarTags.push("tagSeimbang");
 
   // ── peringkat ──
   let rank: number | null = null, rankTotal: number | null = null;
@@ -195,7 +195,7 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
       const yearStart = curYearStart + (st.urut - curUrut);
       const isLulus = k === steps.length - 1;
       const gradeNama = tingkatList.find((tk) => tk.urutan === st.urut)?.nama ?? "";
-      future.push({ year: `${yearStart}/${yearStart + 1}`, semester: st.sem, rombel: isLulus ? "Lulus 🎓" : gradeNama, absen: null, rata: null, status: "future", note: isLulus ? `Juni ${yearStart + 1}` : "" });
+      future.push({ year: `${yearStart}/${yearStart + 1}`, semester: st.sem, rombel: isLulus ? "" : gradeNama, absen: null, rata: null, status: "future", note: isLulus ? `Juni ${yearStart + 1}` : "" });
     });
   }
   const journey = [...past, ...future];
