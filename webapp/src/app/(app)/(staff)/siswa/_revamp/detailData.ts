@@ -44,6 +44,8 @@ export type SiswaDetail = {
 
 const BULAN = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 const fmtTgl = (d: Date) => `${d.getDate()} ${BULAN[d.getMonth() + 1]} ${d.getFullYear()}`;
+/** Tahun mulai dari string TA "2024/2025" → 2024 (untuk urutan kronologis, bukan urut id). */
+const yrOf = (t?: string | null) => parseInt((t ?? "").slice(0, 4), 10) || 0;
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
@@ -66,7 +68,9 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
   });
   if (!s) return null;
 
-  const cur = s.anggotaRombel[0];
+  // "Kelas sekarang" = anggota di TA aktif; fallback ke tahun terbaru, lalu id terbaru.
+  const cur = s.anggotaRombel.find((ar) => ar.rombel?.tahunAjaran?.aktif)
+    ?? [...s.anggotaRombel].sort((a, b) => yrOf(b.rombel?.tahunAjaran?.tahun) - yrOf(a.rombel?.tahunAjaran?.tahun))[0];
   const curRombelId = cur?.rombelId ?? null;
   const tinggi = Number(s.tinggiBadan) || 0;
   const berat = Number(s.beratBadan) || 0;
@@ -104,7 +108,7 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
   const axisAgg = new Map<string, { sum: number; n: number }>();
   for (const n of allNilai) {
     const key = n.periodeId;
-    const e = perPeriode.get(key) ?? { periode: n.periode.nama, tahun: n.periode.tahunAjaran?.tahun ?? "", urutan: (n.periode.tahunAjaranId * 100) + n.periode.urutan, avg: 0, items: [] };
+    const e = perPeriode.get(key) ?? { periode: n.periode.nama, tahun: n.periode.tahunAjaran?.tahun ?? "", urutan: (yrOf(n.periode.tahunAjaran?.tahun) * 10) + n.periode.urutan, avg: 0, items: [] };
     e.items.push({ mapel: n.mapel.namaMapel, nilai: n.nilaiAkhir ?? 0, kkm: n.mapel.kkm, deskripsi: n.deskripsiCapaian });
     perPeriode.set(key, e);
     const ax = axisOf(n.mapel.namaMapel);
@@ -133,11 +137,11 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
   // ── journey (+ rata² nyata per tahun ajaran dari rapor) ──
   const rataByTahun = new Map<string, { sum: number; n: number }>();
   for (const r of rapor) if (r.avg > 0) { const a = rataByTahun.get(r.tahun) ?? { sum: 0, n: 0 }; a.sum += r.avg; a.n++; rataByTahun.set(r.tahun, a); }
-  const journey = s.anggotaRombel.map((ar, idx) => {
-    const tahun = ar.rombel.tahunAjaran?.tahun ?? "";
+  const journey = s.anggotaRombel.map((ar) => {
+    const tahun = ar.rombel?.tahunAjaran?.tahun ?? "";
     const ra = rataByTahun.get(tahun);
-    return { rombel: ar.rombel.nama, tahun, absen: ar.nomorAbsen, current: idx === 0, rata: ra && ra.n ? Math.round(ra.sum / ra.n) : null };
-  }).reverse();
+    return { rombel: ar.rombel.nama, tahun, absen: ar.nomorAbsen, current: ar.rombelId === curRombelId, rata: ra && ra.n ? Math.round(ra.sum / ra.n) : null, _y: yrOf(tahun) };
+  }).sort((a, b) => a._y - b._y).map(({ _y, ...j }) => j);
 
   // ── parents ──
   const parents = s.orangTuaWali.map((o) => ({ tipe: o.tipe, nama: o.nama, pekerjaan: o.pekerjaan, pendidikan: o.pendidikan, penghasilan: o.penghasilan, noHp: o.noHp ?? null }));
