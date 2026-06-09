@@ -614,6 +614,10 @@ model Guru {
   jadwalGuru  JadwalGuru[]
   jurnalGuru  JurnalGuru[]
   kehadiran   KehadiranGuru[]
+  sertifikasi   SertifikasiGuru[]
+  penghargaan   PenghargaanGuru[]
+  rekapKinerja  RekapKinerjaGuru[]
+  evaluasiKelas EvaluasiKelas[]
 
   @@unique([sekolahId, nip])
   @@index([sekolahId])
@@ -657,6 +661,78 @@ model Skp {
   guru Guru @relation(fields: [guruId], references: [id], onDelete: Cascade)
 
   @@map("skp")
+}
+
+model SertifikasiGuru {
+  id           Int     @id @default(autoincrement())
+  guruId       Int     @map("guru_id")
+  jenis        String // "Sertifikasi Pendidik" | "PPG" | "Pelatihan" | "Penghargaan" | "Lisensi"
+  nama         String
+  penerbit     String?
+  nomor        String?
+  tahunTerbit  Int     @map("tahun_terbit")
+  tahunExpired Int?    @map("tahun_expired")
+  predikat     String?
+
+  guru Guru @relation(fields: [guruId], references: [id], onDelete: Cascade)
+
+  @@index([guruId])
+  @@map("sertifikasi_guru")
+}
+
+model PenghargaanGuru {
+  id      Int     @id @default(autoincrement())
+  guruId  Int     @map("guru_id")
+  nama    String
+  tahun   Int
+  pemberi String?
+  tingkat String? // Sekolah | Kota | Provinsi | Nasional
+  ranking String? // Juara 1, 2, 3
+
+  guru Guru @relation(fields: [guruId], references: [id], onDelete: Cascade)
+
+  @@index([guruId])
+  @@map("penghargaan_guru")
+}
+
+model RekapKinerjaGuru {
+  id               Int     @id @default(autoincrement())
+  guruId           Int     @map("guru_id")
+  periodeId        Int     @map("periode_id")
+  skorAkhir        Float   @map("skor_akhir")
+  predikat         String // A+, A, B+, B, C, D
+  peringkatSekolah Int?    @map("peringkat_sekolah")
+  peringkatBidang  Int?    @map("peringkat_bidang")
+  skorPedagogik    Float   @map("skor_pedagogik")
+  skorKepribadian  Float   @map("skor_kepribadian")
+  skorSosial       Float   @map("skor_sosial")
+  skorProfesional  Float   @map("skor_profesional")
+  skorKomitmen     Float   @map("skor_komitmen")
+  catatanKepsek    String? @map("catatan_kepsek")
+  ceritaImpact     String? @map("cerita_impact")
+
+  guru Guru @relation(fields: [guruId], references: [id], onDelete: Cascade)
+
+  @@unique([guruId, periodeId])
+  @@map("rekap_kinerja_guru")
+}
+
+model EvaluasiKelas {
+  id           Int      @id @default(autoincrement())
+  guruId       Int      @map("guru_id")
+  observerNama String?  @map("observer_nama")
+  observerRole String?  @map("observer_role")
+  mapel        String?
+  kelas        String?
+  tanggal      DateTime @db.Date
+  topik        String
+  predikat     String // A+, A, B+, dll
+  catatan      String
+
+  guru Guru @relation(fields: [guruId], references: [id], onDelete: Cascade)
+
+  @@index([guruId])
+  @@map("evaluasi_kelas")
 }
 
 // =============================================================================
