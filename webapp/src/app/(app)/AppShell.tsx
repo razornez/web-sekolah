@@ -39,7 +39,7 @@ function NavLoadingOverlay() {
     return () => clearInterval(t);
   }, []);
   return (
-    <div className="absolute inset-0 z-40 flex flex-col items-center justify-center overflow-hidden"
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
       style={{ background: "linear-gradient(135deg,rgba(248,245,254,0.97)0%,rgba(238,235,255,0.97)50%,rgba(248,245,254,0.97)100%)" }}>
       <div className="absolute top-0 left-0 right-0 h-[3px] z-50 overflow-hidden" style={{ background: "rgba(91,79,233,0.08)" }}>
         <div className="ss-nav-bar h-full rounded-full" style={{ background: "linear-gradient(90deg,#5B4FE9,#7E6FE8)", boxShadow: "0 0 8px rgba(91,79,233,0.6)" }} />
