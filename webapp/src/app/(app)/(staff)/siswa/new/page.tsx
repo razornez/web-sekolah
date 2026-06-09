@@ -1,18 +1,17 @@
-import { getTranslations } from "next-intl/server";
-import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
-import SiswaForm from "../_components/SiswaForm";
+import { prisma } from "@/lib/prisma";
+import { FormWizard } from "../_revamp/FormWizard";
 
 export default async function NewSiswaPage() {
-  await requireModule("siswa");
-  const t = await getTranslations("siswa");
-  const provinsiOpts = await prisma.refProvinsi.findMany({ orderBy: { nama: "asc" }, select: { kode: true, nama: true } });
-  return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-gray-900">{t("newTitle")}</h1>
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <SiswaForm provinsiOptions={provinsiOpts} />
-      </div>
-    </div>
-  );
+  const sekolahId = await requireModule("siswa");
+  const [rombelRows, sekolah] = await Promise.all([
+    prisma.rombel.findMany({
+      where: { sekolahId },
+      select: { id: true, nama: true, tahunAjaran: { select: { tahun: true, aktif: true } }, tingkat: { select: { urutan: true } } },
+      orderBy: [{ tahunAjaran: { aktif: "desc" } }, { tingkat: { urutan: "asc" } }, { nama: "asc" }],
+    }),
+    prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { nama: true } }),
+  ]);
+  const rombels = rombelRows.map((r) => ({ id: r.id, nama: r.nama, tahun: r.tahunAjaran?.tahun ?? "" }));
+  return <FormWizard rombels={rombels} sekolah={sekolah?.nama ?? "Sekolah"} />;
 }

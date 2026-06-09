@@ -1,6 +1,6 @@
 "use server";
 
-import { Prisma, JenisKelamin } from "@prisma/client";
+import { Prisma, JenisKelamin, TipeWali } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -77,6 +77,17 @@ export async function saveSiswa(
       await auditLog({ aksi: "update", entitas: "siswa", entitasId: id, detail: `Update siswa: ${namaLengkap}` });
     } else {
       const s = await prisma.siswa.create({ data: { ...data, sekolahId } });
+      // Penempatan rombel (opsional, dari wizard tambah siswa)
+      const rombelId = num(formData.get("rombelId"));
+      if (rombelId) {
+        const r = await prisma.rombel.findFirst({ where: { id: rombelId, sekolahId }, select: { id: true } });
+        if (r) await prisma.anggotaRombel.create({ data: { rombelId, siswaId: s.id } });
+      }
+      // Orang tua/wali (opsional)
+      for (const tipe of ["ayah", "ibu"] as const) {
+        const nama = str(formData.get(`${tipe}_nama`));
+        if (nama) await prisma.orangTuaWali.create({ data: { siswaId: s.id, tipe: TipeWali[tipe], nama, pekerjaan: str(formData.get(`${tipe}_pekerjaan`)), pendidikan: str(formData.get(`${tipe}_pendidikan`)), noHp: str(formData.get(`${tipe}_hp`)) } });
+      }
       await auditLog({ aksi: "create", entitas: "siswa", entitasId: s.id, detail: `Buat siswa: ${namaLengkap}` });
     }
   } catch (e) {
