@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isStaff } from "@/lib/session";
 import { ViewTracker } from "@/components/ViewTracker";
-import { incrementView } from "@/app/(app)/(staff)/pengumuman/actions";
+import { incrementView, markPengumumanRead } from "@/app/(app)/(staff)/pengumuman/actions";
 
 const KATEGORI_BADGE: Record<string, string> = { umum: "bg-gray-100 text-gray-700", akademik: "bg-blue-100 text-blue-700", keuangan: "bg-green-100 text-green-700", kegiatan: "bg-purple-100 text-purple-700", penting: "bg-red-100 text-red-700" };
 const TARGET_BADGE: Record<string, string> = { semua: "bg-slate-100 text-slate-700", staf: "bg-orange-100 text-orange-700", siswa: "bg-cyan-100 text-cyan-700", ortu: "bg-pink-100 text-pink-700" };
@@ -26,6 +26,7 @@ export default async function PengumumanDetailPage({ params }: { params: Promise
   const waText = `📢 *${p.judul}*\n\n${strip(p.isi)}\n\n— ${p.sekolah.nama}`;
   const staffView = isStaff(user.role);
   const increment = incrementView.bind(null, p.id);
+  const markRead = markPengumumanRead.bind(null, p.id);
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -111,6 +112,8 @@ export default async function PengumumanDetailPage({ params }: { params: Promise
 
       {/* ViewTracker — increment di client (best-effort) */}
       <ViewTracker action={increment} />
+      {/* Tanda baca per-penerima (siswa/ortu) → tingkat dibaca nyata */}
+      {!staffView && <ViewTracker action={markRead} />}
     </div>
   );
 }

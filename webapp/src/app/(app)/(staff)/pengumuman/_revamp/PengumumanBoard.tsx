@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import "./pengumuman.css";
 import type { PengData, PengItem } from "./data";
 import { MiniGameTebakKategori } from "./MiniGameTebakKategori";
+import { ComposeWizard } from "./ComposeWizard";
 import { logKirim } from "../actions";
 
 const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting"] as const;
@@ -32,7 +32,7 @@ function ThumbIcon({ kat }: { kat: string }) {
 }
 
 export function PengumumanBoard({ data }: { data: PengData }) {
-  const router = useRouter();
+  const [composeOpen, setComposeOpen] = useState(false);
   const [kat, setKat] = useState<string>("");
   const [target, setTarget] = useState<string>("");
   const [q, setQ] = useState("");
@@ -61,7 +61,7 @@ export function PengumumanBoard({ data }: { data: PengData }) {
   }, [filtered]);
 
   const sel = selId != null ? data.items.find((p) => p.id === selId) ?? null : null;
-  const create = () => router.push("/pengumuman/new");
+  const create = () => setComposeOpen(true);
 
   const CATS = [
     { key: "", label: "Semua", count: data.total },
@@ -219,6 +219,8 @@ export function PengumumanBoard({ data }: { data: PengData }) {
         <span className="ico"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M7 3 V11 M3 7 H11" /></svg></span>
         Pengumuman baru
       </button>
+
+      <ComposeWizard open={composeOpen} onClose={() => setComposeOpen(false)} data={data} />
     </div>
   );
 }
