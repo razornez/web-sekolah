@@ -304,6 +304,13 @@
       "saveBar": "{n} perubahan belum disimpan", "discard": "Batalkan", "saveAll": "✓ Simpan semua",
       "updatedBy": "Diperbarui {when} oleh {who}", "neverUpdated": "Belum pernah diubah",
       "relToday": "hari ini", "relYesterday": "kemarin", "relDays": "{n} hari lalu", "relWeeks": "{n} minggu lalu"
+    },
+    "rapor": {
+      "crumbProfile": "Profil", "crumbRapor": "Rapor",
+      "abTitle": "Laporan Hasil Belajar", "abSub": "{semester} · {tahun} · Fase {fase}",
+      "share": "🔗 Bagikan link", "waSend": "Kirim ke ortu via WA", "print": "🖨 Cetak / PDF",
+      "waText": "Rapor {nama} — rata-rata {rata} ({predikat})",
+      "tabAkademik": "📄 Rapor Akademik", "tabP5": "🌱 Rapor P5"
     }
   }
 }

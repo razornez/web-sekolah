@@ -304,6 +304,13 @@
       "saveBar": "{n} unsaved changes", "discard": "Discard", "saveAll": "✓ Save all",
       "updatedBy": "Updated {when} by {who}", "neverUpdated": "Never updated",
       "relToday": "today", "relYesterday": "yesterday", "relDays": "{n} days ago", "relWeeks": "{n} weeks ago"
+    },
+    "rapor": {
+      "crumbProfile": "Profile", "crumbRapor": "Report",
+      "abTitle": "Learning Report", "abSub": "{semester} · {tahun} · Phase {fase}",
+      "share": "🔗 Share link", "waSend": "Send to parents via WA", "print": "🖨 Print / PDF",
+      "waText": "Report {nama} — average {rata} ({predikat})",
+      "tabAkademik": "📄 Academic Report", "tabP5": "🌱 P5 Report"
     }
   }
 }

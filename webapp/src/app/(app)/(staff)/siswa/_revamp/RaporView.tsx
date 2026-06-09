@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import "./rapor.css";
 import type { SiswaRapor } from "./raporData";
 
@@ -29,6 +30,7 @@ const KopLogos = () => (<>
 </>);
 
 export function RaporView({ data }: { data: SiswaRapor }) {
+  const t = useTranslations("siswa");
   const [tab, setTab] = useState<"akademik" | "p5">("akademik");
   const s = data.sekolah, id = data.identitas;
   const place = `${(s.alamat ?? "").split(",")[0] || "—"}, ${new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" })}`;
@@ -61,18 +63,18 @@ export function RaporView({ data }: { data: SiswaRapor }) {
 
   return (
     <div id="ak-rp">
-      <div className="crumb"><Link href="/siswa">Siswa</Link> / <Link href={`/siswa/${data.id}`}>Profil</Link> / <b>Rapor</b></div>
+      <div className="crumb"><Link href="/siswa">{t("title")}</Link> / <Link href={`/siswa/${data.id}`}>{t("rapor.crumbProfile")}</Link> / <b>{t("rapor.crumbRapor")}</b></div>
       <div className="action-bar">
-        <div className="ttl"><h1>Laporan Hasil Belajar</h1><p>{id.semester} · {id.tahun} · Fase {id.fase}</p></div>
+        <div className="ttl"><h1>{t("rapor.abTitle")}</h1><p>{t("rapor.abSub", { semester: id.semester, tahun: id.tahun, fase: id.fase })}</p></div>
         <div className="acts">
-          <button className="btn btn-g" onClick={() => { navigator.clipboard?.writeText(window.location.href); }}>🔗 Bagikan link</button>
-          <a className="btn btn-wa" href={`https://wa.me/?text=${encodeURIComponent(`Rapor ${id.nama} — rata-rata ${data.rataAkhir} (${data.predikat})`)}`} target="_blank" rel="noopener noreferrer">Kirim ke ortu via WA</a>
-          <button className="btn btn-ink" onClick={() => window.print()}>🖨 Cetak / PDF</button>
+          <button className="btn btn-g" onClick={() => { navigator.clipboard?.writeText(window.location.href); }}>{t("rapor.share")}</button>
+          <a className="btn btn-wa" href={`https://wa.me/?text=${encodeURIComponent(t("rapor.waText", { nama: id.nama, rata: data.rataAkhir, predikat: data.predikat }))}`} target="_blank" rel="noopener noreferrer">{t("rapor.waSend")}</a>
+          <button className="btn btn-ink" onClick={() => window.print()}>{t("rapor.print")}</button>
         </div>
       </div>
       <div className="doc-tabs">
-        <button className={tab === "akademik" ? "active" : ""} onClick={() => setTab("akademik")}>📄 Rapor Akademik</button>
-        <button className={tab === "p5" ? "active" : ""} onClick={() => setTab("p5")}>🌱 Rapor P5</button>
+        <button className={tab === "akademik" ? "active" : ""} onClick={() => setTab("akademik")}>{t("rapor.tabAkademik")}</button>
+        <button className={tab === "p5" ? "active" : ""} onClick={() => setTab("p5")}>{t("rapor.tabP5")}</button>
       </div>
 
       {/* ============ AKADEMIK ============ */}
