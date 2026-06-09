@@ -18,7 +18,9 @@ function axisOf(nama: string): string | null {
   return null;
 }
 
-export type DetailRapor = { periode: string; tahun: string; urutan: number; avg: number; items: { mapel: string; nilai: number; kkm: number; deskripsi: string | null }[] };
+export type DetailRapor = { periodeId: number; taId: number; periode: string; tahun: string; urutan: number; avg: number; items: { mapel: string; nilai: number; kkm: number; deskripsi: string | null }[] };
+const MIPA_AX = ["Sains", "Matematika"], BASOS_AX = ["Bahasa", "Sosial"];
+const shortTA = (t: string) => t.split("/").map((y) => y.slice(2)).join("/");
 export type SiswaDetail = {
   id: number; nama: string; inisial: string; nisn: string; nis: string; noInduk: string;
   jk: "L" | "P" | null; status: string; foto: string | null;
@@ -31,9 +33,13 @@ export type SiswaDetail = {
   geo: { sLat: number; sLng: number; schLat: number; schLng: number } | null;
   kasus: { count: number; poin: number; list: { nama: string; poin: number; tanggal: string }[] };
   zodiak: Zodiak | null; numero: { angka: number; sifat: string; tags: string[] } | null;
-  line: { label: string; avg: number }[];
+  line: { label: string; mipa: number | null; basos: number | null; kelas: number | null }[];
+  lineInsight: { delta: number; naik: boolean; tahun: number } | null;
+  lineLegend: { mipa: number | null; basos: number | null; kelas: number | null };
+  strongest: { nama: string; nilai: number }[];
   radar: { axis: string; value: number }[];
-  journey: { rombel: string; tahun: string; absen: number | null; current: boolean; rata: number | null }[];
+  radarTags: string[];
+  journey: { year: string; semester: string; rombel: string; absen: number | null; rata: number | null; status: "past" | "current" | "future"; note: string }[];
   rapor: DetailRapor[];
   heatmap: { date: string; status: string }[];
   hadirStats: { hadir: number; izin: number; sakit: number; alpa: number };
@@ -85,10 +91,20 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
       : Promise.resolve([] as { siswaId: number; _avg: { nilaiAkhir: number | null } }[]),
   ]);
 
-  const [sekolahCoord, kasusRows] = await Promise.all([
+  const stuRombelIds = s.anggotaRombel.map((a) => a.rombelId);
+  const stuPeriodeIds = [...new Set(s.nilaiRapor.map((n) => n.periodeId))];
+  const [sekolahCoord, kasusRows, tingkatList, cohort] = await Promise.all([
     prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { lat: true, lng: true } }),
     prisma.kasusSiswa.findMany({ where: { siswaId: id }, orderBy: { tanggal: "desc" }, select: { namaKasus: true, poin: true, tanggal: true } }),
+    prisma.tingkat.findMany({ where: { sekolahId }, select: { nama: true, urutan: true }, orderBy: { urutan: "asc" } }),
+    stuRombelIds.length ? prisma.anggotaRombel.findMany({ where: { rombelId: { in: stuRombelIds } }, select: { siswaId: true } }) : Promise.resolve([] as { siswaId: number }[]),
   ]);
+  // Rata-rata kelas (cohort) per periode — untuk garis pembanding di grafik
+  const cohortIds = [...new Set(cohort.map((c) => c.siswaId))];
+  const classAvgRows = cohortIds.length && stuPeriodeIds.length
+    ? await prisma.nilaiRapor.groupBy({ by: ["periodeId"], where: { siswaId: { in: cohortIds }, periodeId: { in: stuPeriodeIds }, nilaiAkhir: { not: null } }, _avg: { nilaiAkhir: true } })
+    : [];
+  const classAvgByPeriode = new Map(classAvgRows.map((r) => [r.periodeId, r._avg.nilaiAkhir != null ? Math.round(r._avg.nilaiAkhir) : null]));
   const kasusPoin = kasusRows.reduce((a, b) => a + b.poin, 0);
   const hasGeo = s.lat != null && s.lng != null && sekolahCoord?.lat != null && sekolahCoord?.lng != null;
   const distanceKm = hasGeo ? Math.round(haversineKm(s.lat!, s.lng!, sekolahCoord!.lat!, sekolahCoord!.lng!) * 10) / 10 : null;
@@ -108,15 +124,38 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
   const axisAgg = new Map<string, { sum: number; n: number }>();
   for (const n of allNilai) {
     const key = n.periodeId;
-    const e = perPeriode.get(key) ?? { periode: n.periode.nama, tahun: n.periode.tahunAjaran?.tahun ?? "", urutan: (yrOf(n.periode.tahunAjaran?.tahun) * 10) + n.periode.urutan, avg: 0, items: [] };
+    const e = perPeriode.get(key) ?? { periodeId: key, taId: n.periode.tahunAjaranId, periode: n.periode.nama, tahun: n.periode.tahunAjaran?.tahun ?? "", urutan: (yrOf(n.periode.tahunAjaran?.tahun) * 10) + n.periode.urutan, avg: 0, items: [] };
     e.items.push({ mapel: n.mapel.namaMapel, nilai: n.nilaiAkhir ?? 0, kkm: n.mapel.kkm, deskripsi: n.deskripsiCapaian });
     perPeriode.set(key, e);
     const ax = axisOf(n.mapel.namaMapel);
     if (ax) { const a = axisAgg.get(ax) ?? { sum: 0, n: 0 }; a.sum += n.nilaiAkhir ?? 0; a.n++; axisAgg.set(ax, a); }
   }
   const rapor = [...perPeriode.values()].map((r) => ({ ...r, avg: r.items.length ? Math.round(r.items.reduce((a, b) => a + b.nilai, 0) / r.items.length) : 0 })).sort((a, b) => b.urutan - a.urutan);
-  const line = [...rapor].sort((a, b) => a.urutan - b.urutan).slice(-4).map((r) => ({ label: `${r.periode.split(" ")[0]} ${r.tahun.split("/")[0] ?? ""}`.trim(), avg: r.avg }));
+
+  // grafik tren: 3 seri (MIPA, Bahasa & Sosial, Rata-rata kelas) untuk ≤4 semester terbaru
+  const grpAvg = (items: { mapel: string; nilai: number }[], axes: string[]) => {
+    const vs = items.filter((it) => { const a = axisOf(it.mapel); return a != null && axes.includes(a); }).map((it) => it.nilai);
+    return vs.length ? Math.round(vs.reduce((a, b) => a + b, 0) / vs.length) : null;
+  };
+  const fAvg = (r: { items: { nilai: number }[] }) => r.items.length ? r.items.reduce((a, b) => a + b.nilai, 0) / r.items.length : 0;
+  const lineRows = [...rapor].sort((a, b) => a.urutan - b.urutan).slice(-4);
+  const line = lineRows.map((r) => ({ label: `${r.periode.replace(/Semester\s*/i, "")} ${shortTA(r.tahun)}`.trim(), mipa: grpAvg(r.items, MIPA_AX), basos: grpAvg(r.items, BASOS_AX), kelas: classAvgByPeriode.get(r.periodeId) ?? null }));
+  const lineLegend = line.length ? { mipa: line[line.length - 1].mipa, basos: line[line.length - 1].basos, kelas: line[line.length - 1].kelas } : { mipa: null, basos: null, kelas: null };
+  const lineInsight = lineRows.length >= 2
+    ? { delta: Math.round((fAvg(lineRows[lineRows.length - 1]) - fAvg(lineRows[0])) * 10) / 10, naik: fAvg(lineRows[lineRows.length - 1]) >= fAvg(lineRows[0]), tahun: new Set(lineRows.map((r) => r.tahun)).size }
+    : null;
+  const strongest = (rapor[0]?.items ?? []).slice().sort((a, b) => b.nilai - a.nilai).slice(0, 3).map((it) => ({ nama: it.mapel, nilai: it.nilai }));
+
   const radar = RADAR_AXES.map((a) => { const v = axisAgg.get(a.key); return { axis: a.key, value: v && v.n ? Math.round(v.sum / v.n) : 0 }; });
+  const axVal = (k: string) => radar.find((r) => r.axis === k)?.value ?? 0;
+  const radarTags: string[] = [];
+  if (Math.max(axVal("Sains"), axVal("Matematika")) >= 85) radarTags.push("STEM dominan");
+  if (axVal("Bahasa") >= 85) radarTags.push("Verbal kuat");
+  if (axVal("Sains") >= 88) radarTags.push("Jalur olimpiade sains");
+  if (axVal("Seni") >= 85) radarTags.push("Kreatif");
+  if (axVal("Olahraga") >= 85) radarTags.push("Atletis");
+  if (axVal("Sosial") >= 85 && radarTags.length < 2) radarTags.push("Peka sosial");
+  if (!radarTags.length) radarTags.push("Profil seimbang");
 
   // ── peringkat ──
   let rank: number | null = null, rankTotal: number | null = null;
@@ -134,14 +173,32 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
   const sppNunggak = sppRows.filter((t) => t.status === "belum").length;
   const sppStatus = sppRows.length === 0 ? "—" : sppNunggak === 0 ? "Lunas" : `${sppNunggak} bln`;
 
-  // ── journey (+ rata² nyata per tahun ajaran dari rapor) ──
-  const rataByTahun = new Map<string, { sum: number; n: number }>();
-  for (const r of rapor) if (r.avg > 0) { const a = rataByTahun.get(r.tahun) ?? { sum: 0, n: 0 }; a.sum += r.avg; a.n++; rataByTahun.set(r.tahun, a); }
-  const journey = s.anggotaRombel.map((ar) => {
-    const tahun = ar.rombel?.tahunAjaran?.tahun ?? "";
-    const ra = rataByTahun.get(tahun);
-    return { rombel: ar.rombel.nama, tahun, absen: ar.nomorAbsen, current: ar.rombelId === curRombelId, rata: ra && ra.n ? Math.round(ra.sum / ra.n) : null };
-  }).sort((a, b) => yrOf(a.tahun) - yrOf(b.tahun));
+  // ── journey: 1 node per SEMESTER (dari rapor) + proyeksi s/d Lulus ──
+  type JNode = { year: string; semester: string; rombel: string; absen: number | null; rata: number | null; status: "past" | "current" | "future"; note: string };
+  const rombelByTA = new Map<number, { nama: string; absen: number | null }>();
+  for (const ar of s.anggotaRombel) if (ar.rombel?.tahunAjaranId != null) rombelByTA.set(ar.rombel.tahunAjaranId, { nama: ar.rombel.nama, absen: ar.nomorAbsen });
+  const semAsc = [...rapor].sort((a, b) => a.urutan - b.urutan);
+  const past: JNode[] = semAsc.map((r, i) => {
+    const rb = rombelByTA.get(r.taId);
+    return { year: r.tahun, semester: r.periode.replace(/Semester\s*/i, ""), rombel: rb?.nama ?? cur?.rombel?.nama ?? "—", absen: rb?.absen ?? null, rata: Math.round(fAvg(r) * 10) / 10, status: i === semAsc.length - 1 ? "current" : "past", note: "" };
+  });
+  const future: JNode[] = [];
+  const curUrut = cur?.rombel?.tingkat?.urutan ?? null;
+  const maxUrut = tingkatList.length ? tingkatList[tingkatList.length - 1].urutan : null;
+  const curYearStart = yrOf(cur?.rombel?.tahunAjaran?.tahun);
+  const lastSem = past[past.length - 1]?.semester ?? "Genap";
+  if (curUrut != null && maxUrut != null && curYearStart) {
+    const steps: { urut: number; sem: string }[] = [];
+    if (/ganjil/i.test(lastSem)) steps.push({ urut: curUrut, sem: "Genap" });
+    for (let u = curUrut + 1; u <= maxUrut; u++) { steps.push({ urut: u, sem: "Ganjil" }); steps.push({ urut: u, sem: "Genap" }); }
+    steps.forEach((st, k) => {
+      const yearStart = curYearStart + (st.urut - curUrut);
+      const isLulus = k === steps.length - 1;
+      const gradeNama = tingkatList.find((tk) => tk.urutan === st.urut)?.nama ?? "";
+      future.push({ year: `${yearStart}/${yearStart + 1}`, semester: st.sem, rombel: isLulus ? "Lulus 🎓" : gradeNama, absen: null, rata: null, status: "future", note: isLulus ? `Juni ${yearStart + 1}` : "" });
+    });
+  }
+  const journey = [...past, ...future];
 
   // ── parents ──
   const parents = s.orangTuaWali.map((o) => ({ tipe: o.tipe, nama: o.nama, pekerjaan: o.pekerjaan, pendidikan: o.pendidikan, penghasilan: o.penghasilan, noHp: o.noHp ?? null }));
@@ -159,7 +216,7 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
     metrics: { rata, hadirPct, rank, rankTotal, sppStatus, bmi: bmi(tinggi, berat), pelanggaran: kasusPoin },
     distanceKm, geo, kasus: { count: kasusRows.length, poin: kasusPoin, list: kasusRows.slice(0, 5).map((k) => ({ nama: k.namaKasus, poin: k.poin, tanggal: k.tanggal.toISOString() })) },
     zodiak: tl ? zodiakFromDate(tl) : null, numero: tl ? numerologi(tl) : null,
-    line, radar, journey, rapor,
+    line, lineInsight, lineLegend, strongest, radar, radarTags, journey, rapor,
     heatmap, hadirStats,
     spp, prestasi: s.prestasi.map((p) => ({ nama: p.namaPrestasi, tingkat: p.tingkat, tahun: p.tahun })), parents,
   };

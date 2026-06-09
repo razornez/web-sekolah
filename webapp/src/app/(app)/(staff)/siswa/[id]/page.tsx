@@ -16,31 +16,40 @@ const waHref = (no: string | null, text: string) => {
   return `https://wa.me/${n}?text=${encodeURIComponent(text)}`;
 };
 
-function LineChart({ data }: { data: { label: string; avg: number }[] }) {
-  if (data.length < 2) return <p style={{ color: "var(--ak-muted)", fontSize: 12 }}>Butuh ≥2 semester untuk grafik tren.</p>;
-  const W = 600, H = 200, P = 30;
-  const vals = data.map((d) => d.avg);
-  const min = Math.max(0, Math.min(...vals) - 5), max = Math.min(100, Math.max(...vals) + 5) || 100;
-  const x = (i: number) => P + (i / (data.length - 1)) * (W - 2 * P);
-  const y = (v: number) => H - P - ((v - min) / (max - min || 1)) * (H - 2 * P);
-  const pts = data.map((d, i) => `${x(i)},${y(d.avg)}`).join(" ");
+const LINE_SERIES: { key: "mipa" | "basos" | "kelas"; color: string; dash?: string }[] = [
+  { key: "mipa", color: "var(--ak-primary)" },
+  { key: "basos", color: "#D9558C" },
+  { key: "kelas", color: "var(--ak-mint-deep)", dash: "5 4" },
+];
+function LineChart({ data, emptyLabel }: { data: { label: string; mipa: number | null; basos: number | null; kelas: number | null }[]; emptyLabel: string }) {
+  if (data.length < 2) return <p style={{ color: "var(--ak-muted)", fontSize: 12 }}>{emptyLabel}</p>;
+  const W = 600, H = 220, PL = 32, PR = 14, PT = 30, PB = 28;
+  const all = data.flatMap((d) => [d.mipa, d.basos, d.kelas]).filter((v): v is number => v != null);
+  const min = Math.max(0, Math.floor((Math.min(...all) - 6) / 5) * 5), max = Math.min(100, Math.ceil((Math.max(...all) + 6) / 5) * 5);
+  const x = (i: number) => PL + (i / (data.length - 1)) * (W - PL - PR);
+  const y = (v: number) => H - PB - ((v - min) / (max - min || 1)) * (H - PT - PB);
+  const poly = (key: "mipa" | "basos" | "kelas") => data.map((d, i) => (d[key] != null ? `${x(i)},${y(d[key]!)}` : "")).filter(Boolean).join(" ");
+  const ticks: number[] = []; for (let v = min; v <= max; v += 10) ticks.push(v);
+  const lastI = data.length - 1, lastMipa = data[lastI].mipa;
   return (
-    <svg className="line-chart" viewBox={`0 0 ${W} ${H + 24}`} preserveAspectRatio="none" style={{ height: 200 }}>
-      {[0, 0.5, 1].map((t) => <line key={t} x1={P} x2={W - P} y1={P + t * (H - 2 * P)} y2={P + t * (H - 2 * P)} stroke="var(--ak-rule-2)" strokeWidth="1" />)}
-      <polyline points={pts} fill="none" stroke="var(--ak-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      {data.map((d, i) => (
-        <g key={i}>
-          <circle cx={x(i)} cy={y(d.avg)} r={i === data.length - 1 ? 6 : 4} fill={i === data.length - 1 ? "var(--ak-primary)" : "#fff"} stroke="var(--ak-primary)" strokeWidth="2.5" />
-          <text x={x(i)} y={y(d.avg) - 12} textAnchor="middle" fontSize="13" fontWeight="800" fill="var(--ak-ink)">{d.avg}</text>
-          <text x={x(i)} y={H + 14} textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--ak-muted)">{d.label}</text>
+    <svg className="line-chart" viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 210 }}>
+      {ticks.map((tk) => (
+        <g key={tk}>
+          <line x1={PL} x2={W - PR} y1={y(tk)} y2={y(tk)} stroke="var(--ak-rule-2)" strokeWidth="1" />
+          <text x={PL - 7} y={y(tk) + 3.5} textAnchor="end" fontSize="10" fill="var(--ak-muted)">{tk}</text>
         </g>
       ))}
+      {LINE_SERIES.map((s) => <polyline key={s.key} points={poly(s.key)} fill="none" stroke={s.color} strokeWidth="2.5" strokeDasharray={s.dash} strokeLinecap="round" strokeLinejoin="round" />)}
+      {LINE_SERIES.map((s) => data.map((d, i) => d[s.key] != null ? <circle key={s.key + i} cx={x(i)} cy={y(d[s.key]!)} r={i === lastI ? 4.5 : 3} fill="#fff" stroke={s.color} strokeWidth="2" /> : null))}
+      {lastMipa != null && <g><rect x={x(lastI) - 18} y={y(lastMipa) - 33} width="36" height="20" rx="6" fill="var(--ak-primary)" /><text x={x(lastI)} y={y(lastMipa) - 19} textAnchor="middle" fontSize="12" fontWeight="800" fill="#fff">{lastMipa}</text></g>}
+      {data.map((d, i) => <text key={"x" + i} x={x(i)} y={H - 7} textAnchor="middle" fontSize="10.5" fontWeight="700" fill="var(--ak-muted)">{d.label}</text>)}
     </svg>
   );
 }
 
+const AXIS_ICON: Record<string, string> = { Sains: "🔬", Matematika: "📐", Bahasa: "📖", Sosial: "💼", Seni: "🎨", Olahraga: "🏃" };
 function RadarChart({ data }: { data: { axis: string; value: number }[] }) {
-  const cx = 130, cy = 120, R = 88, n = data.length;
+  const cx = 135, cy = 130, R = 82, n = data.length;
   const pt = (v: number, i: number): [number, number] => {
     const ang = -Math.PI / 2 + (i / n) * Math.PI * 2;
     const r = (v / 100) * R;
@@ -48,11 +57,15 @@ function RadarChart({ data }: { data: { axis: string; value: number }[] }) {
   };
   const poly = data.map((d, i) => pt(d.value, i).join(",")).join(" ");
   return (
-    <svg className="radar-chart" viewBox="0 0 260 240" style={{ height: 220 }}>
+    <svg className="radar-chart" viewBox="0 0 270 260" style={{ height: 230 }}>
       {[0.33, 0.66, 1].map((t) => <polygon key={t} points={data.map((_, i) => pt(100 * t, i).join(",")).join(" ")} fill="none" stroke="var(--ak-rule-2)" strokeWidth="1" />)}
       {data.map((d, i) => { const [ex, ey] = pt(100, i); return <line key={i} x1={cx} y1={cy} x2={ex} y2={ey} stroke="var(--ak-rule-2)" strokeWidth="1" />; })}
-      <polygon points={poly} fill="rgba(91,79,233,0.22)" stroke="var(--ak-primary)" strokeWidth="2.5" />
-      {data.map((d, i) => { const [lx, ly] = pt(118, i); return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="10" fontWeight="700" fill="var(--ak-ink-3)">{d.axis}</text>; })}
+      <polygon points={poly} fill="rgba(91,79,233,0.20)" stroke="var(--ak-primary)" strokeWidth="2.5" />
+      {data.map((d, i) => <circle key={"d" + i} cx={pt(d.value, i)[0]} cy={pt(d.value, i)[1]} r="3" fill="var(--ak-primary)" />)}
+      {data.map((d, i) => {
+        const [lx, ly] = pt(122, i);
+        return <text key={"l" + i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="10" fontWeight="800" fill="var(--ak-ink-2)">{AXIS_ICON[d.axis] ?? ""} {d.axis === "Matematika" ? "Mat" : d.axis}</text>;
+      })}
     </svg>
   );
 }
@@ -171,18 +184,43 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       <div className="section">
         <div className="section-h"><h2><span className="ico mint">📊</span>{t("detail.akademik")}</h2><span className="meta">{t("detail.akademikSub", { n: s.rapor.length, b: s.radar.filter((r) => r.value > 0).length })}</span></div>
         <div className="akademik-grid">
-          <div className="chart-card"><h3>{t("detail.chartTren")}</h3><div className="sub">{t("detail.chartTrenSub")}</div><LineChart data={s.line} /></div>
-          <div className="chart-card"><h3>{t("detail.chartBakat")}</h3><div className="sub">{t("detail.chartBakatSub")}</div><RadarChart data={s.radar} /></div>
+          <div className="chart-card">
+            <h3>{t("detail.chartTren")}</h3>
+            <div className="sub">{s.lineInsight ? t(s.lineInsight.naik ? "detail.trenNaik" : "detail.trenTurun", { delta: Math.abs(s.lineInsight.delta), tahun: s.lineInsight.tahun }) : t("detail.chartTrenSub")}</div>
+            <LineChart data={s.line} emptyLabel={t("detail.chartTrenSub")} />
+            <div className="line-legend">
+              <span><i style={{ background: "var(--ak-primary)" }} />{t("detail.legMipa")} <b>{s.lineLegend.mipa ?? "—"}</b></span>
+              <span><i style={{ background: "#D9558C" }} />{t("detail.legBasos")} <b>{s.lineLegend.basos ?? "—"}</b></span>
+              <span><i className="dash" style={{ background: "var(--ak-mint-deep)" }} />{t("detail.legKelas")} <b>{s.lineLegend.kelas ?? "—"}</b></span>
+            </div>
+            {s.strongest.length > 0 && (
+              <div className="strong-box"><span className="sb-ic">✏️</span><div><div className="sb-t">{t("detail.strongTitle")}</div><div className="sb-v">{s.strongest.map((x) => `${x.nama} ${x.nilai}`).join(" · ")}</div></div></div>
+            )}
+          </div>
+          <div className="chart-card">
+            <h3>{t("detail.chartBakat")}</h3><div className="sub">{t("detail.chartBakatSub")}</div>
+            <RadarChart data={s.radar} />
+            {s.radarTags.length > 0 && <div className="radar-tags">{s.radarTags.map((tg) => <span key={tg}>{tg}</span>)}</div>}
+          </div>
         </div>
       </div>
 
       {/* JOURNEY */}
       {s.journey.length > 0 && (
         <div className="section">
-          <div className="section-h"><h2><span className="ico lav">🧭</span>{t("detail.journey")}</h2><span className="meta">{t("detail.journeySub", { n: s.journey.length })}</span></div>
-          <div className="journey">
+          <div className="section-h"><h2><span className="ico lav">🧭</span>{t("detail.journey")}</h2><span className="meta">{t("detail.journeySemester", { n: s.journey.length })}</span></div>
+          <div className="timeline-h">
             {s.journey.map((j, i) => (
-              <div key={i} className={`jnode${j.current ? " cur" : ""}`}><span className="jdot" /><div className="jt">{j.tahun}</div><div className="jk">{j.rombel}</div><div className="js">{j.absen != null ? t("detail.journeyAbsen", { n: j.absen }) : "—"}{j.rata != null ? ` · ${t("detail.journeyRata", { r: j.rata })}` : ""}</div></div>
+              <div key={i} className={`tnode ${j.status}`}>
+                <div className="ty">{j.year} {j.semester}</div>
+                <div className="tdot">{j.status === "past" ? "✓" : j.status === "current" ? "★" : i + 1}</div>
+                <div className="tk">{j.rombel}</div>
+                <div className="ts">{
+                  j.status === "current" ? `${t("detail.saatIni")} · ${t("detail.journeyRata", { r: j.rata ?? 0 })}`
+                    : j.status === "future" ? (j.note ? `${t("detail.target")} ${j.note}` : t("detail.akanDatang"))
+                    : `${j.absen != null ? t("detail.journeyAbsen", { n: j.absen }) + " · " : ""}${t("detail.journeyRata", { r: j.rata ?? 0 })}`
+                }</div>
+              </div>
             ))}
           </div>
         </div>
