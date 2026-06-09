@@ -200,6 +200,8 @@ model Sekolah {
   telepon       String?
   email         String?
   website       String?
+  lat           Float?  @map("lat") // koordinat sekolah (titik tujuan peta)
+  lng           Float?  @map("lng")
   kepalaSekolah String? @map("kepala_sekolah")
   nipKepala     String? @map("nip_kepala")
   logo          String?
@@ -273,9 +275,10 @@ model Sekolah {
   entriNilai       EntriNilai[]
   komponenNilai    KomponenNilai[]
   templatRapor     TemplatRapor[]
-  emailConfig      EmailConfig?
-  emailTemplates   EmailTemplate[]
-  emailLogs        EmailLog[]
+  emailConfig              EmailConfig?
+  emailTemplates           EmailTemplate[]
+  emailLogs                EmailLog[]
+  roleModulePermissions    RoleModulePermission[]
 
   @@map("sekolah")
 }
@@ -289,25 +292,29 @@ model User {
   sekolahId    Int?      @map("sekolah_id") // null = superadmin platform
   username     String
   email        String?   @unique
-  passwordHash String    @map("password_hash")
+  passwordHash String?   @map("password_hash")
   // true bila hash masih MD5 warisan sistem lama; di-upgrade ke bcrypt saat login pertama.
-  passwordLegacyMd5 Boolean @default(false) @map("password_legacy_md5")
+  passwordLegacyMd5    Boolean   @default(false) @map("password_legacy_md5")
+  provider             String    @default("credentials") @map("provider")
+  providerAccountId    String?   @unique @map("provider_account_id")
   namaLengkap  String    @map("nama_lengkap")
   role         Role
   noTelp       String?   @map("no_telp")
   foto         String?
-  isActive     Boolean   @default(true) @map("is_active")
-  lastLoginAt  DateTime? @map("last_login_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  isActive        Boolean   @default(true) @map("is_active")
+  lastLoginAt     DateTime? @map("last_login_at")
+  sessionVersion  Int       @default(0)   @map("session_version")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   sekolah  Sekolah?       @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   siswa    Siswa?
   guru     Guru?
   ortu     OrangTuaWali[]
   logLogin         LogLogin[]
-  pengumumanDibuat Pengumuman[]     @relation("PengumumanAuthor")
-  mutasiDiinput    MutasiSiswa[]    @relation("MutasiCreatedBy")
+  pengumumanDibuat Pengumuman[]          @relation("PengumumanAuthor")
+  mutasiDiinput    MutasiSiswa[]         @relation("MutasiCreatedBy")
+  resetTokens      PasswordResetToken[]
 
   @@unique([sekolahId, username])
   @@index([sekolahId, role])
@@ -467,6 +474,8 @@ model Siswa {
   noHp          String? @map("no_hp")
   tinggalDengan String? @map("tinggal_dengan")
   transportasi  String?
+  lat           Float?  @map("lat") // koordinat rumah (peta rumah→sekolah)
+  lng           Float?  @map("lng")
 
   // Kesehatan (1:1 inline)
   tinggiBadan     String? @map("tinggi_badan")
@@ -1556,6 +1565,15 @@ model Pengumuman {
   kategori    String           @default("umum")
   target      PengumumanTarget @default(semua)
   pinned      Boolean          @default(false)
+  prioritas    Boolean         @default(false)                 // prioritas tinggi (terpisah dari pinned)
+  butuhBalasan Boolean         @default(false) @map("butuh_balasan")
+  scheduledAt    DateTime?     @map("scheduled_at")            // null = langsung; isi = jadwalkan terbit
+  publishedAt    DateTime?     @map("published_at")            // kapan benar2 terbit/dikirim
+  channels       String[]      @default([])                    // ["wa","email","sms"]
+  lampiran       String[]      @default([])                    // URL file lampiran (gambar/dokumen)
+  arsip          Boolean       @default(false)                 // diarsipkan = tidak muncul di papan publik
+  reminderHours  Int?          @map("reminder_hours")          // null = tidak; isi = ulang setelah N jam
+  reminderSentAt DateTime?     @map("reminder_sent_at")
   viewCount   Int              @default(0) @map("view_count")
   createdById String?          @map("created_by") @db.Uuid
   createdAt   DateTime         @default(now()) @map("created_at")
@@ -1563,9 +1581,64 @@ model Pengumuman {
 
   sekolah   Sekolah @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   author    User?   @relation("PengumumanAuthor", fields: [createdById], references: [id], onDelete: SetNull)
+  dibaca    PengumumanBaca[]
+  kiriman   PengumumanKirim[]
 
   @@index([sekolahId, createdAt])
+  @@index([sekolahId, scheduledAt])
   @@map("pengumuman")
+}
+
+enum PenerimaTipe {
+  siswa
+  ortu
+  guru
+}
+
+enum KirimChannel {
+  wa
+  email
+  sms
+  app
+}
+
+enum KirimStatus {
+  antri
+  terkirim
+  gagal
+}
+
+/// Tanda baca per-penerima → dipakai hitung "dibaca %" yang akurat (bukan sekadar viewCount).
+model PengumumanBaca {
+  id           Int          @id @default(autoincrement())
+  pengumumanId Int          @map("pengumuman_id")
+  userId       String?      @map("user_id") @db.Uuid // akun portal yang membaca (siswa/ortu)
+  tipe         PenerimaTipe
+  readAt       DateTime     @default(now()) @map("read_at")
+
+  pengumuman Pengumuman @relation(fields: [pengumumanId], references: [id], onDelete: Cascade)
+
+  @@unique([pengumumanId, userId])
+  @@index([pengumumanId])
+  @@map("pengumuman_baca")
+}
+
+/// Log pengiriman per-channel (WA/Email/SMS/app) → status & ringkasan terkirim.
+model PengumumanKirim {
+  id           Int          @id @default(autoincrement())
+  pengumumanId Int          @map("pengumuman_id")
+  channel      KirimChannel
+  status       KirimStatus  @default(antri)
+  tujuan       Int          @default(0) // jumlah penerima target
+  terkirim     Int          @default(0)
+  gagal        Int          @default(0)
+  sentAt       DateTime?    @map("sent_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  pengumuman Pengumuman @relation(fields: [pengumumanId], references: [id], onDelete: Cascade)
+
+  @@index([pengumumanId])
+  @@map("pengumuman_kirim")
 }
 
 model Ekstrakurikuler {
@@ -1998,4 +2071,50 @@ model EmailLog {
   @@index([sekolahId])
   @@index([createdAt])
   @@map("email_log")
+}
+
+// =============================================================================
+// PASSWORD RESET TOKENS
+// =============================================================================
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  token     String    @unique
+  userId    String    @map("user_id") @db.Uuid
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// =============================================================================
+// RBAC — KUSTOMISASI HAK AKSES PER SEKOLAH
+// Menyimpan override per-tenant dari default hardcoded ROLE_MODULES.
+// Jika sekolah belum punya baris → sistem fallback ke ROLE_MODULES defaults.
+// =============================================================================
+
+model RoleModulePermission {
+  id         Int      @id @default(autoincrement())
+  sekolahId  Int      @map("sekolah_id")
+  role       String   // Role enum value, disimpan sebagai string agar fleksibel
+  moduleKey  String   @map("module_key")
+
+  canView    Boolean  @default(false) @map("can_view")
+  canCreate  Boolean  @default(false) @map("can_create")
+  canEdit    Boolean  @default(false) @map("can_edit")
+  canDelete  Boolean  @default(false) @map("can_delete")
+  canExport  Boolean  @default(false) @map("can_export")
+
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  updatedBy  String?  @db.Uuid @map("updated_by")
+
+  sekolah    Sekolah  @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+
+  @@unique([sekolahId, role, moduleKey])
+  @@index([sekolahId, role])
+  @@map("role_module_permissions")
 }

@@ -27,6 +27,8 @@ export type SiswaDetail = {
   tinggi: number; berat: number;
   prestasiCount: number; beasiswa: string | null;
   metrics: { rata: number | null; hadirPct: number | null; rank: number | null; rankTotal: number | null; sppStatus: string; bmi: Bmi | null; pelanggaran: number };
+  distanceKm: number | null;
+  kasus: { count: number; poin: number; list: { nama: string; poin: number; tanggal: string }[] };
   zodiak: Zodiak | null; numero: { angka: number; sifat: string; tags: string[] } | null;
   line: { label: string; avg: number }[];
   radar: { axis: string; value: number }[];
@@ -41,6 +43,13 @@ export type SiswaDetail = {
 
 const BULAN = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 const fmtTgl = (d: Date) => `${d.getDate()} ${BULAN[d.getMonth() + 1]} ${d.getFullYear()}`;
+
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 export async function getSiswaDetail(id: number, sekolahId: number): Promise<SiswaDetail | null> {
   const s = await prisma.siswa.findFirst({
@@ -70,6 +79,14 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
       ? prisma.nilaiRapor.groupBy({ by: ["siswaId"], where: { nilaiAkhir: { not: null }, siswa: { anggotaRombel: { some: { rombelId: curRombelId } } } }, _avg: { nilaiAkhir: true } })
       : Promise.resolve([] as { siswaId: number; _avg: { nilaiAkhir: number | null } }[]),
   ]);
+
+  const [sekolahCoord, kasusRows] = await Promise.all([
+    prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { lat: true, lng: true } }),
+    prisma.kasusSiswa.findMany({ where: { siswaId: id }, orderBy: { tanggal: "desc" }, select: { namaKasus: true, poin: true, tanggal: true } }),
+  ]);
+  const kasusPoin = kasusRows.reduce((a, b) => a + b.poin, 0);
+  const distanceKm = s.lat != null && s.lng != null && sekolahCoord?.lat != null && sekolahCoord?.lng != null
+    ? Math.round(haversineKm(s.lat, s.lng, sekolahCoord.lat, sekolahCoord.lng) * 10) / 10 : null;
 
   const hg = (st: string) => hadirGroups.find((g) => g.status === st)?._count._all ?? 0;
   const hadirStats = { hadir: hg("hadir") + hg("terlambat"), izin: hg("izin"), sakit: hg("sakit"), alpa: hg("alpa") };
@@ -127,7 +144,8 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
     ttl: `${s.tempatLahir ?? "—"}${tl ? `, ${fmtTgl(tl)}` : ""}`, alamat: s.alamat, transportasi: s.transportasi, tinggalDengan: s.tinggalDengan,
     tinggi, berat,
     prestasiCount: s.prestasi.length, beasiswa: s.beasiswa[0]?.nama ?? null,
-    metrics: { rata, hadirPct, rank, rankTotal, sppStatus, bmi: bmi(tinggi, berat), pelanggaran: 0 },
+    metrics: { rata, hadirPct, rank, rankTotal, sppStatus, bmi: bmi(tinggi, berat), pelanggaran: kasusPoin },
+    distanceKm, kasus: { count: kasusRows.length, poin: kasusPoin, list: kasusRows.slice(0, 5).map((k) => ({ nama: k.namaKasus, poin: k.poin, tanggal: k.tanggal.toISOString() })) },
     zodiak: tl ? zodiakFromDate(tl) : null, numero: tl ? numerologi(tl) : null,
     line, radar, journey, rapor,
     heatmap, hadirStats,

@@ -149,7 +149,7 @@ export function RaporView({ data }: { data: SiswaRapor }) {
             {Kop}
             <div className="doc-title"><h2>LAPORAN PROYEK PENGUATAN PROFIL PELAJAR PANCASILA</h2><div className="sub">{id.semester} · Tahun Pelajaran {id.tahun}</div></div>
             {Identitas([["Nama", id.nama], ["Kelas", id.kelas], ["NISN", id.nisn], ["Fase", id.fase], ["NIS", id.nis], ["Tahun Pelajaran", id.tahun]])}
-            <div className="skala-info"><b>Skala capaian:</b> BB = Belum Berkembang · MB = Mulai Berkembang · BSH = Berkembang Sesuai Harapan · SAB = Sangat Berkembang</div>
+            <div className="skala-info"><b>Skala capaian:</b> MB = Mulai Berkembang · SB = Sedang Berkembang · BSH = Berkembang Sesuai Harapan · SAB = Sangat Berkembang</div>
             <div className="sec-head">B. PROYEK YANG DIIKUTI &amp; CAPAIAN</div>
             <div className="tbl-wrap">
               {!data.p5 || data.p5.projek.length === 0 ? <p style={{ fontStyle: "italic", fontSize: 12 }}>Belum ada penilaian P5 untuk siswa ini.</p> : (

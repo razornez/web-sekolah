@@ -83,7 +83,8 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
   const m = s.metrics;
   const sppLunas = s.spp.filter((x) => x.status === "lunas").length;
   const firstParentHp = s.parents.find((p) => p.noHp)?.noHp ?? null;
-  const poin = Math.max(0, 100 - m.pelanggaran * 5);
+  const poin = Math.max(0, 100 - m.pelanggaran);
+  const estTempuh = s.distanceKm != null ? Math.max(3, Math.round((s.distanceKm / 22) * 60)) : null; // ~22 km/jam motor kota
   const ortuTone = (tipe: string) => (/ayah|ayh/i.test(tipe) ? "ayah" : /ibu/i.test(tipe) ? "ibu" : "wali");
 
   return (
@@ -130,7 +131,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
         <div className="sm"><div className="l">🏆 Peringkat Kelas</div><div className="v">{m.rank ? `#${m.rank}` : "—"}</div><div className="d">{m.rankTotal ? `dari ${m.rankTotal} dinilai` : "belum ada data"}</div></div>
         <div className="sm"><div className="l">💰 SPP</div><div className="v mint">{sppLunas}<small>/{s.spp.length || 12}</small></div><div className="d">{m.sppStatus === "Lunas" ? "Lunas semua" : m.sppStatus}</div></div>
         <div className="sm"><div className="l">📏 BMI</div><div className="v">{m.bmi?.value ?? "—"}</div><div className="d up">{m.bmi?.kategori ?? "Data belum lengkap"}</div></div>
-        <div className="sm"><div className="l">🎯 Poin Pelanggaran</div><div className="v">{m.pelanggaran}</div><div className="d">Bersih sejak masuk</div></div>
+        <div className="sm"><div className="l">🎯 Poin Pelanggaran</div><div className="v">{m.pelanggaran}</div><div className="d">{m.pelanggaran === 0 ? "Bersih sejak masuk" : `${s.kasus.count} catatan BK`}</div></div>
       </div>
 
       {/* PERSONA */}
@@ -212,14 +213,17 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
             <svg className="map-route" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M20 70 L40 70 L40 40 L80 40 L80 30" fill="none" stroke="var(--ak-primary)" strokeWidth="1.5" strokeDasharray="4 2" /></svg>
             <span className="map-pin" style={{ left: "20%", top: "70%" }}>🏠<span className="ring" /></span>
             <span className="map-pin" style={{ left: "80%", top: "30%", fontSize: 24 }}>🏫<span className="ring" /></span>
+            {s.distanceKm != null && <span className="map-dist">{s.distanceKm} km</span>}
           </div>
           <div className="map-info">
             <div className="mi-addr">📍 {s.alamat ?? "Alamat belum diisi"}</div>
             <div className="map-stats">
+              <div className="mst"><div className="k">Jarak ke sekolah</div><div className="v">{s.distanceKm != null ? `${s.distanceKm} km` : "—"}</div></div>
+              <div className="mst"><div className="k">Estimasi tempuh</div><div className="v">{estTempuh != null ? `${estTempuh} mnt` : "—"}</div></div>
               <div className="mst"><div className="k">Tinggal dengan</div><div className="v" style={{ fontSize: 13 }}>{s.tinggalDengan ?? "—"}</div></div>
               <div className="mst"><div className="k">Transportasi</div><div className="v" style={{ fontSize: 13 }}>{s.transportasi ?? "—"}</div></div>
             </div>
-            <div className="map-transport">🚍 Rute &amp; jarak tampil saat koordinat lokasi tersedia.</div>
+            <div className="map-transport">🚍 {s.transportasi ? `Menggunakan ${s.transportasi.toLowerCase()}` : "Moda transportasi belum diisi"}{s.distanceKm != null ? ` · ±${s.distanceKm} km dari sekolah` : ""}.</div>
           </div>
         </div>
       </div>
@@ -228,10 +232,24 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       <div className="section">
         <div className="section-h"><h2><span className="ico mint">🌿</span>Catatan BK &amp; Disiplin</h2></div>
         <div className="bk-grid">
-          <div className="bk-empty">
-            <div className="e">🌿</div><h4>Belum ada catatan pelanggaran</h4><p>Bersikap baik sejak masuk sekolah.</p>
-            <div className="bk-stats"><div><div className="v">0</div><div className="k">Pelanggaran</div></div><div><div className="v">{s.prestasiCount}</div><div className="k">Penghargaan</div></div></div>
-          </div>
+          {s.kasus.count === 0 ? (
+            <div className="bk-empty">
+              <div className="e">🌿</div><h4>Belum ada catatan pelanggaran</h4><p>Bersikap baik sejak masuk sekolah.</p>
+              <div className="bk-stats"><div><div className="v">0</div><div className="k">Pelanggaran</div></div><div><div className="v">{s.prestasiCount}</div><div className="k">Penghargaan</div></div></div>
+            </div>
+          ) : (
+            <div className="bk-empty" style={{ background: "var(--ak-peach)", textAlign: "left" }}>
+              <h4 style={{ color: "var(--ak-peach-deep)", textAlign: "center" }}>{s.kasus.count} catatan BK · {s.kasus.poin} poin</h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
+                {s.kasus.list.map((k, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, background: "rgba(255,255,255,0.6)", borderRadius: 10, padding: "8px 12px", fontSize: 12.5 }}>
+                    <span style={{ fontWeight: 700, color: "var(--ak-ink)" }}>{k.nama}</span>
+                    <span style={{ fontWeight: 800, color: "var(--ak-peach-deep)", whiteSpace: "nowrap" }}>−{k.poin} · {new Date(k.tanggal).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="gauge-card">
             <svg viewBox="0 0 200 110" width="200" height="110">
               <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="var(--ak-bg-2)" strokeWidth="14" strokeLinecap="round" />
