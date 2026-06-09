@@ -48,6 +48,7 @@ export const guruSchema = z.object({
   golongan: optStr,
   jenisJabatan: optStr,
   statusGuru: optStr,
+  tmt: optStr,
 });
 
 export type GuruInput = z.infer<typeof guruSchema>;

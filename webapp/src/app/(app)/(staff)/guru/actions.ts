@@ -45,6 +45,7 @@ export async function saveGuru(
     golongan: d.golongan,
     jenisJabatan: d.jenisJabatan,
     statusGuru: d.statusGuru,
+    tmt: d.tmt ? new Date(d.tmt) : null,
   };
 
   try {
