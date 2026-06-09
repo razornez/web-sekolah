@@ -338,7 +338,7 @@
       "journey": "Academic Journey", "journeySub": "{n} class periods", "journeyAbsen": "Roll no. {n}", "journeyRata": "Avg {r}",
       "raporTitle": "Academic Report", "raporSub": "Grades per subject",
       "heatmap": "Attendance Heatmap", "heatmapSub": "Past year", "hadir": "Present", "izin": "Excused", "sakit": "Sick", "alpa": "Absent",
-      "mapTitle": "Home & Transport", "addrNone": "Address not set", "jarak": "Distance to school", "estTempuh": "Est. travel", "tinggalDengan": "Lives with", "transportasi": "Transport", "mnt": "{n} min", "mapHome": "Home", "mapSchool": "School", "viaRoad": "(via road route)",
+      "mapTitle": "Home & Transport", "addrNone": "Address not set", "jarak": "Distance to school", "estTempuh": "Est. travel", "tinggalDengan": "Lives with", "transportasi": "Transport", "mnt": "{n} min", "mapHome": "Home", "mapSchool": "School", "viaRoad": "(via road route)", "mBerangkat": "Departure", "mPulang": "Home time", "mSampai": "arrive by {t}", "mTiba": "home by {t}",
       "transUse": "🚍 By {mode}", "transNone": "🚍 Transport mode not set", "transDist": " · ±{km} km from school",
       "bkTitle": "Counseling & Discipline", "bkEmpty": "No disciplinary records", "bkEmptySub": "Well-behaved since enrolment.", "pelanggaran": "Violations", "penghargaan": "Awards",
       "bkCount": "{n} BK notes · {p} points", "poinDisiplin": "Discipline points", "disBaik": "Excellent", "disCukup": "Fair", "disPerlu": "Needs attention",

@@ -40,6 +40,10 @@ export function MapSection({ geo, distanceKm, alamat, transportasi, tinggalDenga
 
   const km = osrm?.km ?? distanceKm;
   const mnt = osrm?.min ?? (distanceKm != null ? Math.max(3, Math.round((distanceKm / 22) * 60)) : null);
+  // Estimasi jam berangkat/pulang dari waktu tempuh + jam sekolah standar (06:45 tiba · 14:30 pulang)
+  const fmtJam = (m: number) => `${String(Math.floor((((m % 1440) + 1440) % 1440) / 60)).padStart(2, "0")}:${String(((m % 60) + 60) % 60).padStart(2, "0")}`;
+  const TIBA_SEK = 6 * 60 + 45, PULANG_SEK = 14 * 60 + 30;
+  const jam = mnt != null ? { berangkat: fmtJam(TIBA_SEK - mnt), sampai: fmtJam(TIBA_SEK), pulang: fmtJam(PULANG_SEK), tiba: fmtJam(PULANG_SEK + mnt) } : null;
 
   return (
     <div className="map-grid">
@@ -62,6 +66,10 @@ export function MapSection({ geo, distanceKm, alamat, transportasi, tinggalDenga
           <div className="mst"><div className="k">{t("detail.estTempuh")}</div><div className="v">{mnt != null ? t("detail.mnt", { n: mnt }) : "—"}</div></div>
           <div className="mst"><div className="k">{t("detail.tinggalDengan")}</div><div className="v" style={{ fontSize: 13 }}>{tinggalDengan ?? "—"}</div></div>
           <div className="mst"><div className="k">{t("detail.transportasi")}</div><div className="v" style={{ fontSize: 13 }}>{transportasi ?? "—"}</div></div>
+          {jam && <>
+            <div className="mst"><div className="k">{t("detail.mBerangkat")}</div><div className="v">{jam.berangkat}</div><div className="msub">{t("detail.mSampai", { t: jam.sampai })}</div></div>
+            <div className="mst"><div className="k">{t("detail.mPulang")}</div><div className="v">{jam.pulang}</div><div className="msub">{t("detail.mTiba", { t: jam.tiba })}</div></div>
+          </>}
         </div>
         <div className="map-transport">
           {transportasi ? t("detail.transUse", { mode: transportasi.toLowerCase() }) : t("detail.transNone")}

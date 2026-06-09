@@ -142,6 +142,7 @@
 #ak-sd .map-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 #ak-sd .map-stats .mst { background: var(--ak-surface-2); border-radius: 12px; padding: 10px 12px; }
 #ak-sd .map-stats .mst .k { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--ak-muted); } #ak-sd .map-stats .mst .v { font-size: 15px; font-weight: 800; color: var(--ak-ink); margin-top: 2px; }
+#ak-sd .map-stats .mst .msub { font-size: 10.5px; color: var(--ak-muted); margin-top: 1px; }
 #ak-sd .map-transport { margin-top: 10px; background: var(--ak-lav); color: var(--ak-lav-deep); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; font-weight: 700; }
 
 /* BK + GAUGE */

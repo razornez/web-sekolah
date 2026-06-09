@@ -338,7 +338,7 @@
       "journey": "Perjalanan Akademik", "journeySub": "{n} periode kelas", "journeyAbsen": "No absen {n}", "journeyRata": "Rata² {r}",
       "raporTitle": "Rapor Akademik", "raporSub": "Nilai per mata pelajaran",
       "heatmap": "Heatmap Kehadiran", "heatmapSub": "Setahun terakhir", "hadir": "Hadir", "izin": "Izin", "sakit": "Sakit", "alpa": "Alpa",
-      "mapTitle": "Rumah & Transportasi", "addrNone": "Alamat belum diisi", "jarak": "Jarak ke sekolah", "estTempuh": "Estimasi tempuh", "tinggalDengan": "Tinggal dengan", "transportasi": "Transportasi", "mnt": "{n} mnt", "mapHome": "Rumah", "mapSchool": "Sekolah", "viaRoad": "(via rute jalan)",
+      "mapTitle": "Rumah & Transportasi", "addrNone": "Alamat belum diisi", "jarak": "Jarak ke sekolah", "estTempuh": "Estimasi tempuh", "tinggalDengan": "Tinggal dengan", "transportasi": "Transportasi", "mnt": "{n} mnt", "mapHome": "Rumah", "mapSchool": "Sekolah", "viaRoad": "(via rute jalan)", "mBerangkat": "Berangkat", "mPulang": "Pulang", "mSampai": "sampai jam {t}", "mTiba": "tiba di rumah {t}",
       "transUse": "🚍 Menggunakan {mode}", "transNone": "🚍 Moda transportasi belum diisi", "transDist": " · ±{km} km dari sekolah",
       "bkTitle": "Catatan BK & Disiplin", "bkEmpty": "Belum ada catatan pelanggaran", "bkEmptySub": "Bersikap baik sejak masuk sekolah.", "pelanggaran": "Pelanggaran", "penghargaan": "Penghargaan",
       "bkCount": "{n} catatan BK · {p} poin", "poinDisiplin": "Poin disiplin", "disBaik": "Sangat baik", "disCukup": "Cukup", "disPerlu": "Perlu perhatian",
