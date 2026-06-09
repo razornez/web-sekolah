@@ -7,6 +7,20 @@ import { R, PORTAL } from "@/lib/routes";
 import { AppShell } from "./AppShell";
 import { DemoBanner } from "@/components/DemoBanner";
 import { prisma } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
+
+// Badge sidebar di-cache 120s per sekolah — kueri ini jalan di SETIAP halaman.
+const cachedSiswaCount = unstable_cache(
+  (sekolahId: number) => prisma.siswa.count({ where: { sekolahId, status: "aktif" } }),
+  ["badge-siswa-v1"],
+  { revalidate: 120, tags: ["beranda"] },
+);
+const cachedSppDue = unstable_cache(
+  (sekolahId: number, year: number, month: number) =>
+    prisma.tagihanSpp.count({ where: { sekolahId, status: { not: "lunas" }, OR: [{ tahun: { lt: year } }, { tahun: year, bulan: { lte: month } }] } }),
+  ["badge-spp-v1"],
+  { revalidate: 120, tags: ["beranda"] },
+);
 
 // navKey = key di messages "nav.*", icon opsional prefix
 const STAFF_NAV: { href: string; navKey: string; key?: ModuleKey; icon?: string }[] = [
@@ -86,10 +100,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const badges: { siswa?: number; spp?: number } = {};
   if (staff && user.sekolahId) {
     const now = new Date();
-    const dueFilter = { OR: [{ tahun: { lt: now.getFullYear() } }, { tahun: now.getFullYear(), bulan: { lte: now.getMonth() + 1 } }] };
     const [siswaCount, sppDue] = await Promise.all([
-      canAccess(user.role, "siswa") ? prisma.siswa.count({ where: { sekolahId: user.sekolahId, status: "aktif" } }) : Promise.resolve(0),
-      canAccess(user.role, "spp") ? prisma.tagihanSpp.count({ where: { sekolahId: user.sekolahId, status: { not: "lunas" }, ...dueFilter } }) : Promise.resolve(0),
+      canAccess(user.role, "siswa") ? cachedSiswaCount(user.sekolahId) : Promise.resolve(0),
+      canAccess(user.role, "spp") ? cachedSppDue(user.sekolahId, now.getFullYear(), now.getMonth() + 1) : Promise.resolve(0),
     ]);
     if (siswaCount) badges.siswa = siswaCount;
     if (sppDue) badges.spp = sppDue;
