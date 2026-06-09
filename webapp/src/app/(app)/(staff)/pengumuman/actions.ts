@@ -1,5 +1,8 @@
 "use server";
 
+import { writeFile, mkdir } from "node:fs/promises";
+import path from "node:path";
+import { randomUUID } from "node:crypto";
 import { PengumumanTarget, type KirimChannel, PenerimaTipe } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -7,6 +10,23 @@ import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { auditLog } from "@/lib/audit";
+
+const ATT_TYPES = ["image/png", "image/jpeg", "image/webp", "application/pdf"];
+const ATT_MAX = 5 * 1024 * 1024; // 5 MB
+// Simpan lampiran ke public/uploads (dev/self-hosted). Produksi: ganti ke object storage.
+async function saveLampiran(files: File[], sekolahId: number): Promise<string[]> {
+  const out: string[] = [];
+  const dir = path.join(process.cwd(), "public", "uploads", "pengumuman", String(sekolahId));
+  for (const f of files.slice(0, 5)) {
+    if (!f || f.size === 0 || f.size > ATT_MAX || !ATT_TYPES.includes(f.type)) continue;
+    await mkdir(dir, { recursive: true });
+    const ext = f.type === "application/pdf" ? "pdf" : f.type === "image/png" ? "png" : f.type === "image/webp" ? "webp" : "jpg";
+    const name = `${randomUUID()}.${ext}`;
+    await writeFile(path.join(dir, name), Buffer.from(await f.arrayBuffer()));
+    out.push(`/uploads/pengumuman/${sekolahId}/${name}`);
+  }
+  return out;
+}
 
 const TARGETS: PengumumanTarget[] = ["semua", "staf", "siswa", "ortu"];
 const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting", "staf", "lainnya"];
@@ -57,13 +77,15 @@ export async function createPengumuman(
   const reminderHours = Number.isFinite(reminderHoursRaw) && reminderHoursRaw > 0 ? Math.floor(reminderHoursRaw) : null;
 
   const tujuan = channels.length ? await audienceCount(sekolahId, target) : 0;
+  const lampiranFiles = formData.getAll("lampiran").filter((x): x is File => x instanceof File);
+  const lampiran = await saveLampiran(lampiranFiles, sekolahId);
 
   const p = await prisma.pengumuman.create({
     data: {
       sekolahId, judul, isi, target, kategori, pinned, prioritas, butuhBalasan,
       scheduledAt, reminderHours, createdById: user.id,
       publishedAt: scheduledAt ? null : new Date(),
-      channels,
+      channels, lampiran,
       kiriman: channels.length ? { create: channels.map((channel) => ({ channel, tujuan })) } : undefined,
     },
   });

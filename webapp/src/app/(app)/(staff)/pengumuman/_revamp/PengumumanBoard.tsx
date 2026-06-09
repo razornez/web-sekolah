@@ -197,6 +197,16 @@ export function PengumumanBoard({ data }: { data: PengData }) {
               </div>
               <div className="pg-drawer-body">
                 <div dangerouslySetInnerHTML={{ __html: sel.isi }} />
+                {sel.lampiran.length > 0 && (
+                  <div style={{ marginTop: 14 }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ak-muted)", marginBottom: 8 }}>Lampiran</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {sel.lampiran.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 12px", borderRadius: 10, border: "1px solid var(--ak-rule-2)", background: "var(--ak-surface-2)", fontSize: 12.5, fontWeight: 700, color: "var(--ak-ink-2)", textDecoration: "none" }}>📎 {url.split("/").pop()}</a>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="pg-reach">
                   <div className="rtop"><span className="rl">Tingkat dibaca</span><span className="rv">{pct}<small>%</small></span></div>
                   <div className="rbar">

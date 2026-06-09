@@ -29,6 +29,7 @@ export type PengItem = {
   recipientTotal: number;
   readPct: number;
   waSent: boolean;
+  lampiran: string[];
 };
 
 export type GameCard = { id: number; snippet: string; kategori: string; target: string };
@@ -76,7 +77,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
       take: 120,
       select: {
         id: true, judul: true, isi: true, kategori: true, target: true, pinned: true, prioritas: true,
-        butuhBalasan: true, viewCount: true, createdAt: true, scheduledAt: true,
+        butuhBalasan: true, viewCount: true, createdAt: true, scheduledAt: true, lampiran: true,
         author: { select: { namaLengkap: true } },
         kiriman: { select: { channel: true, status: true } },
       },
@@ -112,6 +113,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
       viewCount: p.viewCount,
       readCount,
       readByTipe: tipeMap.get(p.id) ?? { siswa: 0, ortu: 0, guru: 0 },
+      lampiran: p.lampiran,
       recipientTotal: recTotal,
       readPct: recTotal > 0 ? Math.round((readCount / recTotal) * 100) : 0,
       waSent: p.kiriman.some((k) => k.channel === "wa" && k.status === "terkirim"),

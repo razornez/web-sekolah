@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { TiptapEditor } from "@/components/TiptapEditor";
 import { createPengumuman, type PengumumanFormState } from "../actions";
 import type { PengData } from "./data";
@@ -54,7 +54,25 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
   const [scheduledAt, setScheduledAt] = useState("");
   const [channels, setChannels] = useState<Set<string>>(new Set(["wa"]));
   const [reminderHours, setReminderHours] = useState(0);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [fileNames, setFileNames] = useState<string[]>([]);
+  const [mention, setMention] = useState("");
+  const [sug, setSug] = useState<{ id: number; namaLengkap: string; nisn: string | null }[]>([]);
   const [state, formAction, pending] = useActionState<PengumumanFormState, FormData>(createPengumuman, { ok: false });
+
+  async function onMention(v: string) {
+    setMention(v);
+    const m = (v.split(",").pop() ?? "").trim().replace(/^@/, "");
+    if (m.length < 2) { setSug([]); return; }
+    try { const r = await fetch(`/api/siswa/cari?q=${encodeURIComponent(m)}`); setSug(r.ok ? await r.json() : []); } catch { setSug([]); }
+  }
+  function pickSug(name: string) {
+    const parts = mention.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length) parts[parts.length - 1] = `@${name}`; else parts.push(`@${name}`);
+    setMention(parts.join(", ") + ", ");
+    setSug([]);
+  }
+  function onFiles(list: FileList | null) { setFileNames([...(list ?? [])].map((f) => f.name)); }
 
   const targets = [
     { key: "semua", label: "Semua", n: data.audience.semua, unit: "orang" },
@@ -136,11 +154,16 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
               </div>
               <div className="pg-field">
                 <label>Lampiran — gambar atau dokumen</label>
-                <div style={{ border: "1.5px dashed var(--ak-rule)", borderRadius: 14, padding: "26px 16px", textAlign: "center", color: "var(--ak-muted)", background: "var(--ak-surface-2)" }}>
+                <input ref={fileRef} id="pg-lampiran" type="file" name="lampiran" multiple accept="image/png,image/jpeg,image/webp,application/pdf" style={{ display: "none" }} onChange={(e) => onFiles(e.target.files)} />
+                <label htmlFor="pg-lampiran"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => { e.preventDefault(); if (fileRef.current) { fileRef.current.files = e.dataTransfer.files; onFiles(e.dataTransfer.files); } }}
+                  style={{ display: "block", border: "1.5px dashed var(--ak-rule)", borderRadius: 14, padding: "26px 16px", textAlign: "center", color: "var(--ak-muted)", background: "var(--ak-surface-2)", cursor: "pointer" }}>
                   <div style={{ fontSize: 22 }}>📎</div>
                   <div style={{ fontWeight: 700, fontSize: 13, color: "var(--ak-ink-2)", marginTop: 4 }}>Tarik file ke sini atau klik untuk pilih</div>
                   <div style={{ fontSize: 11, marginTop: 2 }}>PNG · JPG · PDF · maks 5MB</div>
-                </div>
+                  {fileNames.length > 0 && <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: "var(--ak-primary)" }}>{fileNames.join(" · ")}</div>}
+                </label>
               </div>
             </div>
 
@@ -166,9 +189,19 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
                   ))}
                 </div>
               </div>
-              <div className="pg-field">
+              <div className="pg-field" style={{ position: "relative" }}>
                 <label>Atau sapa langsung beberapa orang — ketik nama / NISN</label>
-                <input type="text" placeholder="@Bayu Pratama, @Ananda Putri…" />
+                <input type="text" value={mention} onChange={(e) => onMention(e.target.value)} placeholder="@Bayu Pratama, @Ananda Putri…" autoComplete="off" />
+                {sug.length > 0 && (
+                  <div style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 4, background: "var(--ak-surface)", border: "1px solid var(--ak-rule)", borderRadius: 12, boxShadow: "var(--ak-shadow)", zIndex: 5, overflow: "hidden" }}>
+                    {sug.map((s) => (
+                      <button type="button" key={s.id} onClick={() => pickSug(s.namaLengkap)} style={{ display: "flex", width: "100%", gap: 8, alignItems: "center", padding: "9px 12px", border: 0, background: "transparent", cursor: "pointer", textAlign: "left", fontSize: 13 }}>
+                        <span style={{ fontWeight: 700, color: "var(--ak-ink)" }}>{s.namaLengkap}</span>
+                        {s.nisn && <span style={{ fontSize: 11, color: "var(--ak-muted)" }}>NISN {s.nisn}</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
