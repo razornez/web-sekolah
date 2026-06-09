@@ -8,12 +8,9 @@ export const inisial = (n: string) =>
 const COLORS = ["lav", "peach", "mint", "pink", "sky", "sun"];
 export const cardColor = (id: number) => COLORS[id % COLORS.length];
 
-const HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-
 export type Jenjang = { nama: string; count: number; pct: number; rombel: number; l: number; p: number };
-export type Bday = { id: number; nama: string; inisial: string; kelas: string; when: string; today: boolean };
-export type GameQ = { q: string; options: { v: number; correct: boolean }[]; insight: string };
+export type Bday = { id: number; nama: string; inisial: string; kelas: string; diff: number; dateISO: string };
+export type GameQ = { kind: string; vars: Record<string, string | number>; options: { v: number; correct: boolean }[] };
 export type SiswaPulse = {
   total: number;
   growthMonth: number;
@@ -84,14 +81,13 @@ export const getSiswaPulse = (sekolahId: number) =>
           const next = new Date(now.getFullYear(), b.getMonth(), b.getDate());
           const diff = Math.floor((next.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000);
           if (diff >= 0 && diff < 7) {
-            const when = diff === 0 ? "Hari ini! 🎉" : diff === 1 ? "Besok" : `${HARI[next.getDay()]}, ${next.getDate()} ${BULAN[next.getMonth()]}`;
-            bdayCand.push({ id: s.id, nama: s.namaLengkap, inisial: inisial(s.namaLengkap), kelas: s.anggotaRombel[0]?.rombel?.nama ?? "—", when, today: diff === 0 });
+            bdayCand.push({ id: s.id, nama: s.namaLengkap, inisial: inisial(s.namaLengkap), kelas: s.anggotaRombel[0]?.rombel?.nama ?? "—", diff, dateISO: next.toISOString() });
           }
         }
       }
       const jenjangArr = [...tmap.values()].sort((a, b) => a.urutan - b.urutan);
       const jenjang: Jenjang[] = jenjangArr.map((e) => ({ nama: e.nama, count: e.count, pct: aktif ? Math.round((e.count / aktif) * 100) : 0, rombel: e.rombels.size, l: e.l, p: e.p }));
-      const birthdays = bdayCand.sort((a, b) => (a.today === b.today ? 0 : a.today ? -1 : 1)).slice(0, 5);
+      const birthdays = bdayCand.sort((a, b) => a.diff - b.diff).slice(0, 5);
 
       const L = genderG.find((g) => g.jenisKelamin === "L")?._count._all ?? 0;
       const P = genderG.find((g) => g.jenisKelamin === "P")?._count._all ?? 0;
@@ -99,14 +95,14 @@ export const getSiswaPulse = (sekolahId: number) =>
       const alpa = alpaG.filter((a) => a._count._all >= 3).length;
       const perluData = noFoto + nikIncomplete; // pendekatan: data wajib belum lengkap
 
-      // mini-game dari data nyata
+      // mini-game dari data nyata — teks diformat di client (i18n)
       const game: GameQ[] = [];
       const k11 = jenjang.find((j) => /11|XI(?!I)/i.test(j.nama));
-      if (k11) game.push({ q: `Berapa siswa <b>kelas ${k11.nama}</b> di sekolah Anda hari ini?`, options: shuffle3(k11.count), insight: `✨ <b>${k11.count} siswa</b> di kelas ${k11.nama} — ${k11.pct}% dari total ${aktif.toLocaleString("id-ID")} siswa aktif.` });
-      game.push({ q: `Berapa siswa yang <b>ulang tahun bulan ini</b>?`, options: shuffle3(bdayMonth), insight: `🎂 <b>${bdayMonth} siswa</b> berulang tahun bulan ini. Sapaan singkat dari sekolah bikin mereka merasa diperhatikan.` });
-      game.push({ q: `Berapa siswa yang <b>belum mengunggah foto</b>?`, options: shuffle3(noFoto), insight: `📷 <b>${noFoto} siswa</b> belum punya foto — wajib untuk kartu pelajar & Dapodik.` });
-      game.push({ q: `Berapa siswa <b>perempuan</b> yang aktif?`, options: shuffle3(P), insight: `👧 <b>${P.toLocaleString("id-ID")}</b> siswi aktif dari ${aktif.toLocaleString("id-ID")} total (${aktif ? Math.round((P / aktif) * 100) : 0}%).` });
-      if (sppNunggak > 0) game.push({ q: `Berapa siswa <b>nunggak SPP ≥2 bulan</b>?`, options: shuffle3(sppNunggak), insight: `💔 <b>${sppNunggak} keluarga</b> nunggak ≥2 bulan. Pendekatan hangat lebih efektif dari surat formal.` });
+      if (k11) game.push({ kind: "k11", vars: { kelas: k11.nama, n: k11.count, pct: k11.pct, total: aktif }, options: shuffle3(k11.count) });
+      game.push({ kind: "bday", vars: { n: bdayMonth }, options: shuffle3(bdayMonth) });
+      game.push({ kind: "foto", vars: { n: noFoto }, options: shuffle3(noFoto) });
+      game.push({ kind: "perempuan", vars: { n: P, total: aktif, pct: aktif ? Math.round((P / aktif) * 100) : 0 }, options: shuffle3(P) });
+      if (sppNunggak > 0) game.push({ kind: "spp", vars: { n: sppNunggak }, options: shuffle3(sppNunggak) });
 
       return {
         total: aktif, growthMonth: masukBulanIni, jenjang, birthdays,

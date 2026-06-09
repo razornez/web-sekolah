@@ -1,9 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import type { GameQ } from "./listData";
 
 export function SiswaMiniGame({ game }: { game: GameQ[] }) {
+  const t = useTranslations("siswa");
+  const locale = useLocale();
   const [idx, setIdx] = useState(0);
   const [streak, setStreak] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -36,13 +39,14 @@ export function SiswaMiniGame({ game }: { game: GameQ[] }) {
 
   if (!game.length) return null;
   const q = game[idx];
+  const rich = { b: (c: React.ReactNode) => <b>{c}</b>, ...q.vars };
 
   return (
     <section className="quiz-strip">
       <span className="qz-emoji">🎯</span>
       <div className="qz-body">
-        <div className="qz-lbl">Tebak Statistik Pagi <span className="streak">streak {streak}</span></div>
-        <div className="qz-q" dangerouslySetInnerHTML={{ __html: q.q }} />
+        <div className="qz-lbl">{t("game.label")} <span className="streak">{t("game.streak", { n: streak })}</span></div>
+        <div className="qz-q">{t.rich(`game.q_${q.kind}`, rich)}</div>
       </div>
       <div className="qz-opts">
         {q.options.map((o) => {
@@ -51,11 +55,11 @@ export function SiswaMiniGame({ game }: { game: GameQ[] }) {
             if (o.correct) cls += picked === o.v ? " correct" : " reveal";
             else if (picked === o.v) cls += " wrong";
           }
-          return <button key={o.v} className={cls} onClick={() => pick(o.v, o.correct)} disabled={picked !== null}>{o.v.toLocaleString("id-ID")}</button>;
+          return <button key={o.v} className={cls} onClick={() => pick(o.v, o.correct)} disabled={picked !== null}>{o.v.toLocaleString(locale)}</button>;
         })}
       </div>
-      <button className="qz-skip" onClick={skip}>{revealed ? "Lanjut →" : "Lewati"}</button>
-      {revealed && <div className="qz-insight" dangerouslySetInnerHTML={{ __html: q.insight }} />}
+      <button className="qz-skip" onClick={skip}>{revealed ? t("game.next") : t("game.skip")}</button>
+      {revealed && <div className="qz-insight">{t.rich(`game.i_${q.kind}`, rich)}</div>}
     </section>
   );
 }
