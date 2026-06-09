@@ -36,22 +36,33 @@ function jakartaClock() {
   return { hour, minute };
 }
 
-function buildHeading(name: string, t: T) {
+// Parse "07:00" / "07.00" / "0700" → menit sejak tengah malam. Fallback bila tidak valid.
+export function parseHM(s: string | null | undefined, fallback: number): number {
+  if (!s) return fallback;
+  const m = s.match(/(\d{1,2})\D+(\d{1,2})/) ?? s.match(/^(\d{1,2})(\d{2})$/);
+  if (!m) return fallback;
+  const h = Number(m[1]), mi = Number(m[2]);
+  if (h > 23 || mi > 59) return fallback;
+  return h * 60 + mi;
+}
+export const fmtHM = (min: number) => `${String(Math.floor(min / 60)).padStart(2, "0")}.${String(min % 60).padStart(2, "0")}`;
+
+function buildHeading(name: string, t: T, startMin: number, endMin: number) {
   const { hour, minute } = jakartaClock();
   const greeting = hour < 11 ? t("ak.greetingPagi") : hour < 15 ? t("ak.greetingSiang") : hour < 18 ? t("ak.greetingSore") : t("ak.greetingMalam");
   const mins = hour * 60 + minute;
-  const start = 7 * 60;
-  const end = 14 * 60 + 30;
+  const periods = 8;
   let eyebrow: string;
   let note: string;
-  if (mins >= start && mins < end) {
-    const jamKe = Math.min(8, Math.floor((mins - start) / 45) + 1);
-    const sisaJam = Math.max(1, Math.round((end - mins) / 60));
+  if (mins >= startMin && mins < endMin) {
+    const per = Math.max(1, Math.floor((endMin - startMin) / periods));
+    const jamKe = Math.min(periods, Math.floor((mins - startMin) / per) + 1);
+    const sisaJam = Math.max(1, Math.round((endMin - mins) / 60));
     eyebrow = t("ak.eyebrowInClass", { n: jamKe });
-    note = t("ak.noteInClass", { h: sisaJam });
-  } else if (mins < start) {
+    note = t("ak.noteInClass", { h: sisaJam, jam: fmtHM(endMin) });
+  } else if (mins < startMin) {
     eyebrow = t("ak.eyebrowBefore");
-    note = t("ak.noteBefore");
+    note = t("ak.noteBefore", { jam: fmtHM(startMin) });
   } else {
     eyebrow = t("ak.eyebrowAfter");
     note = t("ak.noteAfter");
@@ -79,7 +90,12 @@ export async function getBerandaData(sekolahId: number, userName: string, t: T, 
   const monthName = new Intl.DateTimeFormat(locale, { month: "long" });
   const weekdayName = new Intl.DateTimeFormat(locale, { weekday: "long" });
 
-  const ta = await prisma.tahunAjaran.findFirst({ where: { sekolahId, aktif: true }, select: { id: true, tahun: true } });
+  const [ta, setting] = await Promise.all([
+    prisma.tahunAjaran.findFirst({ where: { sekolahId, aktif: true }, select: { id: true, tahun: true } }),
+    prisma.settingKehadiran.findFirst({ where: { sekolahId }, select: { jamMasuk: true, jamPulang: true } }),
+  ]);
+  const startMin = parseHM(setting?.jamMasuk, 420);
+  const endMin = parseHM(setting?.jamPulang, 870);
 
   // ── Siswa ──
   const [totalSiswa, genderG, growth, anggota] = await Promise.all([
@@ -195,7 +211,7 @@ export async function getBerandaData(sekolahId: number, userName: string, t: T, 
   const markedSiswa = hadirSiswaG.reduce((s, g) => s + g._count, 0);
   const kehadiranPct = markedSiswa > 0 ? Math.round((hadirSiswa / markedSiswa) * 100) : null;
 
-  const heading = buildHeading(userName, t);
+  const heading = buildHeading(userName, t, startMin, endMin);
 
   return {
     heading,

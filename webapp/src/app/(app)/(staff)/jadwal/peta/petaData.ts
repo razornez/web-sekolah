@@ -22,7 +22,17 @@ export type Room = {
   secondaryLabel: string;
   secondaryHref: string;
 };
-export type PetaData = { schoolName: string; rooms: Room[]; defaultId: string };
+export type PetaData = { schoolName: string; rooms: Room[]; defaultId: string; startMin: number; endMin: number };
+
+// "07:00"/"07.00"/"0700" → menit. Fallback bila tidak valid.
+function parseHM(s: string | null | undefined, fallback: number): number {
+  if (!s) return fallback;
+  const m = s.match(/(\d{1,2})\D+(\d{1,2})/) ?? s.match(/^(\d{1,2})(\d{2})$/);
+  if (!m) return fallback;
+  const h = Number(m[1]), mi = Number(m[2]);
+  if (h > 23 || mi > 59) return fallback;
+  return h * 60 + mi;
+}
 
 export async function getPetaData(sekolahId: number, t: T): Promise<PetaData> {
   const now = new Date();
@@ -33,10 +43,13 @@ export async function getPetaData(sekolahId: number, t: T): Promise<PetaData> {
   const thisMonth = now.getMonth() + 1;
   const dueFilter = { OR: [{ tahun: { lt: thisYear } }, { tahun: thisYear, bulan: { lte: thisMonth } }] };
 
-  const [sekolah, ta] = await Promise.all([
+  const [sekolah, ta, setting] = await Promise.all([
     prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { nama: true } }),
     prisma.tahunAjaran.findFirst({ where: { sekolahId, aktif: true }, select: { id: true } }),
+    prisma.settingKehadiran.findFirst({ where: { sekolahId }, select: { jamMasuk: true, jamPulang: true } }),
   ]);
+  const startMin = parseHM(setting?.jamMasuk, 420);
+  const endMin = parseHM(setting?.jamPulang, 870);
 
   const rombels = await prisma.rombel.findMany({
     where: { sekolahId, ...(ta ? { tahunAjaranId: ta.id } : {}) },
@@ -223,5 +236,7 @@ export async function getPetaData(sekolahId: number, t: T): Promise<PetaData> {
     schoolName: sekolah?.nama ?? "Sekolah Anda",
     rooms,
     defaultId: rooms[0]?.id ?? "kepala",
+    startMin,
+    endMin,
   };
 }

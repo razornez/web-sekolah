@@ -6,33 +6,42 @@ import { useTranslations } from "next-intl";
 import "./peta.css";
 import type { PetaData } from "./petaData";
 
-// kind: 'upacara' | 'jam' (dengan nomor) | 'istirahat'
-const PERIODS = [
-  { time: "07.00", kind: "upacara" as const, num: 0, start: 420 },
-  { time: "07.30", kind: "jam" as const, num: 1, start: 450 },
-  { time: "08.15", kind: "jam" as const, num: 2, start: 495 },
-  { time: "09.00", kind: "jam" as const, num: 3, start: 540 },
-  { time: "09.45", kind: "istirahat" as const, num: 0, start: 585 },
-  { time: "10.00", kind: "jam" as const, num: 4, start: 600 },
-  { time: "10.45", kind: "jam" as const, num: 5, start: 645 },
-  { time: "11.30", kind: "jam" as const, num: 6, start: 690 },
-  { time: "13.00", kind: "jam" as const, num: 7, start: 780 },
-  { time: "13.45", kind: "jam" as const, num: 8, start: 825 },
+// Layout dasar jam pelajaran (offset menit dari 07:00 default 07:00–14:30, span 450).
+// Akan diskala ke jam sekolah nyata (SettingKehadiran) agar tidak hardcoded.
+const BASE = [
+  { kind: "upacara" as const, num: 0, off: 0 },
+  { kind: "jam" as const, num: 1, off: 30 },
+  { kind: "jam" as const, num: 2, off: 75 },
+  { kind: "jam" as const, num: 3, off: 120 },
+  { kind: "istirahat" as const, num: 0, off: 165 },
+  { kind: "jam" as const, num: 4, off: 180 },
+  { kind: "jam" as const, num: 5, off: 225 },
+  { kind: "jam" as const, num: 6, off: 270 },
+  { kind: "jam" as const, num: 7, off: 360 },
+  { kind: "jam" as const, num: 8, off: 405 },
 ];
+const BASE_SPAN = 450; // 07:00 → 14:30
+const fmtHM = (m: number) => `${String(Math.floor(m / 60)).padStart(2, "0")}.${String(m % 60).padStart(2, "0")}`;
+function buildPeriods(startMin: number, endMin: number) {
+  const k = Math.max(1, endMin - startMin) / BASE_SPAN;
+  return BASE.map((p) => ({ ...p, start: Math.round(startMin + p.off * k) }));
+}
 
 export function PetaSekolah({ data }: { data: PetaData }) {
   const t = useTranslations("jadwal");
   const [selected, setSelected] = useState(data.defaultId);
   const [nowIdx, setNowIdx] = useState(-1);
+  const periods = buildPeriods(data.startMin, data.endMin);
 
   useEffect(() => {
+    const ps = buildPeriods(data.startMin, data.endMin);
     const p = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(new Date());
     const mins = Number(p.find((x) => x.type === "hour")?.value ?? "0") * 60 + Number(p.find((x) => x.type === "minute")?.value ?? "0");
     let idx = -1;
-    for (let i = 0; i < PERIODS.length; i++) if (mins >= PERIODS[i].start) idx = i;
+    for (let i = 0; i < ps.length; i++) if (mins >= ps[i].start) idx = i;
     const raf = requestAnimationFrame(() => setNowIdx(idx));
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [data.startMin, data.endMin]);
 
   const room = data.rooms.find((r) => r.id === selected) ?? data.rooms[0];
   const facade = data.schoolName.toUpperCase().slice(0, 22);
@@ -186,11 +195,11 @@ export function PetaSekolah({ data }: { data: PetaData }) {
           <div className="v">{t("peta.dockPelajaran")}</div>
         </div>
         <div className="ap-dock-line">
-          {PERIODS.map((p, i) => {
+          {periods.map((p, i) => {
             const label = p.kind === "upacara" ? t("peta.pdUpacara") : p.kind === "istirahat" ? t("peta.pdIstirahat") : t("peta.pdJam", { n: p.num });
             return (
               <div key={i} className={`ap-pd${i === nowIdx ? " now" : i < nowIdx ? " past" : ""}`}>
-                <span className="ph">{i === nowIdx ? t("peta.dockNow") : p.time}</span>{label}
+                <span className="ph">{i === nowIdx ? t("peta.dockNow") : fmtHM(p.start)}</span>{label}
               </div>
             );
           })}
