@@ -1,86 +1,65 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
-import { AccountPanel } from "@/components/AccountPanel";
+import { prisma } from "@/lib/prisma";
 import { FotoUpload } from "@/components/FotoUpload";
-import SiswaForm from "../../_components/SiswaForm";
+import { AccountPanel } from "@/components/AccountPanel";
+import { SiswaEditForm, type EditInitial } from "../../_revamp/SiswaEditForm";
+
+function rel(d: Date): string {
+  const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if (days <= 0) return "hari ini";
+  if (days === 1) return "kemarin";
+  if (days < 7) return `${days} hari lalu`;
+  if (days < 30) return `${Math.floor(days / 7)} minggu lalu`;
+  return d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+}
 
 export default async function EditSiswaPage({ params }: { params: Promise<{ id: string }> }) {
   const sekolahId = await requireModule("siswa");
-  const t = await getTranslations("siswa");
-  const provinsiOpts = await prisma.refProvinsi.findMany({ orderBy: { nama: "asc" }, select: { kode: true, nama: true } });
   const { id } = await params;
-  const siswa = await prisma.siswa.findFirst({
-    where: { id: Number(id), sekolahId, deletedAt: null },
-    include: { user: { select: { id: true, username: true, isActive: true } } },
+  const sid = Number(id);
+  const s = await prisma.siswa.findFirst({
+    where: { id: sid, sekolahId, deletedAt: null },
+    include: {
+      anggotaRombel: { take: 1, orderBy: { id: "desc" }, select: { rombel: { select: { nama: true } } } },
+      orangTuaWali: true,
+      user: { select: { id: true, username: true, isActive: true } },
+    },
   });
-  if (!siswa) notFound();
+  if (!s) notFound();
+  const audit = await prisma.auditLog.findMany({
+    where: { sekolahId, entitas: "siswa", entitasId: String(sid) },
+    orderBy: { createdAt: "desc" }, take: 6,
+    select: { aksi: true, detail: true, userName: true, createdAt: true },
+  });
+
+  const v = (x: string | null | undefined) => x ?? "";
+  const ayah = s.orangTuaWali.find((o) => o.tipe === "ayah");
+  const ibu = s.orangTuaWali.find((o) => o.tipe === "ibu");
+  const initial: EditInitial = {
+    namaLengkap: v(s.namaLengkap), jenisKelamin: v(s.jenisKelamin), tempatLahir: v(s.tempatLahir),
+    tanggalLahir: s.tanggalLahir ? s.tanggalLahir.toISOString().slice(0, 10) : "",
+    nik: v(s.nik), agama: v(s.agama), anakKe: s.anakKe != null ? String(s.anakKe) : "",
+    hobi: v(s.hobi), citaCita: v(s.citaCita),
+    nisn: v(s.nisn), nis: v(s.nis), noInduk: v(s.noInduk),
+    tahunMasuk: s.tahunMasuk != null ? String(s.tahunMasuk) : "", status: v(s.status), asalSekolah: v(s.asalSekolah),
+    alamat: v(s.alamat), desaKel: v(s.desaKel), kecamatan: v(s.kecamatan), kabupaten: v(s.kabupaten),
+    kodePos: v(s.kodePos), noHp: v(s.noHp), tinggalDengan: v(s.tinggalDengan), transportasi: v(s.transportasi),
+    tinggiBadan: v(s.tinggiBadan), beratBadan: v(s.beratBadan), golonganDarah: v(s.golonganDarah), kebutuhanKhusus: v(s.kebutuhanKhusus),
+    ayah_nama: v(ayah?.nama), ayah_pekerjaan: v(ayah?.pekerjaan), ayah_pendidikan: v(ayah?.pendidikan), ayah_hp: v(ayah?.noHp),
+    ibu_nama: v(ibu?.nama), ibu_pekerjaan: v(ibu?.pekerjaan), ibu_pendidikan: v(ibu?.pendidikan), ibu_hp: v(ibu?.noHp),
+  };
+  const kelas = s.anggotaRombel[0]?.rombel?.nama ?? "—";
+  const updatedInfo = audit[0] ? `Diperbarui ${rel(audit[0].createdAt)} oleh ${audit[0].userName}` : "Belum pernah diubah";
+  const auditFmt = audit.map((a) => ({ aksi: a.aksi, detail: a.detail ?? "", userName: a.userName, when: rel(a.createdAt) }));
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <Link href={`/siswa/${siswa.id}`} className="text-sm text-gray-500 hover:text-gray-900">{t("editBackProfil")}</Link>
-          <h1 className="text-2xl font-semibold text-gray-900">{siswa.namaLengkap}</h1>
-        </div>
-        <div className="flex gap-2">
-          <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100">
-            {t("editCetakRapor")}
-          </a>
-          <a href={`/siswa/${siswa.id}/export`} className="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-100" title={t("exportDataHint")}>
-            {t("exportData")}
-          </a>
-          <Link href={`/siswa/${siswa.id}/delete`} className="rounded-md border border-red-300 px-3 py-2 text-sm text-red-700 hover:bg-red-50">
-            {t("editHapus")}
-          </Link>
-        </div>
+    <div>
+      <SiswaEditForm id={sid} initial={initial} kelas={kelas} audit={auditFmt} updatedInfo={updatedInfo} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 18, maxWidth: 720 }}>
+        <FotoUpload kind="siswa" ownerId={s.id} current={s.foto} />
+        <AccountPanel kind="siswa" ownerId={s.id} account={s.user ? { userId: s.user.id, username: s.user.username, isActive: s.user.isActive } : null} />
       </div>
-
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <SiswaForm
-          provinsiOptions={provinsiOpts}
-          initial={{
-            id: siswa.id,
-            namaLengkap: siswa.namaLengkap,
-            nisn: siswa.nisn,
-            nis: siswa.nis,
-            nik: siswa.nik,
-            noInduk: siswa.noInduk,
-            jenisKelamin: siswa.jenisKelamin,
-            tempatLahir: siswa.tempatLahir,
-            tanggalLahir: siswa.tanggalLahir ? siswa.tanggalLahir.toISOString().slice(0, 10) : null,
-            agama: siswa.agama,
-            hobi: siswa.hobi,
-            citaCita: siswa.citaCita,
-            anakKe: siswa.anakKe,
-            tahunMasuk: siswa.tahunMasuk,
-            status: siswa.status,
-            asalSekolah: siswa.asalSekolah,
-            alamat: siswa.alamat,
-            desaKel: siswa.desaKel,
-            kecamatan: siswa.kecamatan,
-            kabupaten: siswa.kabupaten,
-            kodePos: siswa.kodePos,
-            noHp: siswa.noHp,
-            tinggalDengan: siswa.tinggalDengan,
-            transportasi: siswa.transportasi,
-            tinggiBadan: siswa.tinggiBadan,
-            beratBadan: siswa.beratBadan,
-            golonganDarah: siswa.golonganDarah,
-            kebutuhanKhusus: siswa.kebutuhanKhusus,
-          }}
-        />
-      </div>
-
-      <FotoUpload kind="siswa" ownerId={siswa.id} current={siswa.foto} />
-
-      <AccountPanel
-        kind="siswa"
-        ownerId={siswa.id}
-        account={siswa.user ? { userId: siswa.user.id, username: siswa.user.username, isActive: siswa.user.isActive } : null}
-      />
     </div>
   );
 }

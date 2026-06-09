@@ -74,6 +74,15 @@ export async function saveSiswa(
       const existing = await prisma.siswa.findFirst({ where: { id, sekolahId, deletedAt: null }, select: { id: true } });
       if (!existing) return { ok: false, message: "Data siswa tidak ditemukan." };
       await prisma.siswa.update({ where: { id }, data });
+      // Upsert orang tua (ayah/ibu) — hanya jika nama diisi
+      for (const tipe of ["ayah", "ibu"] as const) {
+        const nama = str(formData.get(`${tipe}_nama`));
+        if (!nama) continue;
+        const pdata = { nama, pekerjaan: str(formData.get(`${tipe}_pekerjaan`)), pendidikan: str(formData.get(`${tipe}_pendidikan`)), noHp: str(formData.get(`${tipe}_hp`)) };
+        const ortu = await prisma.orangTuaWali.findFirst({ where: { siswaId: id, tipe: TipeWali[tipe] }, select: { id: true } });
+        if (ortu) await prisma.orangTuaWali.update({ where: { id: ortu.id }, data: pdata });
+        else await prisma.orangTuaWali.create({ data: { siswaId: id, tipe: TipeWali[tipe], ...pdata } });
+      }
       await auditLog({ aksi: "update", entitas: "siswa", entitasId: id, detail: `Update siswa: ${namaLengkap}` });
     } else {
       const s = await prisma.siswa.create({ data: { ...data, sekolahId } });
