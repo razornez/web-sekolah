@@ -33,7 +33,7 @@ function shuffle3(correct: number): { v: number; correct: boolean }[] {
   return [...opts].sort((a, b) => a - b).map((v) => ({ v, correct: v === correct }));
 }
 
-/** Bagian "Pulse" yang berat — di-cache per sekolah (revalidate 5 menit). */
+/** Bagian "Pulse" yang berat — di-cache per sekolah (revalidate 60 dtk, locale-independent). */
 export const getSiswaPulse = (sekolahId: number) =>
   unstable_cache(
     async (): Promise<SiswaPulse> => {
@@ -112,7 +112,7 @@ export const getSiswaPulse = (sekolahId: number) =>
       };
     },
     [`siswa-pulse-${sekolahId}`],
-    { revalidate: 300, tags: [`siswa-${sekolahId}`] },
+    { revalidate: 60, tags: [`siswa-${sekolahId}`] },
   )();
 
 export type SiswaCard = {
