@@ -191,11 +191,11 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
               </div>
               <div className="pg-field" style={{ position: "relative" }}>
                 <label>Atau sapa langsung beberapa orang — ketik nama / NISN</label>
-                <input type="text" value={mention} onChange={(e) => onMention(e.target.value)} placeholder="@Bayu Pratama, @Ananda Putri…" autoComplete="off" />
+                <input type="text" value={mention} onChange={(e) => onMention(e.target.value)} onBlur={() => setTimeout(() => setSug([]), 150)} placeholder="@Bayu Pratama, @Ananda Putri…" autoComplete="off" />
                 {sug.length > 0 && (
-                  <div style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 4, background: "var(--ak-surface)", border: "1px solid var(--ak-rule)", borderRadius: 12, boxShadow: "var(--ak-shadow)", zIndex: 5, overflow: "hidden" }}>
+                  <div style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 4, background: "var(--ak-surface)", border: "1px solid var(--ak-rule)", borderRadius: 12, boxShadow: "var(--ak-shadow)", zIndex: 4, overflow: "hidden", maxHeight: 220, overflowY: "auto" }}>
                     {sug.map((s) => (
-                      <button type="button" key={s.id} onClick={() => pickSug(s.namaLengkap)} style={{ display: "flex", width: "100%", gap: 8, alignItems: "center", padding: "9px 12px", border: 0, background: "transparent", cursor: "pointer", textAlign: "left", fontSize: 13 }}>
+                      <button type="button" key={s.id} onMouseDown={(e) => e.preventDefault()} onClick={() => pickSug(s.namaLengkap)} style={{ display: "flex", width: "100%", gap: 8, alignItems: "center", padding: "9px 12px", border: 0, background: "transparent", cursor: "pointer", textAlign: "left", fontSize: 13 }}>
                         <span style={{ fontWeight: 700, color: "var(--ak-ink)" }}>{s.namaLengkap}</span>
                         {s.nisn && <span style={{ fontSize: 11, color: "var(--ak-muted)" }}>NISN {s.nisn}</span>}
                       </button>

@@ -293,7 +293,7 @@
 #ak-peng .pg-field label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ak-muted); margin-bottom: 6px; }
 #ak-peng .pg-field input[type="text"], #ak-peng .pg-field input[type="datetime-local"], #ak-peng .pg-field select { width: 100%; border: 1px solid var(--ak-rule-2); border-radius: 10px; padding: 10px 12px; font-family: var(--ak-sans); font-size: 13.5px; color: var(--ak-ink); outline: none; background: var(--ak-surface); }
 #ak-peng .pg-field input:focus, #ak-peng .pg-field select:focus { border-color: var(--ak-primary); }
-#ak-peng .pg-wz-foot { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-top: 1px solid var(--ak-rule-2); }
+#ak-peng .pg-wz-foot { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-top: 1px solid var(--ak-rule-2); position: relative; z-index: 5; background: var(--ak-surface); }
 #ak-peng .pg-wz-dots { display: flex; gap: 5px; }
 #ak-peng .pg-wz-dots span { width: 22px; height: 5px; border-radius: 3px; background: var(--ak-bg-2); }
 #ak-peng .pg-wz-dots span.done { background: var(--ak-primary); }
