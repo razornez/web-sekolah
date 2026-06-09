@@ -28,11 +28,12 @@ export type SiswaDetail = {
   prestasiCount: number; beasiswa: string | null;
   metrics: { rata: number | null; hadirPct: number | null; rank: number | null; rankTotal: number | null; sppStatus: string; bmi: Bmi | null; pelanggaran: number };
   distanceKm: number | null;
+  geo: { sLat: number; sLng: number; schLat: number; schLng: number } | null;
   kasus: { count: number; poin: number; list: { nama: string; poin: number; tanggal: string }[] };
   zodiak: Zodiak | null; numero: { angka: number; sifat: string; tags: string[] } | null;
   line: { label: string; avg: number }[];
   radar: { axis: string; value: number }[];
-  journey: { rombel: string; tahun: string; absen: number | null; current: boolean }[];
+  journey: { rombel: string; tahun: string; absen: number | null; current: boolean; rata: number | null }[];
   rapor: DetailRapor[];
   heatmap: { date: string; status: string }[];
   hadirStats: { hadir: number; izin: number; sakit: number; alpa: number };
@@ -85,8 +86,9 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
     prisma.kasusSiswa.findMany({ where: { siswaId: id }, orderBy: { tanggal: "desc" }, select: { namaKasus: true, poin: true, tanggal: true } }),
   ]);
   const kasusPoin = kasusRows.reduce((a, b) => a + b.poin, 0);
-  const distanceKm = s.lat != null && s.lng != null && sekolahCoord?.lat != null && sekolahCoord?.lng != null
-    ? Math.round(haversineKm(s.lat, s.lng, sekolahCoord.lat, sekolahCoord.lng) * 10) / 10 : null;
+  const hasGeo = s.lat != null && s.lng != null && sekolahCoord?.lat != null && sekolahCoord?.lng != null;
+  const distanceKm = hasGeo ? Math.round(haversineKm(s.lat!, s.lng!, sekolahCoord!.lat!, sekolahCoord!.lng!) * 10) / 10 : null;
+  const geo = hasGeo ? { sLat: s.lat!, sLng: s.lng!, schLat: sekolahCoord!.lat!, schLng: sekolahCoord!.lng! } : null;
 
   const hg = (st: string) => hadirGroups.find((g) => g.status === st)?._count._all ?? 0;
   const hadirStats = { hadir: hg("hadir") + hg("terlambat"), izin: hg("izin"), sakit: hg("sakit"), alpa: hg("alpa") };
@@ -128,8 +130,14 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
   const sppNunggak = sppRows.filter((t) => t.status === "belum").length;
   const sppStatus = sppRows.length === 0 ? "—" : sppNunggak === 0 ? "Lunas" : `${sppNunggak} bln`;
 
-  // ── journey ──
-  const journey = s.anggotaRombel.map((ar, idx) => ({ rombel: ar.rombel.nama, tahun: ar.rombel.tahunAjaran?.tahun ?? "", absen: ar.nomorAbsen, current: idx === 0 })).reverse();
+  // ── journey (+ rata² nyata per tahun ajaran dari rapor) ──
+  const rataByTahun = new Map<string, { sum: number; n: number }>();
+  for (const r of rapor) if (r.avg > 0) { const a = rataByTahun.get(r.tahun) ?? { sum: 0, n: 0 }; a.sum += r.avg; a.n++; rataByTahun.set(r.tahun, a); }
+  const journey = s.anggotaRombel.map((ar, idx) => {
+    const tahun = ar.rombel.tahunAjaran?.tahun ?? "";
+    const ra = rataByTahun.get(tahun);
+    return { rombel: ar.rombel.nama, tahun, absen: ar.nomorAbsen, current: idx === 0, rata: ra && ra.n ? Math.round(ra.sum / ra.n) : null };
+  }).reverse();
 
   // ── parents ──
   const parents = s.orangTuaWali.map((o) => ({ tipe: o.tipe, nama: o.nama, pekerjaan: o.pekerjaan, pendidikan: o.pendidikan, penghasilan: o.penghasilan, noHp: o.noHp ?? null }));
@@ -145,7 +153,7 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
     tinggi, berat,
     prestasiCount: s.prestasi.length, beasiswa: s.beasiswa[0]?.nama ?? null,
     metrics: { rata, hadirPct, rank, rankTotal, sppStatus, bmi: bmi(tinggi, berat), pelanggaran: kasusPoin },
-    distanceKm, kasus: { count: kasusRows.length, poin: kasusPoin, list: kasusRows.slice(0, 5).map((k) => ({ nama: k.namaKasus, poin: k.poin, tanggal: k.tanggal.toISOString() })) },
+    distanceKm, geo, kasus: { count: kasusRows.length, poin: kasusPoin, list: kasusRows.slice(0, 5).map((k) => ({ nama: k.namaKasus, poin: k.poin, tanggal: k.tanggal.toISOString() })) },
     zodiak: tl ? zodiakFromDate(tl) : null, numero: tl ? numerologi(tl) : null,
     line, radar, journey, rapor,
     heatmap, hadirStats,

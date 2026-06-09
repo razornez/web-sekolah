@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getSiswaDetail } from "../_revamp/detailData";
 import { RaporTabs } from "../_revamp/RaporTabs";
 import { KartuButton } from "../_revamp/KartuButton";
+import { MapSection } from "../_revamp/MapSection";
 import "../_revamp/detail.css";
 
 const BULAN3 = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
@@ -86,7 +87,6 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
   const sppLunas = s.spp.filter((x) => x.status === "lunas").length;
   const firstParentHp = s.parents.find((p) => p.noHp)?.noHp ?? null;
   const poin = Math.max(0, 100 - m.pelanggaran);
-  const estTempuh = s.distanceKm != null ? Math.max(3, Math.round((s.distanceKm / 22) * 60)) : null; // ~22 km/jam motor kota
   const ortuTone = (tipe: string) => (/ayah|ayh/i.test(tipe) ? "ayah" : /ibu/i.test(tipe) ? "ibu" : "wali");
 
   return (
@@ -182,7 +182,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
           <div className="section-h"><h2><span className="ico lav">🧭</span>{t("detail.journey")}</h2><span className="meta">{t("detail.journeySub", { n: s.journey.length })}</span></div>
           <div className="journey">
             {s.journey.map((j, i) => (
-              <div key={i} className={`jnode${j.current ? " cur" : ""}`}><span className="jdot" /><div className="jt">{j.tahun}</div><div className="jk">{j.rombel}</div><div className="js">{j.absen != null ? t("detail.journeyAbsen", { n: j.absen }) : "—"}</div></div>
+              <div key={i} className={`jnode${j.current ? " cur" : ""}`}><span className="jdot" /><div className="jt">{j.tahun}</div><div className="jk">{j.rombel}</div><div className="js">{j.absen != null ? t("detail.journeyAbsen", { n: j.absen }) : "—"}{j.rata != null ? ` · ${t("detail.journeyRata", { r: j.rata })}` : ""}</div></div>
             ))}
           </div>
         </div>
@@ -210,24 +210,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       {/* MAP */}
       <div className="section">
         <div className="section-h"><h2><span className="ico sky">📍</span>{t("detail.mapTitle")}</h2></div>
-        <div className="map-grid">
-          <div className="map-canvas">
-            <svg className="map-route" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M20 70 L40 70 L40 40 L80 40 L80 30" fill="none" stroke="var(--ak-primary)" strokeWidth="1.5" strokeDasharray="4 2" /></svg>
-            <span className="map-pin" style={{ left: "20%", top: "70%" }}>🏠<span className="ring" /></span>
-            <span className="map-pin" style={{ left: "80%", top: "30%", fontSize: 24 }}>🏫<span className="ring" /></span>
-            {s.distanceKm != null && <span className="map-dist">{s.distanceKm} km</span>}
-          </div>
-          <div className="map-info">
-            <div className="mi-addr">📍 {s.alamat ?? t("detail.addrNone")}</div>
-            <div className="map-stats">
-              <div className="mst"><div className="k">{t("detail.jarak")}</div><div className="v">{s.distanceKm != null ? `${s.distanceKm} km` : "—"}</div></div>
-              <div className="mst"><div className="k">{t("detail.estTempuh")}</div><div className="v">{estTempuh != null ? t("detail.mnt", { n: estTempuh }) : "—"}</div></div>
-              <div className="mst"><div className="k">{t("detail.tinggalDengan")}</div><div className="v" style={{ fontSize: 13 }}>{s.tinggalDengan ?? "—"}</div></div>
-              <div className="mst"><div className="k">{t("detail.transportasi")}</div><div className="v" style={{ fontSize: 13 }}>{s.transportasi ?? "—"}</div></div>
-            </div>
-            <div className="map-transport">{s.transportasi ? t("detail.transUse", { mode: s.transportasi.toLowerCase() }) : t("detail.transNone")}{s.distanceKm != null ? t("detail.transDist", { km: s.distanceKm }) : ""}.</div>
-          </div>
-        </div>
+        <MapSection geo={s.geo} distanceKm={s.distanceKm} alamat={s.alamat} transportasi={s.transportasi} tinggalDengan={s.tinggalDengan} />
       </div>
 
       {/* BK + GAUGE */}
@@ -253,12 +236,25 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
             </div>
           )}
           <div className="gauge-card">
-            <svg viewBox="0 0 200 110" width="200" height="110">
+            <svg viewBox="0 0 200 116" width="200" height="116">
+              <defs>
+                <linearGradient id="poinG" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="var(--ak-peach-deep)" />
+                  <stop offset="38%" stopColor="var(--ak-sun-deep)" />
+                  <stop offset="70%" stopColor="var(--ak-mint-deep)" />
+                  <stop offset="100%" stopColor="var(--ak-mint-deep)" />
+                </linearGradient>
+              </defs>
               <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="var(--ak-bg-2)" strokeWidth="14" strokeLinecap="round" />
-              <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="var(--ak-mint-deep)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${(poin / 100) * 267} 400`} />
+              <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="url(#poinG)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${(poin / 100) * 267} 400`} />
+              <g transform={`rotate(${-90 + (poin / 100) * 180} 100 100)`}>
+                <line x1="100" y1="100" x2="100" y2="34" stroke="var(--ak-ink)" strokeWidth="3" strokeLinecap="round" />
+                <circle cx="100" cy="100" r="6.5" fill="var(--ak-ink)" />
+              </g>
             </svg>
-            <div className="gnum">{poin}</div><div className="gk">{t("detail.poinDisiplin")}</div>
-            <div className="gpill">{poin >= 80 ? t("detail.disBaik") : poin >= 50 ? t("detail.disCukup") : t("detail.disPerlu")}</div>
+            <div className="gnum">{poin}<small>{t("detail.poinSisa")}</small></div><div className="gk">{t("detail.poinDisiplin")}</div>
+            <div className="gpill">{poin >= 80 ? t("detail.gSangat") : poin >= 60 ? t("detail.gBaik") : poin >= 40 ? t("detail.gCukup") : poin >= 20 ? t("detail.gPeringatan") : t("detail.gKritis")}</div>
+            <div className="gdesc">{t("detail.poinDesc", { max: 100 })}</div>
           </div>
         </div>
       </div>

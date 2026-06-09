@@ -198,6 +198,23 @@
 #ak-sd .km-themes button { width: 38px; height: 38px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; }
 #ak-sd .km-close { position: absolute; top: 14px; right: 16px; background: var(--ak-surface-2); border: 0; width: 30px; height: 30px; border-radius: 9px; cursor: pointer; }
 
+/* ===== LEAFLET MAP ===== */
+#ak-sd .ak-map-canvas { height: 320px; padding: 0; position: relative; z-index: 0; isolation: isolate; }
+#ak-sd .ak-map-canvas .leaflet-container { height: 100%; width: 100%; border-radius: 16px; background: #EAF3EC; font-family: var(--ak-sans); }
+#ak-sd .ak-map-skel { height: 100%; width: 100%; border-radius: 16px; background: linear-gradient(110deg, var(--ak-surface-2) 30%, var(--ak-bg-2) 50%, var(--ak-surface-2) 70%); background-size: 200% 100%; animation: ak-shimmer 1.4s linear infinite; }
+@keyframes ak-shimmer { to { background-position: -200% 0; } }
+.ak-pin { position: relative; display: block; width: 34px; height: 34px; }
+.ak-pin .ak-pin-ring { position: absolute; inset: 2px; border-radius: 50%; opacity: 0.4; animation: ak-pinpulse 2.2s ease-out infinite; }
+.ak-pin .ak-pin-dot { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 3px solid var(--ak-primary); font-size: 15px; box-shadow: 0 3px 8px -2px rgba(0,0,0,0.3); }
+.ak-pin-home .ak-pin-ring { background: var(--ak-mint-deep); } .ak-pin-home .ak-pin-dot { border-color: var(--ak-mint-deep); }
+.ak-pin-school .ak-pin-ring { background: var(--ak-primary); } .ak-pin-school .ak-pin-dot { background: var(--ak-primary); color: #fff; border-color: var(--ak-primary); }
+@keyframes ak-pinpulse { 0% { transform: scale(0.7); opacity: 0.5; } 100% { transform: scale(2.1); opacity: 0; } }
+.leaflet-overlay-pane path.ak-route { animation: ak-dashflow 1.2s linear infinite; }
+@keyframes ak-dashflow { to { stroke-dashoffset: -17; } }
+@media print { #ak-sd .ak-map-canvas { display: none !important; } }
+#ak-sd .gauge-card .gnum small { display: block; font-size: 10px; font-weight: 700; color: var(--ak-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0; }
+#ak-sd .gauge-card .gdesc { font-size: 11px; color: var(--ak-muted); text-align: center; line-height: 1.5; margin-top: 8px; max-width: 210px; }
+
 @media (max-width: 1180px) {
   #ak-sd .strip { grid-template-columns: repeat(3, 1fr); }
   #ak-sd .persona-grid, #ak-sd .akademik-grid, #ak-sd .map-grid, #ak-sd .bk-grid, #ak-sd .ortu-grid { grid-template-columns: 1fr; }
