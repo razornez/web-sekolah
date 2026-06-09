@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { PengumumanFeed } from "@/components/PengumumanFeed";
 import { BarList, Donut } from "@/components/charts";
+import { BerandaAkadewa } from "./_beranda/BerandaAkadewa";
+
+// Role yang mendapat dashboard "Beranda Akadewa" (revamp kepala sekolah/admin)
+const BERANDA_ROLES = ["admin", "operator", "kepsek", "kurikulum"];
 
 const fmt = (d: Date | null) =>
   d ? d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "-";
@@ -13,14 +17,14 @@ const gCount = (rows: { _count: number }[], field: string, value: string | null)
 
 function StatCard({ label, value, href, colorClass }: { label: string; value: number | string; href?: string; colorClass?: string }) {
   const inner = (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 hover:opacity-80">
-      <div className={`text-2xl font-semibold ${colorClass ?? "text-gray-900"}`}>
+    <div className="ak-statcard">
+      <div className={`v ${colorClass ?? "text-[#1A1830]"}`}>
         {typeof value === "number" ? value.toLocaleString("id-ID") : value}
       </div>
-      <div className="mt-1 text-xs text-gray-500">{label}</div>
+      <div className="l">{label}</div>
     </div>
   );
-  return href ? <Link href={href}>{inner}</Link> : <div>{inner}</div>;
+  return href ? <Link href={href} className="block">{inner}</Link> : inner;
 }
 
 // ── Admin / Kepsek / Operator ─────────────────────────────────────────────────
@@ -349,14 +353,17 @@ export default async function DashboardPage() {
   const tRoles = await getTranslations("roles");
   const roleLabel = tRoles.has(role) ? tRoles(role) : (ROLE_LABELS[role] ?? role);
 
+  // Beranda Akadewa — full-bleed, hero menggantikan judul generik.
+  if (BERANDA_ROLES.includes(role)) {
+    return <BerandaAkadewa sekolahId={sekolahId} userName={user.name ?? ""} />;
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">{t("title")}</h1>
-        <p className="text-sm text-gray-500">
-          {t("welcome")} <span className="font-medium">{user.name}</span>
-          {" · "}<span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">{roleLabel}</span>
-        </p>
+      <div className="ak-pagehead">
+        <span className="eb">{roleLabel}</span>
+        <h1>{t("welcome")} {user.name} 👋</h1>
+        <p>{t("title")}</p>
       </div>
 
       {["admin","operator","kepsek","superadmin","kurikulum"].includes(role) && <DashboardAdmin sekolahId={sekolahId} />}

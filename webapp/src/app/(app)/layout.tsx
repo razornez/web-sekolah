@@ -6,6 +6,7 @@ import { canAccess, type ModuleKey } from "@/lib/permissions";
 import { R, PORTAL } from "@/lib/routes";
 import { AppShell } from "./AppShell";
 import { DemoBanner } from "@/components/DemoBanner";
+import { prisma } from "@/lib/prisma";
 
 // navKey = key di messages "nav.*", icon opsional prefix
 const STAFF_NAV: { href: string; navKey: string; key?: ModuleKey; icon?: string }[] = [
@@ -19,7 +20,6 @@ const STAFF_NAV: { href: string; navKey: string; key?: ModuleKey; icon?: string 
   { href: R.ROMBEL,          navKey: "rombel",           key: "rombel" },
   { href: R.MAPEL,           navKey: "mapel",            key: "mapel" },
   { href: R.NILAI,           navKey: "nilai",            key: "nilai" },
-  { href: R.NILAI_ENTRI,     navKey: "nilaiEntri",       key: "nilai" },
   { href: R.P5,              navKey: "p5",               key: "p5" },
   { href: R.JURNAL,          navKey: "jurnal",           key: "jurnal" },
   { href: R.JADWAL,          navKey: "jadwal",           key: "jadwal" },
@@ -55,16 +55,45 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Superadmin tidak punya tenant — langsung ke panel admin
   if (user.role === "superadmin") redirect("/admin");
 
+  // Google user yang belum melengkapi data sekolah
+  if (user.needsOnboarding) redirect("/daftar-sekolah?step=complete");
+
+  // Pastikan sekolah masih ada (demo expired + dihapus cron = sekolahId sudah tidak valid)
+  if (user.sekolahId) {
+    const sekolah = await prisma.sekolah.findUnique({
+      where: { id: user.sekolahId },
+      select: { id: true },
+    });
+    if (!sekolah) {
+      await signOut({ redirectTo: "/login?error=sekolah-dihapus" });
+    }
+  }
+
   const t = await getTranslations("nav");
 
-  const source = isStaff(user.role)
+  const staff = isStaff(user.role);
+  const source = staff
     ? STAFF_NAV.filter((n) => !n.key || canAccess(user.role, n.key))
     : PORTAL_NAV;
 
   const nav = source.map((n) => ({
     href: n.href,
-    label: ("icon" in n && n.icon ? n.icon : "") + t(n.navKey as never),
+    navKey: n.navKey,
+    label: t(n.navKey as never),
   }));
+
+  // Badge sidebar — angka nyata (cheap count). Hanya untuk staf bertenant.
+  const badges: { siswa?: number; spp?: number } = {};
+  if (staff && user.sekolahId) {
+    const now = new Date();
+    const dueFilter = { OR: [{ tahun: { lt: now.getFullYear() } }, { tahun: now.getFullYear(), bulan: { lte: now.getMonth() + 1 } }] };
+    const [siswaCount, sppDue] = await Promise.all([
+      canAccess(user.role, "siswa") ? prisma.siswa.count({ where: { sekolahId: user.sekolahId, status: "aktif" } }) : Promise.resolve(0),
+      canAccess(user.role, "spp") ? prisma.tagihanSpp.count({ where: { sekolahId: user.sekolahId, status: { not: "lunas" }, ...dueFilter } }) : Promise.resolve(0),
+    ]);
+    if (siswaCount) badges.siswa = siswaCount;
+    if (sppDue) badges.spp = sppDue;
+  }
 
   async function handleSignOut() {
     "use server";
@@ -76,6 +105,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       nav={nav}
       user={{ name: user.name, role: user.role }}
       signOutAction={handleSignOut}
+      badges={badges}
+      isPortal={!staff}
     >
       <DemoBanner sekolahId={user.sekolahId} />
       {children}
