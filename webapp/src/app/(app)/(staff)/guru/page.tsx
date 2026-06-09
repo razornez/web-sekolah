@@ -1,146 +1,73 @@
 import Link from "next/link";
-import type { Prisma } from "@prisma/client";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
-import { requireModule, canManageGuru } from "@/lib/permissions";
-import { getCurrentUser } from "@/lib/session";
-import { PageGuide } from "@/components/PageGuide";
-import { aktifkanKembaliGuru } from "./actions";
+import { requireModule } from "@/lib/permissions";
+import { getGuruPulse, getGuruGallery } from "./_revamp/listData";
+import { GuruSpotlight } from "./_revamp/GuruSpotlight";
+import { GuruFlip } from "./_revamp/GuruFlip";
+import { GuruBoard } from "./_revamp/GuruBoard";
+import "./_revamp/list.css";
 
-const PER_PAGE = 20;
-const STATUS_BADGE: Record<string, string> = { PNS: "bg-blue-100 text-blue-700", GTT: "bg-amber-100 text-amber-700", GTY: "bg-purple-100 text-purple-700" };
+const COMP_TONE: Record<string, string> = { PNS: "sky", GTT: "sun", GTY: "lav", PPPK: "mint", HONORER: "peach" };
 
-export default async function GuruPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; page?: string; tampil?: string }>;
-}) {
+export default async function GuruListPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sekolahId = await requireModule("guru");
-  const me = await getCurrentUser();
-  const canManage = canManageGuru(me.role);
   const t = await getTranslations("guru");
   const sp = await searchParams;
-  const q = (sp.q ?? "").trim();
-  const tampil = sp.tampil ?? "aktif"; // aktif | nonaktif
-  const page = Math.max(1, Number(sp.page) || 1);
-
-  const where: Prisma.GuruWhereInput = {
-    sekolahId,
-    deletedAt: tampil === "nonaktif" ? { not: null } : null,
-    ...(q ? { OR: [{ namaGuru: { contains: q, mode: "insensitive" } }, { nip: { contains: q } }, { nuptk: { contains: q } }] } : {}),
+  const filters = {
+    q: (sp.q ?? "").trim(), bidang: sp.bidang ?? "", status: (sp.status ?? "").toUpperCase(),
+    role: sp.role ?? "", page: Math.max(1, Number(sp.page) || 1), tampil: sp.tampil ?? "aktif",
   };
-
-  const [total, rows, nonaktifCount] = await Promise.all([
-    prisma.guru.count({ where }),
-    prisma.guru.findMany({ where, orderBy: { namaGuru: "asc" }, skip: (page - 1) * PER_PAGE, take: PER_PAGE }),
+  const [pulse, gallery, nonaktifCount] = await Promise.all([
+    getGuruPulse(sekolahId),
+    getGuruGallery(sekolahId, filters),
     prisma.guru.count({ where: { sekolahId, deletedAt: { not: null } } }),
   ]);
-
-  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-  const hp = (p: number) => `/guru?${new URLSearchParams({ q, tampil, page: String(p) }).toString()}`;
+  const alerts = [
+    { key: "beban", icon: "⚠", tone: "peach", n: pulse.alerts.beban, to: "/guru?role=beban" },
+    { key: "jurnal", icon: "📓", tone: "sun", n: pulse.alerts.jurnal, to: "/guru" },
+    { key: "ultah", icon: "🎂", tone: "mint", n: pulse.alerts.ultah, to: "/guru" },
+    { key: "sertif", icon: "📜", tone: "lav", n: pulse.alerts.sertifikasi, to: "/guru" },
+  ];
 
   return (
-    <div className="space-y-4">
-      <PageGuide
-        icon="👨‍🏫"
-        title={t("title")}
-        description={t("guideDescription")}
-        tips={[
-          t("tip1"),
-          t("tip2"),
-          t("tip3"),
-          t("tip4"),
-        ]}
-      />
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900 sm:text-2xl">{t("title")}</h1>
-          <p className="text-sm text-gray-500">
-            {tampil === "nonaktif" ? t("countInactive", { n: total.toLocaleString("id-ID") }) : t("countActive", { n: total.toLocaleString("id-ID") })}
-            {nonaktifCount > 0 && (
-              <Link href="/guru?tampil=nonaktif" className="ml-2 rounded bg-red-50 px-1.5 py-0.5 text-xs text-red-600 hover:bg-red-100">
-                {t("nonaktifBadge", { n: nonaktifCount })}
+    <div id="ak-guru">
+      <div className="pulse-row">
+        <div className="pulse-card komposisi">
+          <div className="pk-head"><span className="pk-eyebrow">{t("pulseEyebrow")}</span><div className="pk-big">{pulse.total}</div></div>
+          <h3 className="pk-title">{t("compTitle")}</h3>
+          <div className="pk-dna">{pulse.comp.map((c) => <Link key={c.key} href={`/guru?status=${c.key}`} className={`dna ${COMP_TONE[c.key] ?? "sky"}`} style={{ flexGrow: c.count }} aria-label={c.key} />)}</div>
+          <div className="pk-stats">
+            {pulse.comp.slice(0, 3).map((c) => (
+              <Link key={c.key} href={`/guru?status=${c.key}`} className="pk-stat">
+                <span className="pk-stat-top"><span className={`dot ${COMP_TONE[c.key] ?? "sky"}`} />{c.key}</span>
+                <b>{c.count}<small>/{pulse.total}</small></b>
+                <span className="pk-stat-pct">{c.pct}%</span>
               </Link>
-            )}
-          </p>
-        </div>
-        {canManage && (
-          <Link href="/guru/new" className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
-            {t("addGuru")}
-          </Link>
-        )}
-      </div>
-
-      {/* Tab aktif/nonaktif + search */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex overflow-hidden rounded-lg border border-gray-300">
-          <Link href={`/guru?q=${q}`} className={`px-3 py-1.5 text-xs font-medium transition-colors ${tampil === "aktif" ? "bg-gray-900 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>{t("tabAktif")}</Link>
-          <Link href={`/guru?tampil=nonaktif&q=${q}`} className={`border-l px-3 py-1.5 text-xs font-medium transition-colors ${tampil === "nonaktif" ? "bg-gray-900 text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}>{t("tabNonaktif", { n: nonaktifCount })}</Link>
-        </div>
-        <form className="flex flex-1 gap-2">
-          <input type="hidden" name="tampil" value={tampil} />
-          <input name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="w-full min-w-0 rounded-md border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-gray-900 sm:w-64" />
-          <button className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-100">{t("search")}</button>
-          {q && <Link href={`/guru?tampil=${tampil}`} className="px-2 py-1.5 text-sm text-gray-500 hover:text-gray-900">{t("reset")}</Link>}
-        </form>
-      </div>
-
-      {/* Tabel */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-500">
-            <tr>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">{t("colNama")}</th>
-              <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide sm:table-cell">{t("colNip")}</th>
-              <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide sm:table-cell">{t("colLP")}</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide">{t("colStatus")}</th>
-              {tampil === "nonaktif" && <th className="hidden px-4 py-3 text-xs font-semibold uppercase tracking-wide sm:table-cell">{t("colAlasan")}</th>}
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-right">{t("colAksi")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {rows.length === 0 && <tr><td colSpan={tampil === "nonaktif" ? 6 : 5} className="px-4 py-10 text-center text-gray-400">{t("noData")}</td></tr>}
-            {rows.map((g) => (
-              <tr key={g.id} className={`hover:bg-gray-50 transition-colors ${tampil === "nonaktif" ? "opacity-70" : ""}`}>
-                <td className="px-4 py-3">
-                  <Link href={`/guru/${g.id}`} className="font-medium text-gray-900 hover:underline">{g.namaGuru}</Link>
-                  {g.email && <div className="text-xs text-gray-400">{g.email}</div>}
-                </td>
-                <td className="hidden px-4 py-3 font-mono text-xs text-gray-600 sm:table-cell">{g.nip ?? g.npk ?? "—"}</td>
-                <td className="hidden px-4 py-3 text-gray-600 sm:table-cell">{g.jenisKelamin}</td>
-                <td className="px-4 py-3">
-                  {g.statusGuru && <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${STATUS_BADGE[g.statusGuru] ?? "bg-gray-100 text-gray-700"}`}>{g.statusGuru}</span>}
-                </td>
-                {tampil === "nonaktif" && (
-                  <td className="hidden px-4 py-3 max-w-xs text-xs text-gray-500 italic truncate sm:table-cell">{g.alasanHapus ?? "—"}</td>
-                )}
-                <td className="px-4 py-3 text-right">
-                  {tampil === "nonaktif" ? (
-                    canManage ? (
-                      <form action={aktifkanKembaliGuru} className="inline">
-                        <input type="hidden" name="id" value={g.id} />
-                        <button className="rounded-md border border-green-300 px-3 py-1 text-xs text-green-700 hover:bg-green-50">{t("aktifkan")}</button>
-                      </form>
-                    ) : <span className="text-xs text-gray-300">—</span>
-                  ) : canManage ? (
-                    <Link href={`/guru/${g.id}`} className="text-gray-600 hover:underline">{t("detailEdit")}</Link>
-                  ) : <span className="text-xs text-gray-300">—</span>}
-                </td>
-              </tr>
             ))}
-          </tbody>
-        </table>
-      </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-gray-600">
-          <span>{t("pageInfo", { page, total: totalPages })}</span>
-          <div className="flex gap-2">
-            {page > 1 && <Link href={hp(page - 1)} className="rounded-md border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("prev")}</Link>}
-            {page < totalPages && <Link href={hp(page + 1)} className="rounded-md border border-gray-300 px-3 py-1.5 hover:bg-gray-100">{t("nextPage")}</Link>}
           </div>
         </div>
-      )}
+
+        <GuruSpotlight pool={pulse.spotlight} />
+
+        <div className="pulse-card perlu">
+          <span className="pk-eyebrow">{t("perluEyebrow")}</span>
+          <h3 className="pk-title">{t("perluTitle", { n: alerts.filter((a) => a.n > 0).length })}</h3>
+          <div className="perlu-list">
+            {alerts.map((a) => (
+              <Link key={a.key} href={a.to} className="perlu-item">
+                <span className={`pi-ic ${a.tone}`}>{a.icon}</span>
+                <div className="pi-txt"><b>{t(`alert_${a.key}`)}</b><span>{t(`alertSub_${a.key}`)}</span></div>
+                <span className="pi-n">{a.n}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <GuruFlip flip={pulse.flip} />
+
+      <GuruBoard cards={gallery.cards} total={gallery.total} totalPage={gallery.totalPage} pulse={pulse} filters={filters} tampil={filters.tampil} aktifCount={pulse.total} nonaktifCount={nonaktifCount} />
     </div>
   );
 }
