@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -18,9 +18,16 @@ export function SiswaListBoard({ pulse, gallery, filters }: { pulse: SiswaPulse;
   const locale = useLocale();
   const [view, setView] = useState(filters.view === "table" ? "table" : "gallery");
   const [sel, setSel] = useState<Set<number>>(new Set());
-  const [activeJ, setActiveJ] = useState(0);
   const [q, setQ] = useState(filters.q);
   const nf = (n: number) => n.toLocaleString(locale);
+
+  // Pencarian real-time (debounce 450ms) — navigasi query-only, tak munculkan overlay.
+  useEffect(() => {
+    if (q === filters.q) return;
+    const id = setTimeout(() => router.push(href({ q, page: 1 })), 450);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
 
   function href(o: Partial<Record<string, string | number>>) {
     const m: Record<string, string> = { q: filters.q, status: filters.status, jenjang: filters.jenjang, gender: filters.gender, flag: filters.flag, view, page: String(filters.page) };
@@ -41,6 +48,8 @@ export function SiswaListBoard({ pulse, gallery, filters }: { pulse: SiswaPulse;
 
   const j = pulse.jenjang;
   const sumJ = j.reduce((a, b) => a + b.count, 0) || 1;
+  const activeJ = j.findIndex((seg) => seg.nama === filters.jenjang);
+  const focusJenjang = (nama: string) => router.push(href({ jenjang: filters.jenjang === nama ? "" : nama, page: 1 }));
   const QF = (key: string, val: string) => (filters.status === val && key === "status") || (filters.gender === val && key === "gender") || (filters.flag === val && key === "flag");
   const none = !filters.status && !filters.gender && !filters.flag;
 
@@ -56,13 +65,13 @@ export function SiswaListBoard({ pulse, gallery, filters }: { pulse: SiswaPulse;
           <div className="dna-row">
             <div className="dna-bar">
               {j.map((seg, i) => (
-                <button key={seg.nama} className={`dna-seg${activeJ === i ? " active" : ""}`} style={{ flexGrow: seg.count, background: JENJANG_COLOR[i % JENJANG_COLOR.length] }} onClick={() => setActiveJ(i)} aria-label={t("list.kelasLabel", { nama: seg.nama })} />
+                <button key={seg.nama} className={`dna-seg${activeJ === i ? " active" : ""}`} style={{ flexGrow: seg.count, background: JENJANG_COLOR[i % JENJANG_COLOR.length] }} onClick={() => focusJenjang(seg.nama)} aria-label={t("list.kelasLabel", { nama: seg.nama })} />
               ))}
             </div>
           </div>
           <div className="dna-stats">
             {j.map((seg, i) => (
-              <button key={seg.nama} className={`ds${activeJ === i ? " active" : ""}`} onClick={() => setActiveJ(i)}>
+              <button key={seg.nama} className={`ds${activeJ === i ? " active" : ""}`} onClick={() => focusJenjang(seg.nama)}>
                 <div className="ds-lbl"><span className="dot" style={{ background: JENJANG_COLOR[i % JENJANG_COLOR.length] }} />{t("list.kelasLabel", { nama: seg.nama })}</div>
                 <div className="ds-v">{nf(seg.count)}<small>{t("list.siswaUnit")}</small></div>
                 <div className="ds-pct">{t("list.dsPct", { pct: Math.round((seg.count / sumJ) * 100), rombel: seg.rombel, l: seg.l, p: seg.p })}</div>

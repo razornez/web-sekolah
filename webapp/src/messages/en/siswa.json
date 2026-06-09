@@ -283,7 +283,8 @@
       "personaTitle": "Auto profile from DOB", "personaEmpty": "Enter the date of birth to see zodiac & numerology.",
       "completionTitle": "📋 Data completeness", "pctLengkap": "{pct}% complete", "doneOf": "{done} of {total} required", "belumDiisi": "Not filled",
       "drIdentitas": "Identity", "drTgl": "Date of Birth", "drFoto": "Photo", "drNisn": "NISN", "drKelas": "Class", "drAlamat": "Address", "drOrtu": "Parents", "drTinggi": "Height/Weight", "drHp": "Phone",
-      "footAuto": "Auto-saved to draft", "footMundur": "← Back", "footNext": "Next →", "footSave": "✓ Save student", "footSaving": "Saving…"
+      "footAuto": "Auto-saved to draft", "footMundur": "← Back", "footNext": "Next →", "footSave": "✓ Save student", "footSaving": "Saving…",
+      "errNama": "Full name is required.", "errTgl": "Date of birth is required."
     },
     "edit": {
       "crumb": "Edit", "modeEdit": "Edit mode", "save": "✓ Save changes", "saving": "Saving…", "cancel": "← Cancel",

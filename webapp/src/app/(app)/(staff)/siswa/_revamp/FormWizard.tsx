@@ -17,8 +17,18 @@ export function FormWizard({ rombels, sekolah }: { rombels: { id: number; nama: 
   const locale = useLocale();
   const [step, setStep] = useState(0);
   const [f, setF] = useState<Record<string, string>>({ jenisKelamin: "P", status: "aktif" });
+  const [err, setErr] = useState("");
   const [state, formAction, pending] = useActionState<SiswaFormState, FormData>(saveSiswa, { ok: false });
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
+
+  function goNext() {
+    if (step === 0) {
+      if (!(f.namaLengkap ?? "").trim()) { setErr(t("wizard.errNama")); return; }
+      if (!f.tanggalLahir) { setErr(t("wizard.errTgl")); return; }
+    }
+    setErr("");
+    setStep((s) => s + 1);
+  }
 
   useEffect(() => { if (state.ok) router.push(state.to ?? "/siswa"); }, [state, router]);
 
@@ -81,7 +91,7 @@ export function FormWizard({ rombels, sekolah }: { rombels: { id: number; nama: 
             </div>
 
             <div className="form-content">
-              {state.message && <p style={{ background: "#fdecec", color: "#c0392b", borderRadius: 10, padding: "8px 12px", fontSize: 13, marginBottom: 12 }}>{state.message}</p>}
+              {(state.message || err) && <p style={{ background: "#fdecec", color: "#c0392b", borderRadius: 10, padding: "8px 12px", fontSize: 13, marginBottom: 12 }}>{state.message || err}</p>}
 
               {/* STEP 1 */}
               <div className={`pane${step === 0 ? " show" : ""}`}>
@@ -187,7 +197,7 @@ export function FormWizard({ rombels, sekolah }: { rombels: { id: number; nama: 
               <div className="sp" />
               {step > 0 && <button type="button" className="btn-g" onClick={() => setStep((s) => s - 1)}>{t("wizard.footMundur")}</button>}
               {!last
-                ? <button type="button" className="btn-p" onClick={() => setStep((s) => s + 1)}>{t("wizard.footNext")}</button>
+                ? <button type="button" className="btn-p" onClick={goNext}>{t("wizard.footNext")}</button>
                 : <button type="submit" disabled={pending} className="btn-p save">{pending ? t("wizard.footSaving") : t("wizard.footSave")}</button>}
             </div>
           </form>

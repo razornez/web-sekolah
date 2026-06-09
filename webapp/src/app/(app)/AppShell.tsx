@@ -130,7 +130,12 @@ export function AppShell({
       const anchor = (e.target as Element).closest("a[href]");
       if (!anchor) return;
       const href = anchor.getAttribute("href") ?? "";
-      if (href.startsWith("/") && href !== pathname && !href.startsWith("/api")) setNavLoad(true);
+      if (!href.startsWith("/") || href.startsWith("/api")) return;
+      // Hanya tampilkan overlay untuk pindah HALAMAN (pathname beda).
+      // Navigasi query-only (filter/pagination di halaman sama) tidak butuh overlay
+      // dan reset-nya tidak terpicu oleh pathname → jangan set agar tak nyangkut.
+      const hrefPath = href.split(/[?#]/)[0];
+      if (hrefPath !== pathname) setNavLoad(true);
     };
     document.addEventListener("click", handler, true);
     return () => document.removeEventListener("click", handler, true);
@@ -226,6 +231,7 @@ export function AppShell({
             <span className="ak-kbd">/</span>
           </Link>
           <div className="ak-topbar-actions">
+            <LanguageSwitcher compact />
             <div className="ak-datepill" suppressHydrationWarning>
               <span className="ak-dic">{dateLabel.day || "·"}</span>
               <span suppressHydrationWarning>{dateLabel.rest || " "}</span>
