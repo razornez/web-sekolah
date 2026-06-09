@@ -140,8 +140,8 @@ export async function getSiswaDetail(id: number, sekolahId: number): Promise<Sis
   const journey = s.anggotaRombel.map((ar) => {
     const tahun = ar.rombel?.tahunAjaran?.tahun ?? "";
     const ra = rataByTahun.get(tahun);
-    return { rombel: ar.rombel.nama, tahun, absen: ar.nomorAbsen, current: ar.rombelId === curRombelId, rata: ra && ra.n ? Math.round(ra.sum / ra.n) : null, _y: yrOf(tahun) };
-  }).sort((a, b) => a._y - b._y).map(({ _y, ...j }) => j);
+    return { rombel: ar.rombel.nama, tahun, absen: ar.nomorAbsen, current: ar.rombelId === curRombelId, rata: ra && ra.n ? Math.round(ra.sum / ra.n) : null };
+  }).sort((a, b) => yrOf(a.tahun) - yrOf(b.tahun));
 
   // ── parents ──
   const parents = s.orangTuaWali.map((o) => ({ tipe: o.tipe, nama: o.nama, pekerjaan: o.pekerjaan, pendidikan: o.pendidikan, penghasilan: o.penghasilan, noHp: o.noHp ?? null }));
