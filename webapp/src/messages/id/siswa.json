@@ -345,9 +345,12 @@
       "gSangat": "🟢 Sangat baik", "gBaik": "🟢 Baik", "gCukup": "🟡 Cukup", "gPeringatan": "🟠 Peringatan", "gKritis": "🔴 Kritis", "poinSisa": "poin tersisa", "poinDesc": "Dari {max} poin maksimal. Di bawah 40 → peringatan tertulis.",
       "sppTitle": "Pembayaran SPP", "sppBulan": "{n} bulan", "sppEmpty": "Belum ada tagihan SPP.", "sppLunas": "Lunas", "sppCicil": "Cicil", "sppBelum": "Belum", "sppTotal": "Total terbayar", "sppBln": "{n} bln",
       "prestasiTitle": "Prestasi & Penghargaan", "prestasiSub": "{n} pencapaian", "penghargaanLabel": "Penghargaan",
+      "prestasiMeta": "{n} prestasi · {b} beasiswa", "juara": "Juara {n}", "beasiswaAktif": "Beasiswa aktif", "beasiswaSub": "Potongan SPP · aktif",
       "ortuTitle": "Orang Tua & Wali", "ortuSub": "Kontak komunikasi", "ortuPekerjaan": "Pekerjaan", "ortuPendidikan": "Pendidikan", "ortuPenghasilan": "Penghasilan", "ortuNoHp": "No HP", "ortuWa": "💬 WhatsApp", "ortuTel": "📞 Telepon", "waOrtu": "Assalamualaikum {nama}, kami dari sekolah ingin menyampaikan informasi tentang ananda {anak}.",
       "rtEmpty": "Belum ada nilai rapor.", "rtRata": "Rata-rata semester", "rtJumlah": "Jumlah mapel", "rtKkm": "Di atas KKM", "rtMax": "Nilai tertinggi", "rtMin": "Nilai terendah",
-      "kartuBtn": "📇 Cetak Kartu Pelajar", "kartuTitle": "Kartu Pelajar", "kartuSuffix": "Kartu Pelajar", "kartuTema": "Tema warna", "kartuDesc": "Kartu siap cetak ukuran ISO (85×54 mm). Foto siswa otomatis muncul jika sudah diunggah.", "kartuDownload": "⬇ Unduh / Cetak PDF"
+      "rtIstimewa": "Istimewa", "rtSangat": "Sangat baik", "rtBaik": "Baik", "rtCukup": "Cukup", "rtKurang": "Kurang",
+      "kartuBtn": "📇 Cetak Kartu Pelajar", "kartuTitle": "Kartu Pelajar", "kartuSuffix": "Kartu Pelajar", "kartuTema": "Tema warna", "kartuDesc": "Kartu siap cetak ukuran ISO (85×54 mm). Foto siswa otomatis muncul jika sudah diunggah.", "kartuDownload": "⬇ Unduh / Cetak PDF",
+      "kKelas": "Kelas", "kartuFormat": "Format kartu", "kartuBelakang": "Belakang kartu", "fmtIso": "ISO standar (85×54mm)", "fmtLanyard": "Lanyard (potret)", "bkOrtu": "Data ortu", "bkDarurat": "Kontak darurat", "kartuBack": "Belakang: {x}", "thUngu": "Ungu", "thNavy": "Navy formal", "thHijau": "Hijau islami", "thEmas": "Emas premium"
     }
   }
 }

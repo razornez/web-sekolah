@@ -345,9 +345,12 @@
       "gSangat": "🟢 Excellent", "gBaik": "🟢 Good", "gCukup": "🟡 Fair", "gPeringatan": "🟠 Warning", "gKritis": "🔴 Critical", "poinSisa": "points left", "poinDesc": "Of {max} max points. Below 40 → written warning.",
       "sppTitle": "Tuition Payments", "sppBulan": "{n} months", "sppEmpty": "No tuition bills yet.", "sppLunas": "Paid", "sppCicil": "Partial", "sppBelum": "Unpaid", "sppTotal": "Total paid", "sppBln": "{n} mo",
       "prestasiTitle": "Achievements & Awards", "prestasiSub": "{n} achievements", "penghargaanLabel": "Award",
+      "prestasiMeta": "{n} achievements · {b} scholarship", "juara": "Rank {n}", "beasiswaAktif": "Active scholarship", "beasiswaSub": "Tuition discount · active",
       "ortuTitle": "Parents & Guardian", "ortuSub": "Communication contacts", "ortuPekerjaan": "Occupation", "ortuPendidikan": "Education", "ortuPenghasilan": "Income", "ortuNoHp": "Phone", "ortuWa": "💬 WhatsApp", "ortuTel": "📞 Call", "waOrtu": "Hello {nama}, this is the school reaching out about {anak}.",
       "rtEmpty": "No report grades yet.", "rtRata": "Semester average", "rtJumlah": "Subjects", "rtKkm": "Above passing", "rtMax": "Highest grade", "rtMin": "Lowest grade",
-      "kartuBtn": "📇 Print Student Card", "kartuTitle": "Student Card", "kartuSuffix": "Student Card", "kartuTema": "Color theme", "kartuDesc": "Print-ready card at ISO size (85×54 mm). The student photo appears automatically if uploaded.", "kartuDownload": "⬇ Download / Print PDF"
+      "rtIstimewa": "Excellent", "rtSangat": "Very good", "rtBaik": "Good", "rtCukup": "Fair", "rtKurang": "Poor",
+      "kartuBtn": "📇 Print Student Card", "kartuTitle": "Student Card", "kartuSuffix": "Student Card", "kartuTema": "Color theme", "kartuDesc": "Print-ready card at ISO size (85×54 mm). The student photo appears automatically if uploaded.", "kartuDownload": "⬇ Download / Print PDF",
+      "kKelas": "Class", "kartuFormat": "Card format", "kartuBelakang": "Card back", "fmtIso": "ISO standard (85×54mm)", "fmtLanyard": "Lanyard (portrait)", "bkOrtu": "Parent info", "bkDarurat": "Emergency contact", "kartuBack": "Back: {x}", "thUngu": "Purple", "thNavy": "Navy formal", "thHijau": "Green islamic", "thEmas": "Gold premium"
     }
   }
 }

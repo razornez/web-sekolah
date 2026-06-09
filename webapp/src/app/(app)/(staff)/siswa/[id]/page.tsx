@@ -320,16 +320,33 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       </div>
 
       {/* PRESTASI */}
-      {s.prestasi.length > 0 && (
+      {(s.prestasi.length > 0 || s.beasiswa) && (
         <div className="section">
-          <div className="section-h"><h2><span className="ico sun">🏆</span>{t("detail.prestasiTitle")}</h2><span className="meta">{t("detail.prestasiSub", { n: s.prestasi.length })}</span></div>
+          <div className="section-h"><h2><span className="ico sun">🏆</span>{t("detail.prestasiTitle")}</h2><span className="meta">{t("detail.prestasiMeta", { n: s.prestasi.length, b: s.beasiswa ? 1 : 0 })}</span></div>
           <div className="shelf">
             <div className="shelf-row">
-              {s.prestasi.slice(0, 6).map((p, i) => {
-                const tone = ["g", "s", "b", "p"][i % 4];
-                const ico = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
-                return <div className={`medal ${tone}`} key={i}><div className="disc">{ico}</div><div className="mt">{p.nama}</div><div className="ms">{[p.tingkat, p.tahun].filter(Boolean).join(" · ") || t("detail.penghargaanLabel")}</div></div>;
+              {s.prestasi.slice(0, 5).map((p, i) => {
+                const tone = ["g", "s", "b", "p", "p"][i] ?? "p";
+                const disc = i === 0 ? "★" : i < 3 ? String(i + 1) : "🏅";
+                return (
+                  <div className={`medal ${tone}`} key={i}>
+                    <span className="ribbon" />
+                    <div className="disc">{disc}</div>
+                    <span className="jpill">{i < 3 ? t("detail.juara", { n: i + 1 }) : t("detail.penghargaanLabel")}</span>
+                    <div className="mt">{p.nama}</div>
+                    <div className="ms">{[p.tingkat, p.tahun].filter(Boolean).join(" · ") || t("detail.penghargaanLabel")}</div>
+                  </div>
+                );
               })}
+              {s.beasiswa && (
+                <div className="medal beasiswa">
+                  <span className="ribbon" />
+                  <div className="disc">🎓</div>
+                  <span className="jpill aktif">{t("detail.beasiswaAktif")}</span>
+                  <div className="mt">{s.beasiswa}</div>
+                  <div className="ms">{t("detail.beasiswaSub")}</div>
+                </div>
+              )}
             </div>
             <div className="shelf-board" />
           </div>

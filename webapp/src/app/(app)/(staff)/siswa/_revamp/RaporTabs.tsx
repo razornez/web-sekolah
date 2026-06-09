@@ -16,6 +16,13 @@ const MAPEL_ICON = (n: string) => {
   return "📘";
 };
 
+const PREDIKAT = (n: number): { key: string; color: string } =>
+  n >= 92 ? { key: "rtIstimewa", color: "var(--ak-lav-deep)" }
+    : n >= 90 ? { key: "rtSangat", color: "var(--ak-mint-deep)" }
+      : n >= 80 ? { key: "rtBaik", color: "var(--ak-sky-deep)" }
+        : n >= 75 ? { key: "rtCukup", color: "var(--ak-sun-deep)" }
+          : { key: "rtKurang", color: "var(--ak-peach-deep)" };
+
 export function RaporTabs({ rapor }: { rapor: DetailRapor[] }) {
   const t = useTranslations("siswa");
   const [active, setActive] = useState(0);
@@ -34,14 +41,17 @@ export function RaporTabs({ rapor }: { rapor: DetailRapor[] }) {
       </div>
       <div className="rapor-grid">
         <div>
-          {r.items.map((m, i) => (
-            <div className="mapel-row" key={i}>
-              <span className="mi">{MAPEL_ICON(m.mapel)}</span>
-              <div className="mn"><b>{m.mapel}</b><span>{m.deskripsi ? m.deskripsi.slice(0, 60) : `KKM ${m.kkm}`}</span></div>
-              <div className="mbar"><i style={{ width: `${Math.min(100, m.nilai)}%` }} /></div>
-              <div className="mpill" style={{ color: m.nilai >= m.kkm ? "var(--ak-mint-deep)" : "var(--ak-peach-deep)" }}>{m.nilai}</div>
-            </div>
-          ))}
+          {r.items.map((m, i) => {
+            const pr = PREDIKAT(m.nilai);
+            return (
+              <div className="mapel-row" key={i}>
+                <span className="mi">{MAPEL_ICON(m.mapel)}</span>
+                <div className="mn"><b>{m.mapel}</b><span>{m.deskripsi ? m.deskripsi.slice(0, 64) : `KKM ${m.kkm}`}</span></div>
+                <div className="mbar"><i style={{ width: `${Math.min(100, m.nilai)}%` }} /></div>
+                <div className="mpill"><b style={{ color: pr.color }}>{m.nilai}</b><span className="mpred" style={{ color: pr.color }}>{t(`detail.${pr.key}`)}</span></div>
+              </div>
+            );
+          })}
         </div>
         <div className="rapor-sum">
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>{t("detail.rtRata")}</div>

@@ -104,14 +104,16 @@
 #ak-sd .rapor-tab { padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; background: var(--ak-surface-2); border: 1px solid var(--ak-rule-2); color: var(--ak-ink-2); cursor: pointer; }
 #ak-sd .rapor-tab.active { background: var(--ak-ink); color: #fff; border-color: var(--ak-ink); }
 #ak-sd .rapor-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; align-items: start; }
-#ak-sd .mapel-row { display: grid; grid-template-columns: 26px 1fr 70px 44px; gap: 10px; align-items: center; padding: 9px 4px; border-bottom: 1px dashed var(--ak-rule-2); }
+#ak-sd .mapel-row { display: grid; grid-template-columns: 26px 1fr 58px 66px; gap: 10px; align-items: center; padding: 9px 4px; border-bottom: 1px dashed var(--ak-rule-2); }
 #ak-sd .mapel-row .mi { width: 26px; height: 26px; border-radius: 8px; background: var(--ak-lav); display: flex; align-items: center; justify-content: center; font-size: 13px; }
 #ak-sd .mapel-row .mn { min-width: 0; }
 #ak-sd .mapel-row .mn b { font-size: 13px; font-weight: 800; color: var(--ak-ink); display: block; }
 #ak-sd .mapel-row .mn span { font-size: 11px; color: var(--ak-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #ak-sd .mbar { height: 7px; border-radius: 100px; background: var(--ak-bg-2); overflow: hidden; }
 #ak-sd .mbar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--ak-primary), var(--ak-mint-deep)); }
-#ak-sd .mpill { text-align: center; font-size: 14px; font-weight: 800; color: var(--ak-ink); font-variant-numeric: tabular-nums; }
+#ak-sd .mpill { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.05; font-variant-numeric: tabular-nums; }
+#ak-sd .mpill b { font-size: 15px; font-weight: 800; }
+#ak-sd .mpill .mpred { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; margin-top: 2px; white-space: nowrap; }
 #ak-sd .rapor-sum { background: linear-gradient(160deg, var(--ak-ink), #2D2A4F); border-radius: 16px; padding: 20px; color: #fff; }
 #ak-sd .rapor-sum .big { font-size: 40px; font-weight: 800; color: var(--ak-sun); letter-spacing: -0.03em; }
 #ak-sd .rapor-sum .rs-row { display: flex; justify-content: space-between; font-size: 12px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.75); font-weight: 600; }
@@ -171,6 +173,21 @@
 #ak-sd .medal.g .disc { background: linear-gradient(160deg, #FFD972, #C68A1C); } #ak-sd .medal.s .disc { background: linear-gradient(160deg, #E5E7EB, #9CA3AF); } #ak-sd .medal.b .disc { background: linear-gradient(160deg, #E8A87C, #B45309); } #ak-sd .medal.p .disc { background: linear-gradient(160deg, var(--ak-lav-deep), var(--ak-primary-deep)); }
 #ak-sd .medal .mt { font-size: 12px; font-weight: 800; color: var(--ak-ink); line-height: 1.2; } #ak-sd .medal .ms { font-size: 10.5px; color: var(--ak-muted); font-weight: 600; margin-top: 2px; }
 #ak-sd .shelf-board { height: 14px; background: linear-gradient(180deg, #B98A4E, #8A5D2E); border-radius: 0 0 16px 16px; box-shadow: 0 6px 14px -6px rgba(0,0,0,0.4); }
+#ak-sd .medal { position: relative; }
+#ak-sd .medal .disc { z-index: 1; }
+#ak-sd .medal .ribbon { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 46px; height: 30px; z-index: 0; }
+#ak-sd .medal .ribbon::before, #ak-sd .medal .ribbon::after { content: ""; position: absolute; bottom: 0; width: 13px; height: 32px; border-radius: 2px; background: var(--ak-primary); }
+#ak-sd .medal .ribbon::before { left: 7px; transform-origin: bottom center; transform: rotate(-20deg); }
+#ak-sd .medal .ribbon::after { right: 7px; transform-origin: bottom center; transform: rotate(20deg); }
+#ak-sd .medal.g .ribbon::before, #ak-sd .medal.g .ribbon::after { background: var(--ak-lav-deep); }
+#ak-sd .medal.s .ribbon::before, #ak-sd .medal.s .ribbon::after { background: #D9558C; }
+#ak-sd .medal.b .ribbon::before, #ak-sd .medal.b .ribbon::after { background: var(--ak-mint-deep); }
+#ak-sd .medal .jpill { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 10px; border-radius: 100px; margin-bottom: 6px; }
+#ak-sd .medal.g .jpill { background: #FBE9C0; color: #8A5D0E; }
+#ak-sd .medal.s .jpill { background: #ECEEF1; color: #6B7280; }
+#ak-sd .medal.b .jpill { background: #F4DECE; color: #B45309; }
+#ak-sd .medal.p .jpill, #ak-sd .medal .jpill.aktif { background: var(--ak-lav); color: var(--ak-primary-deep); }
+#ak-sd .medal.beasiswa .disc { background: linear-gradient(160deg, var(--ak-primary), var(--ak-lav-deep)); font-size: 24px; }
 
 /* ORTU */
 #ak-sd .ortu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -196,6 +213,21 @@
 #ak-sd .km-side h3 { margin: 0 0 10px; font-size: 16px; font-weight: 800; color: var(--ak-ink); }
 #ak-sd .km-themes { display: flex; gap: 8px; margin-bottom: 14px; }
 #ak-sd .km-themes button { width: 38px; height: 38px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; }
+#ak-sd .km-stage { display: flex; flex-direction: column; gap: 10px; }
+#ak-sd .kartu.lanyard { width: 200px; height: 320px; margin: 0 auto; }
+#ak-sd .kartu.lanyard .kbody { flex-direction: column; align-items: center; text-align: center; }
+#ak-sd .kartu .kqr { position: absolute; bottom: 14px; right: 16px; width: 44px; height: 44px; border-radius: 8px; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; color: var(--ak-ink); }
+#ak-sd .kback-note { font-size: 11px; color: var(--ak-muted); text-align: center; }
+#ak-sd .km-lbl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ak-muted); margin: 12px 0 7px; }
+#ak-sd .km-themes.named { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 0; }
+#ak-sd .km-themes.named button { width: auto; height: auto; display: flex; align-items: center; gap: 7px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--ak-rule-2); background: var(--ak-surface-2); font-size: 11.5px; font-weight: 700; color: var(--ak-ink-2); cursor: pointer; }
+#ak-sd .km-themes.named button.on { border-color: var(--ak-primary); background: var(--ak-lav); color: var(--ak-primary-deep); }
+#ak-sd .km-themes.named .dot { width: 16px; height: 16px; border-radius: 50%; flex: none; }
+#ak-sd .km-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+#ak-sd .km-seg button { padding: 9px 8px; border-radius: 10px; border: 1.5px solid var(--ak-rule-2); background: var(--ak-surface-2); font-size: 11px; font-weight: 700; color: var(--ak-ink-2); cursor: pointer; }
+#ak-sd .km-seg button.on { border-color: var(--ak-primary); background: var(--ak-lav); color: var(--ak-primary-deep); }
+#ak-sd .km-actions { display: flex; gap: 8px; margin-top: 16px; }
+#ak-sd .km-actions .btn { flex: 1; justify-content: center; }
 #ak-sd .km-close { position: absolute; top: 14px; right: 16px; background: var(--ak-surface-2); border: 0; width: 30px; height: 30px; border-radius: 9px; cursor: pointer; }
 
 /* ===== LEAFLET MAP ===== */
