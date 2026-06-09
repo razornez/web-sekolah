@@ -311,6 +311,38 @@
       "share": "🔗 Bagikan link", "waSend": "Kirim ke ortu via WA", "print": "🖨 Cetak / PDF",
       "waText": "Rapor {nama} — rata-rata {rata} ({predikat})",
       "tabAkademik": "📄 Rapor Akademik", "tabP5": "🌱 Rapor P5"
+    },
+    "detail": {
+      "eyebrow": "Profil Siswa",
+      "chipAktif": "✓ Aktif", "chipP": "♀ Perempuan", "chipL": "♂ Laki-laki", "chipFase": "🎓 Fase {fase}", "chipPrestasi": "prestasi",
+      "metaWali": "Wali kelas", "metaAbsen": "No absen",
+      "actWa": "Kirim WA ke Ortu", "actEdit": "✏ Edit Data", "actRapor": "📄 Lihat Rapor",
+      "waHero": "Assalamualaikum, kami dari {sekolah} ingin menyampaikan informasi terkait ananda {nama}.",
+      "mRata": "📊 Rata-rata Nilai", "mRataSub": "{n} semester dinilai",
+      "mHadir": "✅ Kehadiran", "mHadirSub": "{h} hadir · {i} izin · {s} sakit · {a} alpa",
+      "mRank": "🏆 Peringkat Kelas", "mRankSub": "dari {n} dinilai", "mRankNone": "belum ada data",
+      "mSpp": "💰 SPP", "mSppLunas": "Lunas semua",
+      "mBmi": "📏 BMI", "mBmiNone": "Data belum lengkap",
+      "mPoin": "🎯 Poin Pelanggaran", "mPoinClean": "Bersih sejak masuk", "mPoinCount": "{n} catatan BK",
+      "personaTitle": "Tentang {nama}", "personaSub": "Analisis dari tanggal lahir & biometri",
+      "zodiak": "Zodiak", "element": "🌊 Element {el}", "noTtl": "Tanggal lahir belum diisi.",
+      "bmiTitle": "Status Gizi · BMI", "bmiHeight": "Tinggi {t} cm · Berat {b} kg", "bmiIncomplete": "Belum lengkap", "bmiFill": "Isi tinggi & berat badan di Edit Data.",
+      "numeroTitle": "Numerologi · Angka Hidup", "numeroAngka": "Angka {n} — {sifat}",
+      "akademik": "Perkembangan Akademik", "akademikSub": "{n} semester · {b} bidang",
+      "chartTren": "Tren rata-rata per semester", "chartTrenSub": "Nilai pengetahuan tiap periode",
+      "chartBakat": "Pemetaan bakat", "chartBakatSub": "Rata-rata nilai per bidang",
+      "journey": "Perjalanan Akademik", "journeySub": "{n} periode kelas", "journeyAbsen": "No absen {n}",
+      "raporTitle": "Rapor Akademik", "raporSub": "Nilai per mata pelajaran",
+      "heatmap": "Heatmap Kehadiran", "heatmapSub": "Setahun terakhir", "hadir": "Hadir", "izin": "Izin", "sakit": "Sakit", "alpa": "Alpa",
+      "mapTitle": "Rumah & Transportasi", "addrNone": "Alamat belum diisi", "jarak": "Jarak ke sekolah", "estTempuh": "Estimasi tempuh", "tinggalDengan": "Tinggal dengan", "transportasi": "Transportasi", "mnt": "{n} mnt",
+      "transUse": "🚍 Menggunakan {mode}", "transNone": "🚍 Moda transportasi belum diisi", "transDist": " · ±{km} km dari sekolah",
+      "bkTitle": "Catatan BK & Disiplin", "bkEmpty": "Belum ada catatan pelanggaran", "bkEmptySub": "Bersikap baik sejak masuk sekolah.", "pelanggaran": "Pelanggaran", "penghargaan": "Penghargaan",
+      "bkCount": "{n} catatan BK · {p} poin", "poinDisiplin": "Poin disiplin", "disBaik": "Sangat baik", "disCukup": "Cukup", "disPerlu": "Perlu perhatian",
+      "sppTitle": "Pembayaran SPP", "sppBulan": "{n} bulan", "sppEmpty": "Belum ada tagihan SPP.", "sppLunas": "Lunas", "sppCicil": "Cicil", "sppBelum": "Belum", "sppTotal": "Total terbayar", "sppBln": "{n} bln",
+      "prestasiTitle": "Prestasi & Penghargaan", "prestasiSub": "{n} pencapaian", "penghargaanLabel": "Penghargaan",
+      "ortuTitle": "Orang Tua & Wali", "ortuSub": "Kontak komunikasi", "ortuPekerjaan": "Pekerjaan", "ortuPendidikan": "Pendidikan", "ortuPenghasilan": "Penghasilan", "ortuNoHp": "No HP", "ortuWa": "💬 WhatsApp", "ortuTel": "📞 Telepon", "waOrtu": "Assalamualaikum {nama}, kami dari sekolah ingin menyampaikan informasi tentang ananda {anak}.",
+      "rtEmpty": "Belum ada nilai rapor.", "rtRata": "Rata-rata semester", "rtJumlah": "Jumlah mapel", "rtKkm": "Di atas KKM", "rtMax": "Nilai tertinggi", "rtMin": "Nilai terendah",
+      "kartuBtn": "📇 Cetak Kartu Pelajar", "kartuTitle": "Kartu Pelajar", "kartuSuffix": "Kartu Pelajar", "kartuTema": "Tema warna", "kartuDesc": "Kartu siap cetak ukuran ISO (85×54 mm). Foto siswa otomatis muncul jika sudah diunggah.", "kartuDownload": "⬇ Unduh / Cetak PDF"
     }
   }
 }

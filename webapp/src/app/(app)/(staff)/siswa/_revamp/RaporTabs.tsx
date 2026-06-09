@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { DetailRapor } from "./detailData";
 
 const MAPEL_ICON = (n: string) => {
@@ -16,8 +17,9 @@ const MAPEL_ICON = (n: string) => {
 };
 
 export function RaporTabs({ rapor }: { rapor: DetailRapor[] }) {
+  const t = useTranslations("siswa");
   const [active, setActive] = useState(0);
-  if (!rapor.length) return <p style={{ color: "var(--ak-muted)", fontSize: 13, padding: "16px 0" }}>Belum ada nilai rapor.</p>;
+  if (!rapor.length) return <p style={{ color: "var(--ak-muted)", fontSize: 13, padding: "16px 0" }}>{t("detail.rtEmpty")}</p>;
   const r = rapor[active];
   const aman = r.items.filter((i) => i.nilai >= i.kkm).length;
 
@@ -42,12 +44,12 @@ export function RaporTabs({ rapor }: { rapor: DetailRapor[] }) {
           ))}
         </div>
         <div className="rapor-sum">
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>Rata-rata semester</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>{t("detail.rtRata")}</div>
           <div className="big">{r.avg}</div>
-          <div className="rs-row"><span>Jumlah mapel</span><b>{r.items.length}</b></div>
-          <div className="rs-row"><span>Di atas KKM</span><b>{aman} / {r.items.length}</b></div>
-          <div className="rs-row"><span>Nilai tertinggi</span><b>{Math.max(...r.items.map((i) => i.nilai))}</b></div>
-          <div className="rs-row"><span>Nilai terendah</span><b>{Math.min(...r.items.map((i) => i.nilai))}</b></div>
+          <div className="rs-row"><span>{t("detail.rtJumlah")}</span><b>{r.items.length}</b></div>
+          <div className="rs-row"><span>{t("detail.rtKkm")}</span><b>{aman} / {r.items.length}</b></div>
+          <div className="rs-row"><span>{t("detail.rtMax")}</span><b>{Math.max(...r.items.map((i) => i.nilai))}</b></div>
+          <div className="rs-row"><span>{t("detail.rtMin")}</span><b>{Math.min(...r.items.map((i) => i.nilai))}</b></div>
         </div>
       </div>
     </div>

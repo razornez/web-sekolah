@@ -311,6 +311,38 @@
       "share": "🔗 Share link", "waSend": "Send to parents via WA", "print": "🖨 Print / PDF",
       "waText": "Report {nama} — average {rata} ({predikat})",
       "tabAkademik": "📄 Academic Report", "tabP5": "🌱 P5 Report"
+    },
+    "detail": {
+      "eyebrow": "Student Profile",
+      "chipAktif": "✓ Active", "chipP": "♀ Female", "chipL": "♂ Male", "chipFase": "🎓 Phase {fase}", "chipPrestasi": "achievements",
+      "metaWali": "Homeroom", "metaAbsen": "Roll no.",
+      "actWa": "WhatsApp the parents", "actEdit": "✏ Edit Data", "actRapor": "📄 View Report",
+      "waHero": "Hello, this is {sekolah} reaching out regarding {nama}.",
+      "mRata": "📊 Average Grade", "mRataSub": "{n} graded semesters",
+      "mHadir": "✅ Attendance", "mHadirSub": "{h} present · {i} excused · {s} sick · {a} absent",
+      "mRank": "🏆 Class Rank", "mRankSub": "of {n} graded", "mRankNone": "no data yet",
+      "mSpp": "💰 Tuition", "mSppLunas": "All paid",
+      "mBmi": "📏 BMI", "mBmiNone": "Data incomplete",
+      "mPoin": "🎯 Discipline Points", "mPoinClean": "Clean since enrolment", "mPoinCount": "{n} BK notes",
+      "personaTitle": "About {nama}", "personaSub": "Analysis from date of birth & biometrics",
+      "zodiak": "Zodiac", "element": "🌊 {el} element", "noTtl": "Date of birth not set.",
+      "bmiTitle": "Nutrition Status · BMI", "bmiHeight": "Height {t} cm · Weight {b} kg", "bmiIncomplete": "Incomplete", "bmiFill": "Fill height & weight in Edit Data.",
+      "numeroTitle": "Numerology · Life Number", "numeroAngka": "Number {n} — {sifat}",
+      "akademik": "Academic Progress", "akademikSub": "{n} semesters · {b} fields",
+      "chartTren": "Average trend per semester", "chartTrenSub": "Knowledge score each period",
+      "chartBakat": "Aptitude map", "chartBakatSub": "Average grade per field",
+      "journey": "Academic Journey", "journeySub": "{n} class periods", "journeyAbsen": "Roll no. {n}",
+      "raporTitle": "Academic Report", "raporSub": "Grades per subject",
+      "heatmap": "Attendance Heatmap", "heatmapSub": "Past year", "hadir": "Present", "izin": "Excused", "sakit": "Sick", "alpa": "Absent",
+      "mapTitle": "Home & Transport", "addrNone": "Address not set", "jarak": "Distance to school", "estTempuh": "Est. travel", "tinggalDengan": "Lives with", "transportasi": "Transport", "mnt": "{n} min",
+      "transUse": "🚍 By {mode}", "transNone": "🚍 Transport mode not set", "transDist": " · ±{km} km from school",
+      "bkTitle": "Counseling & Discipline", "bkEmpty": "No disciplinary records", "bkEmptySub": "Well-behaved since enrolment.", "pelanggaran": "Violations", "penghargaan": "Awards",
+      "bkCount": "{n} BK notes · {p} points", "poinDisiplin": "Discipline points", "disBaik": "Excellent", "disCukup": "Fair", "disPerlu": "Needs attention",
+      "sppTitle": "Tuition Payments", "sppBulan": "{n} months", "sppEmpty": "No tuition bills yet.", "sppLunas": "Paid", "sppCicil": "Partial", "sppBelum": "Unpaid", "sppTotal": "Total paid", "sppBln": "{n} mo",
+      "prestasiTitle": "Achievements & Awards", "prestasiSub": "{n} achievements", "penghargaanLabel": "Award",
+      "ortuTitle": "Parents & Guardian", "ortuSub": "Communication contacts", "ortuPekerjaan": "Occupation", "ortuPendidikan": "Education", "ortuPenghasilan": "Income", "ortuNoHp": "Phone", "ortuWa": "💬 WhatsApp", "ortuTel": "📞 Call", "waOrtu": "Hello {nama}, this is the school reaching out about {anak}.",
+      "rtEmpty": "No report grades yet.", "rtRata": "Semester average", "rtJumlah": "Subjects", "rtKkm": "Above passing", "rtMax": "Highest grade", "rtMin": "Lowest grade",
+      "kartuBtn": "📇 Print Student Card", "kartuTitle": "Student Card", "kartuSuffix": "Student Card", "kartuTema": "Color theme", "kartuDesc": "Print-ready card at ISO size (85×54 mm). The student photo appears automatically if uploaded.", "kartuDownload": "⬇ Download / Print PDF"
     }
   }
 }

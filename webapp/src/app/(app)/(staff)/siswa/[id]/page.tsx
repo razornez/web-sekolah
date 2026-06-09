@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { requireModule } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { getSiswaDetail } from "../_revamp/detailData";
@@ -79,6 +80,7 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
     prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { nama: true } }),
   ]);
   if (!s) notFound();
+  const t = await getTranslations("siswa");
 
   const m = s.metrics;
   const sppLunas = s.spp.filter((x) => x.status === "lunas").length;
@@ -89,98 +91,98 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div id="ak-sd">
-      <div className="crumb"><Link href="/siswa">Siswa</Link><span>/</span><b>{s.nama}</b></div>
+      <div className="crumb"><Link href="/siswa">{t("title")}</Link><span>/</span><b>{s.nama}</b></div>
 
       {/* HERO */}
       <section className="hero-prof">
         <div className="hero-prof-row">
           <div className="hero-photo">{s.foto ? <img src={s.foto} alt={s.nama} /> : s.inisial}</div>
           <div className="hero-info">
-            <span className="hero-eyebrow">Profil Siswa</span>
+            <span className="hero-eyebrow">{t("detail.eyebrow")}</span>
             <h1 className="hero-name">{s.nama}</h1>
             <div className="hero-chips">
-              {s.status === "aktif" && <span className="hc aktif">✓ Aktif</span>}
-              {s.jk && <span className="hc">{s.jk === "P" ? "♀ Perempuan" : "♂ Laki-laki"}</span>}
+              {s.status === "aktif" && <span className="hc aktif">{t("detail.chipAktif")}</span>}
+              {s.jk && <span className="hc">{s.jk === "P" ? t("detail.chipP") : t("detail.chipL")}</span>}
               <span className="hc">📚 <b>{s.kelas}</b></span>
-              {s.fase && <span className="hc">🎓 Fase {s.fase}</span>}
-              {s.prestasiCount > 0 && <span className="hc">🏆 <b>{s.prestasiCount}</b> prestasi</span>}
+              {s.fase && <span className="hc">{t("detail.chipFase", { fase: s.fase })}</span>}
+              {s.prestasiCount > 0 && <span className="hc">🏆 <b>{s.prestasiCount}</b> {t("detail.chipPrestasi")}</span>}
               {s.beasiswa && <span className="hc">💰 {s.beasiswa}</span>}
             </div>
             <div className="hero-meta">
               <span className="m">NISN <b>{s.nisn}</b></span>
               <span className="m">NIS <b>{s.nis}</b></span>
-              {s.waliKelas && <span className="m">Wali kelas <b>{s.waliKelas}</b></span>}
-              {s.absen != null && <span className="m">No absen <b>{String(s.absen).padStart(2, "0")}</b></span>}
+              {s.waliKelas && <span className="m">{t("detail.metaWali")} <b>{s.waliKelas}</b></span>}
+              {s.absen != null && <span className="m">{t("detail.metaAbsen")} <b>{String(s.absen).padStart(2, "0")}</b></span>}
             </div>
           </div>
           <div className="hero-actions">
             <KartuButton nama={s.nama} nisn={s.nisn} kelas={s.kelas} inisial={s.inisial} sekolah={sekolah?.nama ?? "Sekolah"} ttl={s.ttl} />
-            <a className="btn btn-wa" href={waHref(firstParentHp, `Assalamualaikum, kami dari ${sekolah?.nama ?? "sekolah"} ingin menyampaikan informasi terkait ananda ${s.nama}.`)} target="_blank" rel="noopener noreferrer">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 1 A6 6 0 0 0 2 10 L1 13 L4 12 A6 6 0 1 0 7 1 Z" /></svg>Kirim WA ke Ortu
+            <a className="btn btn-wa" href={waHref(firstParentHp, t("detail.waHero", { sekolah: sekolah?.nama ?? "sekolah", nama: s.nama }))} target="_blank" rel="noopener noreferrer">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 1 A6 6 0 0 0 2 10 L1 13 L4 12 A6 6 0 1 0 7 1 Z" /></svg>{t("detail.actWa")}
             </a>
-            <Link className="btn btn-ghost" href={`/siswa/${s.id}/edit`}>✏ Edit Data</Link>
-            <Link className="btn btn-ghost" href={`/siswa/${s.id}/rapor`}>📄 Lihat Rapor</Link>
+            <Link className="btn btn-ghost" href={`/siswa/${s.id}/edit`}>{t("detail.actEdit")}</Link>
+            <Link className="btn btn-ghost" href={`/siswa/${s.id}/rapor`}>{t("detail.actRapor")}</Link>
           </div>
         </div>
       </section>
 
       {/* STRIP */}
       <div className="strip">
-        <div className="sm"><div className="l">📊 Rata-rata Nilai</div><div className="v mint">{m.rata ?? "—"}</div><div className="d">{s.rapor.length} semester dinilai</div></div>
-        <div className="sm"><div className="l">✅ Kehadiran</div><div className="v mint">{m.hadirPct != null ? m.hadirPct : "—"}<small>%</small></div><div className="d">{s.hadirStats.hadir} hadir · {s.hadirStats.izin} izin · {s.hadirStats.sakit} sakit · {s.hadirStats.alpa} alpa</div></div>
-        <div className="sm"><div className="l">🏆 Peringkat Kelas</div><div className="v">{m.rank ? `#${m.rank}` : "—"}</div><div className="d">{m.rankTotal ? `dari ${m.rankTotal} dinilai` : "belum ada data"}</div></div>
-        <div className="sm"><div className="l">💰 SPP</div><div className="v mint">{sppLunas}<small>/{s.spp.length || 12}</small></div><div className="d">{m.sppStatus === "Lunas" ? "Lunas semua" : m.sppStatus}</div></div>
-        <div className="sm"><div className="l">📏 BMI</div><div className="v">{m.bmi?.value ?? "—"}</div><div className="d up">{m.bmi?.kategori ?? "Data belum lengkap"}</div></div>
-        <div className="sm"><div className="l">🎯 Poin Pelanggaran</div><div className="v">{m.pelanggaran}</div><div className="d">{m.pelanggaran === 0 ? "Bersih sejak masuk" : `${s.kasus.count} catatan BK`}</div></div>
+        <div className="sm"><div className="l">{t("detail.mRata")}</div><div className="v mint">{m.rata ?? "—"}</div><div className="d">{t("detail.mRataSub", { n: s.rapor.length })}</div></div>
+        <div className="sm"><div className="l">{t("detail.mHadir")}</div><div className="v mint">{m.hadirPct != null ? m.hadirPct : "—"}<small>%</small></div><div className="d">{t("detail.mHadirSub", { h: s.hadirStats.hadir, i: s.hadirStats.izin, s: s.hadirStats.sakit, a: s.hadirStats.alpa })}</div></div>
+        <div className="sm"><div className="l">{t("detail.mRank")}</div><div className="v">{m.rank ? `#${m.rank}` : "—"}</div><div className="d">{m.rankTotal ? t("detail.mRankSub", { n: m.rankTotal }) : t("detail.mRankNone")}</div></div>
+        <div className="sm"><div className="l">{t("detail.mSpp")}</div><div className="v mint">{sppLunas}<small>/{s.spp.length || 12}</small></div><div className="d">{m.sppStatus === "Lunas" ? t("detail.mSppLunas") : m.sppStatus}</div></div>
+        <div className="sm"><div className="l">{t("detail.mBmi")}</div><div className="v">{m.bmi?.value ?? "—"}</div><div className="d up">{m.bmi?.kategori ?? t("detail.mBmiNone")}</div></div>
+        <div className="sm"><div className="l">{t("detail.mPoin")}</div><div className="v">{m.pelanggaran}</div><div className="d">{m.pelanggaran === 0 ? t("detail.mPoinClean") : t("detail.mPoinCount", { n: s.kasus.count })}</div></div>
       </div>
 
       {/* PERSONA */}
       <div className="section">
-        <div className="section-h"><h2><span className="ico lav">✨</span>Tentang {s.nama.split(" ")[0]}</h2><span className="meta">Analisis dari tanggal lahir &amp; biometri</span></div>
+        <div className="section-h"><h2><span className="ico lav">✨</span>{t("detail.personaTitle", { nama: s.nama.split(" ")[0] })}</h2><span className="meta">{t("detail.personaSub")}</span></div>
         <div className="persona-grid">
           {s.zodiak ? (
             <div className="persona-card zodiac">
-              <div className="persona-h"><div><div className="ttl">Zodiak</div><h3>{s.zodiak.name} — <em>{s.zodiak.tags[2] ?? "unik"}</em></h3></div><span className="persona-emoji">{s.zodiak.sym}</span></div>
+              <div className="persona-h"><div><div className="ttl">{t("detail.zodiak")}</div><h3>{s.zodiak.name} — <em>{s.zodiak.tags[2] ?? "—"}</em></h3></div><span className="persona-emoji">{s.zodiak.sym}</span></div>
               <div className="persona-body">{s.zodiak.desc}</div>
-              <div className="persona-tags"><span>🌊 Element {s.zodiak.el}</span>{s.zodiak.tags.slice(0, 2).map((t) => <span key={t}>{t}</span>)}</div>
+              <div className="persona-tags"><span>{t("detail.element", { el: s.zodiak.el })}</span>{s.zodiak.tags.slice(0, 2).map((tag) => <span key={tag}>{tag}</span>)}</div>
             </div>
-          ) : <div className="persona-card zodiac"><div className="persona-body">Tanggal lahir belum diisi.</div></div>}
+          ) : <div className="persona-card zodiac"><div className="persona-body">{t("detail.noTtl")}</div></div>}
 
           {m.bmi ? (
             <div className="persona-card bmi">
-              <div className="persona-h"><div><div className="ttl">Status Gizi · BMI</div><h3>Tinggi {s.tinggi} cm · Berat {s.berat} kg</h3></div><span className="persona-emoji">💪</span></div>
+              <div className="persona-h"><div><div className="ttl">{t("detail.bmiTitle")}</div><h3>{t("detail.bmiHeight", { t: s.tinggi, b: s.berat })}</h3></div><span className="persona-emoji">💪</span></div>
               <div className="bmi-row"><div className="bmi-num">{m.bmi.value}<small>BMI</small></div><span className="bmi-status">{m.bmi.kategori.toUpperCase()}</span></div>
               <div className="bmi-meter"><div className="bmi-arrow" style={{ left: `${m.bmi.pct}%` }} /></div>
               <div className="bmi-scale"><span>&lt;18.5</span><span>18.5-25</span><span>25-30</span><span>&gt;30</span></div>
             </div>
-          ) : <div className="persona-card bmi"><div className="persona-h"><div><div className="ttl">Status Gizi · BMI</div><h3>Belum lengkap</h3></div><span className="persona-emoji">💪</span></div><div className="persona-body" style={{ fontSize: 12 }}>Isi tinggi &amp; berat badan di Edit Data.</div></div>}
+          ) : <div className="persona-card bmi"><div className="persona-h"><div><div className="ttl">{t("detail.bmiTitle")}</div><h3>{t("detail.bmiIncomplete")}</h3></div><span className="persona-emoji">💪</span></div><div className="persona-body" style={{ fontSize: 12 }}>{t("detail.bmiFill")}</div></div>}
 
           {s.numero ? (
             <div className="persona-card numerologi">
-              <div className="persona-h"><div><div className="ttl">Numerologi · Angka Hidup</div><h3>Angka <span style={{ color: "var(--ak-lav-deep)" }}>{s.numero.angka}</span></h3></div><span className="persona-emoji">🔮</span></div>
-              <div className="persona-body">Angka {s.numero.angka} — {s.numero.sifat}</div>
-              <div className="persona-tags">{s.numero.tags.map((t) => <span key={t}>{t}</span>)}</div>
+              <div className="persona-h"><div><div className="ttl">{t("detail.numeroTitle")}</div><h3>Angka <span style={{ color: "var(--ak-lav-deep)" }}>{s.numero.angka}</span></h3></div><span className="persona-emoji">🔮</span></div>
+              <div className="persona-body">{t("detail.numeroAngka", { n: s.numero.angka, sifat: s.numero.sifat })}</div>
+              <div className="persona-tags">{s.numero.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
             </div>
-          ) : <div className="persona-card numerologi"><div className="persona-body">Tanggal lahir belum diisi.</div></div>}
+          ) : <div className="persona-card numerologi"><div className="persona-body">{t("detail.noTtl")}</div></div>}
         </div>
       </div>
 
       {/* AKADEMIK */}
       <div className="section">
-        <div className="section-h"><h2><span className="ico mint">📊</span>Perkembangan Akademik</h2><span className="meta">{s.rapor.length} semester · {s.radar.filter((r) => r.value > 0).length} bidang</span></div>
+        <div className="section-h"><h2><span className="ico mint">📊</span>{t("detail.akademik")}</h2><span className="meta">{t("detail.akademikSub", { n: s.rapor.length, b: s.radar.filter((r) => r.value > 0).length })}</span></div>
         <div className="akademik-grid">
-          <div className="chart-card"><h3>Tren rata-rata per semester</h3><div className="sub">Nilai pengetahuan tiap periode</div><LineChart data={s.line} /></div>
-          <div className="chart-card"><h3>Pemetaan bakat</h3><div className="sub">Rata-rata nilai per bidang</div><RadarChart data={s.radar} /></div>
+          <div className="chart-card"><h3>{t("detail.chartTren")}</h3><div className="sub">{t("detail.chartTrenSub")}</div><LineChart data={s.line} /></div>
+          <div className="chart-card"><h3>{t("detail.chartBakat")}</h3><div className="sub">{t("detail.chartBakatSub")}</div><RadarChart data={s.radar} /></div>
         </div>
       </div>
 
       {/* JOURNEY */}
       {s.journey.length > 0 && (
         <div className="section">
-          <div className="section-h"><h2><span className="ico lav">🧭</span>Perjalanan Akademik</h2><span className="meta">{s.journey.length} periode kelas</span></div>
+          <div className="section-h"><h2><span className="ico lav">🧭</span>{t("detail.journey")}</h2><span className="meta">{t("detail.journeySub", { n: s.journey.length })}</span></div>
           <div className="journey">
             {s.journey.map((j, i) => (
-              <div key={i} className={`jnode${j.current ? " cur" : ""}`}><span className="jdot" /><div className="jt">{j.tahun}</div><div className="jk">{j.rombel}</div><div className="js">{j.absen != null ? `No absen ${j.absen}` : "—"}</div></div>
+              <div key={i} className={`jnode${j.current ? " cur" : ""}`}><span className="jdot" /><div className="jt">{j.tahun}</div><div className="jk">{j.rombel}</div><div className="js">{j.absen != null ? t("detail.journeyAbsen", { n: j.absen }) : "—"}</div></div>
             ))}
           </div>
         </div>
@@ -188,26 +190,26 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
 
       {/* RAPOR */}
       <div className="section">
-        <div className="section-h"><h2><span className="ico sun">📑</span>Rapor Akademik</h2><span className="meta">Nilai per mata pelajaran</span></div>
+        <div className="section-h"><h2><span className="ico sun">📑</span>{t("detail.raporTitle")}</h2><span className="meta">{t("detail.raporSub")}</span></div>
         <RaporTabs rapor={s.rapor} />
       </div>
 
       {/* HEATMAP */}
       <div className="section">
-        <div className="section-h"><h2><span className="ico mint">🗓</span>Heatmap Kehadiran</h2><span className="meta">Setahun terakhir</span></div>
+        <div className="section-h"><h2><span className="ico mint">🗓</span>{t("detail.heatmap")}</h2><span className="meta">{t("detail.heatmapSub")}</span></div>
         <div className="hm-wrap"><Heatmap cells={s.heatmap} /></div>
         <div className="hm-foot">
-          <div className="hm-stat"><span className="n">{s.hadirStats.hadir}</span><span className="k">Hadir</span></div>
-          <div className="hm-stat"><span className="n">{s.hadirStats.izin}</span><span className="k">Izin</span></div>
-          <div className="hm-stat"><span className="n">{s.hadirStats.sakit}</span><span className="k">Sakit</span></div>
-          <div className="hm-stat"><span className="n">{s.hadirStats.alpa}</span><span className="k">Alpa</span></div>
-          <div className="hm-legend"><span><i style={{ background: "var(--ak-mint-deep)" }} />Hadir</span><span><i style={{ background: "var(--ak-sky-deep)" }} />Izin</span><span><i style={{ background: "var(--ak-sun-deep)" }} />Sakit</span><span><i style={{ background: "var(--ak-peach-deep)" }} />Alpa</span></div>
+          <div className="hm-stat"><span className="n">{s.hadirStats.hadir}</span><span className="k">{t("detail.hadir")}</span></div>
+          <div className="hm-stat"><span className="n">{s.hadirStats.izin}</span><span className="k">{t("detail.izin")}</span></div>
+          <div className="hm-stat"><span className="n">{s.hadirStats.sakit}</span><span className="k">{t("detail.sakit")}</span></div>
+          <div className="hm-stat"><span className="n">{s.hadirStats.alpa}</span><span className="k">{t("detail.alpa")}</span></div>
+          <div className="hm-legend"><span><i style={{ background: "var(--ak-mint-deep)" }} />{t("detail.hadir")}</span><span><i style={{ background: "var(--ak-sky-deep)" }} />{t("detail.izin")}</span><span><i style={{ background: "var(--ak-sun-deep)" }} />{t("detail.sakit")}</span><span><i style={{ background: "var(--ak-peach-deep)" }} />{t("detail.alpa")}</span></div>
         </div>
       </div>
 
       {/* MAP */}
       <div className="section">
-        <div className="section-h"><h2><span className="ico sky">📍</span>Rumah &amp; Transportasi</h2></div>
+        <div className="section-h"><h2><span className="ico sky">📍</span>{t("detail.mapTitle")}</h2></div>
         <div className="map-grid">
           <div className="map-canvas">
             <svg className="map-route" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M20 70 L40 70 L40 40 L80 40 L80 30" fill="none" stroke="var(--ak-primary)" strokeWidth="1.5" strokeDasharray="4 2" /></svg>
@@ -216,30 +218,30 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
             {s.distanceKm != null && <span className="map-dist">{s.distanceKm} km</span>}
           </div>
           <div className="map-info">
-            <div className="mi-addr">📍 {s.alamat ?? "Alamat belum diisi"}</div>
+            <div className="mi-addr">📍 {s.alamat ?? t("detail.addrNone")}</div>
             <div className="map-stats">
-              <div className="mst"><div className="k">Jarak ke sekolah</div><div className="v">{s.distanceKm != null ? `${s.distanceKm} km` : "—"}</div></div>
-              <div className="mst"><div className="k">Estimasi tempuh</div><div className="v">{estTempuh != null ? `${estTempuh} mnt` : "—"}</div></div>
-              <div className="mst"><div className="k">Tinggal dengan</div><div className="v" style={{ fontSize: 13 }}>{s.tinggalDengan ?? "—"}</div></div>
-              <div className="mst"><div className="k">Transportasi</div><div className="v" style={{ fontSize: 13 }}>{s.transportasi ?? "—"}</div></div>
+              <div className="mst"><div className="k">{t("detail.jarak")}</div><div className="v">{s.distanceKm != null ? `${s.distanceKm} km` : "—"}</div></div>
+              <div className="mst"><div className="k">{t("detail.estTempuh")}</div><div className="v">{estTempuh != null ? t("detail.mnt", { n: estTempuh }) : "—"}</div></div>
+              <div className="mst"><div className="k">{t("detail.tinggalDengan")}</div><div className="v" style={{ fontSize: 13 }}>{s.tinggalDengan ?? "—"}</div></div>
+              <div className="mst"><div className="k">{t("detail.transportasi")}</div><div className="v" style={{ fontSize: 13 }}>{s.transportasi ?? "—"}</div></div>
             </div>
-            <div className="map-transport">🚍 {s.transportasi ? `Menggunakan ${s.transportasi.toLowerCase()}` : "Moda transportasi belum diisi"}{s.distanceKm != null ? ` · ±${s.distanceKm} km dari sekolah` : ""}.</div>
+            <div className="map-transport">{s.transportasi ? t("detail.transUse", { mode: s.transportasi.toLowerCase() }) : t("detail.transNone")}{s.distanceKm != null ? t("detail.transDist", { km: s.distanceKm }) : ""}.</div>
           </div>
         </div>
       </div>
 
       {/* BK + GAUGE */}
       <div className="section">
-        <div className="section-h"><h2><span className="ico mint">🌿</span>Catatan BK &amp; Disiplin</h2></div>
+        <div className="section-h"><h2><span className="ico mint">🌿</span>{t("detail.bkTitle")}</h2></div>
         <div className="bk-grid">
           {s.kasus.count === 0 ? (
             <div className="bk-empty">
-              <div className="e">🌿</div><h4>Belum ada catatan pelanggaran</h4><p>Bersikap baik sejak masuk sekolah.</p>
-              <div className="bk-stats"><div><div className="v">0</div><div className="k">Pelanggaran</div></div><div><div className="v">{s.prestasiCount}</div><div className="k">Penghargaan</div></div></div>
+              <div className="e">🌿</div><h4>{t("detail.bkEmpty")}</h4><p>{t("detail.bkEmptySub")}</p>
+              <div className="bk-stats"><div><div className="v">0</div><div className="k">{t("detail.pelanggaran")}</div></div><div><div className="v">{s.prestasiCount}</div><div className="k">{t("detail.penghargaan")}</div></div></div>
             </div>
           ) : (
             <div className="bk-empty" style={{ background: "var(--ak-peach)", textAlign: "left" }}>
-              <h4 style={{ color: "var(--ak-peach-deep)", textAlign: "center" }}>{s.kasus.count} catatan BK · {s.kasus.poin} poin</h4>
+              <h4 style={{ color: "var(--ak-peach-deep)", textAlign: "center" }}>{t("detail.bkCount", { n: s.kasus.count, p: s.kasus.poin })}</h4>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
                 {s.kasus.list.map((k, i) => (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, background: "rgba(255,255,255,0.6)", borderRadius: 10, padding: "8px 12px", fontSize: 12.5 }}>
@@ -255,29 +257,29 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
               <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="var(--ak-bg-2)" strokeWidth="14" strokeLinecap="round" />
               <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="var(--ak-mint-deep)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${(poin / 100) * 267} 400`} />
             </svg>
-            <div className="gnum">{poin}</div><div className="gk">Poin disiplin</div>
-            <div className="gpill">{poin >= 80 ? "Sangat baik" : poin >= 50 ? "Cukup" : "Perlu perhatian"}</div>
+            <div className="gnum">{poin}</div><div className="gk">{t("detail.poinDisiplin")}</div>
+            <div className="gpill">{poin >= 80 ? t("detail.disBaik") : poin >= 50 ? t("detail.disCukup") : t("detail.disPerlu")}</div>
           </div>
         </div>
       </div>
 
       {/* SPP */}
       <div className="section">
-        <div className="section-h"><h2><span className="ico sun">💰</span>Pembayaran SPP</h2><span className="meta">{s.spp.length} bulan</span></div>
-        {s.spp.length === 0 ? <p style={{ color: "var(--ak-muted)", fontSize: 13 }}>Belum ada tagihan SPP.</p> : (
+        <div className="section-h"><h2><span className="ico sun">💰</span>{t("detail.sppTitle")}</h2><span className="meta">{t("detail.sppBulan", { n: s.spp.length })}</span></div>
+        {s.spp.length === 0 ? <p style={{ color: "var(--ak-muted)", fontSize: 13 }}>{t("detail.sppEmpty")}</p> : (
           <>
             <div className="spp-grid">
               {Array.from({ length: 12 }, (_, i) => {
-                const t = s.spp.find((x) => x.bulan === i + 1);
-                const st = t?.status ?? "";
+                const cell = s.spp.find((x) => x.bulan === i + 1);
+                const st = cell?.status ?? "";
                 return <div key={i} className={`spp-cell ${st}`}><div className="b">{BULAN3[i + 1]}</div><div className="i">{st === "lunas" ? "✓" : st === "cicil" ? "½" : st === "belum" ? "·" : ""}</div></div>;
               })}
             </div>
             <div className="spp-sum">
-              <div className="ss"><div className="k">Lunas</div><div className="v">{sppLunas} bln</div></div>
-              <div className="ss"><div className="k">Cicil</div><div className="v">{s.spp.filter((x) => x.status === "cicil").length} bln</div></div>
-              <div className="ss"><div className="k">Belum</div><div className="v">{s.spp.filter((x) => x.status === "belum").length} bln</div></div>
-              <div className="ss"><div className="k">Total terbayar</div><div className="v">Rp {s.spp.filter((x) => x.status === "lunas").reduce((a, b) => a + b.nominal, 0).toLocaleString("id-ID")}</div></div>
+              <div className="ss"><div className="k">{t("detail.sppLunas")}</div><div className="v">{t("detail.sppBln", { n: sppLunas })}</div></div>
+              <div className="ss"><div className="k">{t("detail.sppCicil")}</div><div className="v">{t("detail.sppBln", { n: s.spp.filter((x) => x.status === "cicil").length })}</div></div>
+              <div className="ss"><div className="k">{t("detail.sppBelum")}</div><div className="v">{t("detail.sppBln", { n: s.spp.filter((x) => x.status === "belum").length })}</div></div>
+              <div className="ss"><div className="k">{t("detail.sppTotal")}</div><div className="v">Rp {s.spp.filter((x) => x.status === "lunas").reduce((a, b) => a + b.nominal, 0).toLocaleString("id-ID")}</div></div>
             </div>
           </>
         )}
@@ -286,13 +288,13 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       {/* PRESTASI */}
       {s.prestasi.length > 0 && (
         <div className="section">
-          <div className="section-h"><h2><span className="ico sun">🏆</span>Prestasi &amp; Penghargaan</h2><span className="meta">{s.prestasi.length} pencapaian</span></div>
+          <div className="section-h"><h2><span className="ico sun">🏆</span>{t("detail.prestasiTitle")}</h2><span className="meta">{t("detail.prestasiSub", { n: s.prestasi.length })}</span></div>
           <div className="shelf">
             <div className="shelf-row">
               {s.prestasi.slice(0, 6).map((p, i) => {
                 const tone = ["g", "s", "b", "p"][i % 4];
                 const ico = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
-                return <div className={`medal ${tone}`} key={i}><div className="disc">{ico}</div><div className="mt">{p.nama}</div><div className="ms">{[p.tingkat, p.tahun].filter(Boolean).join(" · ") || "Penghargaan"}</div></div>;
+                return <div className={`medal ${tone}`} key={i}><div className="disc">{ico}</div><div className="mt">{p.nama}</div><div className="ms">{[p.tingkat, p.tahun].filter(Boolean).join(" · ") || t("detail.penghargaanLabel")}</div></div>;
               })}
             </div>
             <div className="shelf-board" />
@@ -303,22 +305,22 @@ export default async function SiswaDetailPage({ params }: { params: Promise<{ id
       {/* ORTU */}
       {s.parents.length > 0 && (
         <div className="section">
-          <div className="section-h"><h2><span className="ico pink">👨‍👩‍👧</span>Orang Tua &amp; Wali</h2><span className="meta">Kontak komunikasi</span></div>
+          <div className="section-h"><h2><span className="ico pink">👨‍👩‍👧</span>{t("detail.ortuTitle")}</h2><span className="meta">{t("detail.ortuSub")}</span></div>
           <div className="ortu-grid">
             {s.parents.slice(0, 3).map((p, i) => (
               <div className={`ortu-card ${ortuTone(p.tipe)}`} key={i}>
                 <span className="ortu-tag">{p.tipe}</span>
                 <h4>{p.nama}</h4>
                 <div className="ortu-rows">
-                  {p.pekerjaan && <div className="or"><span className="k">Pekerjaan</span><span className="vv">{p.pekerjaan}</span></div>}
-                  {p.pendidikan && <div className="or"><span className="k">Pendidikan</span><span className="vv">{p.pendidikan}</span></div>}
-                  {p.penghasilan && <div className="or"><span className="k">Penghasilan</span><span className="vv">{p.penghasilan}</span></div>}
-                  {p.noHp && <div className="or"><span className="k">No HP</span><span className="vv">{p.noHp}</span></div>}
+                  {p.pekerjaan && <div className="or"><span className="k">{t("detail.ortuPekerjaan")}</span><span className="vv">{p.pekerjaan}</span></div>}
+                  {p.pendidikan && <div className="or"><span className="k">{t("detail.ortuPendidikan")}</span><span className="vv">{p.pendidikan}</span></div>}
+                  {p.penghasilan && <div className="or"><span className="k">{t("detail.ortuPenghasilan")}</span><span className="vv">{p.penghasilan}</span></div>}
+                  {p.noHp && <div className="or"><span className="k">{t("detail.ortuNoHp")}</span><span className="vv">{p.noHp}</span></div>}
                 </div>
                 {p.noHp && (
                   <div className="ortu-actions">
-                    <a className="wa" href={waHref(p.noHp, `Assalamualaikum ${p.nama}, kami dari sekolah ingin menyampaikan informasi tentang ananda ${s.nama}.`)} target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
-                    <a className="tel" href={`tel:${p.noHp}`}>📞 Telepon</a>
+                    <a className="wa" href={waHref(p.noHp, t("detail.waOrtu", { nama: p.nama, anak: s.nama }))} target="_blank" rel="noopener noreferrer">{t("detail.ortuWa")}</a>
+                    <a className="tel" href={`tel:${p.noHp}`}>{t("detail.ortuTel")}</a>
                   </div>
                 )}
               </div>
