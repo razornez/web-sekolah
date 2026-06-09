@@ -22,11 +22,13 @@ export function TiptapEditor({
   defaultValue = "",
   placeholder = "Tulis isi pengumuman…",
   minHeight = "200px",
+  onChange,
 }: {
   name?: string;
   defaultValue?: string;
   placeholder?: string;
   minHeight?: string;
+  onChange?: (html: string) => void;
 }) {
   const [html, setHtml] = useState(defaultValue);
 
@@ -39,7 +41,7 @@ export function TiptapEditor({
       Placeholder.configure({ placeholder }),
     ],
     content: defaultValue,
-    onUpdate: ({ editor }) => setHtml(editor.getHTML()),
+    onUpdate: ({ editor }) => { const h = editor.getHTML(); setHtml(h); onChange?.(h); },
     editorProps: {
       attributes: {
         class: "prose prose-sm max-w-none focus:outline-none px-4 py-3 min-h-[200px]",

@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/lib/session";
 import { auditLog } from "@/lib/audit";
 
 const TARGETS: PengumumanTarget[] = ["semua", "staf", "siswa", "ortu"];
-const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting"];
+const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting", "staf", "lainnya"];
 const CHANNELS: KirimChannel[] = ["wa", "email", "sms", "app"];
 
 export type PengumumanFormState = { ok: boolean; message?: string };

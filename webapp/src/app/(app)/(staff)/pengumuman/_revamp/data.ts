@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
-export const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting"] as const;
+export const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting", "staf", "lainnya"] as const;
 export type Kategori = (typeof KATEGORIS)[number];
+// Kategori yang punya "bin" di mini-game (yang lain tidak ditebak).
+const GAME_KAT = ["umum", "akademik", "keuangan", "kegiatan", "penting"];
 
 export function strip(html: string, n = 140): string {
   const t = html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
@@ -23,6 +25,7 @@ export type PengItem = {
   author: string | null;
   viewCount: number;
   readCount: number;
+  readByTipe: { siswa: number; ortu: number; guru: number };
   recipientTotal: number;
   readPct: number;
   waSent: boolean;
@@ -66,7 +69,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
   ]);
   const audience = { siswa: siswaCount, ortu: ortuCount, guru: guruCount, semua: siswaCount + ortuCount + guruCount };
 
-  const [rows, readGroups, catGroups] = await Promise.all([
+  const [rows, readGroups, readTipeGroups, catGroups] = await Promise.all([
     prisma.pengumuman.findMany({
       where: { sekolahId },
       orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
@@ -79,10 +82,17 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
       },
     }),
     prisma.pengumumanBaca.groupBy({ by: ["pengumumanId"], where: { pengumuman: { sekolahId } }, _count: { _all: true } }),
+    prisma.pengumumanBaca.groupBy({ by: ["pengumumanId", "tipe"], where: { pengumuman: { sekolahId } }, _count: { _all: true } }),
     prisma.pengumuman.groupBy({ by: ["kategori"], where: { sekolahId }, _count: { _all: true } }),
   ]);
 
   const readMap = new Map<number, number>(readGroups.map((r) => [r.pengumumanId, r._count._all]));
+  const tipeMap = new Map<number, { siswa: number; ortu: number; guru: number }>();
+  for (const r of readTipeGroups) {
+    const e = tipeMap.get(r.pengumumanId) ?? { siswa: 0, ortu: 0, guru: 0 };
+    e[r.tipe] = r._count._all;
+    tipeMap.set(r.pengumumanId, e);
+  }
   const items: PengItem[] = rows.map((p) => {
     const recTotal = recipientTotal(p.target, audience);
     const readCount = readMap.get(p.id) ?? 0;
@@ -101,6 +111,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
       author: p.author?.namaLengkap ?? null,
       viewCount: p.viewCount,
       readCount,
+      readByTipe: tipeMap.get(p.id) ?? { siswa: 0, ortu: 0, guru: 0 },
       recipientTotal: recTotal,
       readPct: recTotal > 0 ? Math.round((readCount / recTotal) * 100) : 0,
       waSent: p.kiriman.some((k) => k.channel === "wa" && k.status === "terkirim"),
@@ -114,7 +125,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
 
   // Mini-game: kartu = pengumuman nyata (snippet pendek + kategori benar)
   const gameCards: GameCard[] = items
-    .filter((i) => (KATEGORIS as readonly string[]).includes(i.kategori) && i.judul.length > 3)
+    .filter((i) => GAME_KAT.includes(i.kategori) && i.judul.length > 3)
     .slice(0, 16)
     .map((i) => ({ id: i.id, snippet: i.judul, kategori: i.kategori, target: i.target }));
 

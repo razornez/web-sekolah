@@ -5,19 +5,40 @@ import { TiptapEditor } from "@/components/TiptapEditor";
 import { createPengumuman, type PengumumanFormState } from "../actions";
 import type { PengData } from "./data";
 
+function strip(html: string, n = 220): string {
+  const t = html.replace(/<\/(p|div|h[1-6]|li)>/gi, "\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+  return t.length > n ? t.slice(0, n).trimEnd() + "…" : t;
+}
+
+const I = {
+  akademik: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6 L10 11 L17 6" /><rect x="3" y="6" width="14" height="10" rx="1.5" /></svg>,
+  keuangan: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="10" cy="6" rx="7" ry="2.6" /><path d="M3 6 V14 Q3 16.6 10 16.6 Q17 16.6 17 14 V6" /></svg>,
+  kegiatan: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M10 2.5 L12.4 7.5 L18 8 L13.8 11.6 L15.2 17 L10 14 L4.8 17 L6.2 11.6 L2 8 L7.6 7.5 Z" /></svg>,
+  umum: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9 L12 5 L12 15 L3 11 Z" /><path d="M12 7 Q17 7 17 10 Q17 13 12 13" /></svg>,
+  staf: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="6.5" cy="7" r="2.3" /><circle cx="13" cy="7" r="2.3" /><path d="M2.5 16 Q2.5 12 6.5 12 Q9 12 10 13" /><path d="M17.5 16 Q17.5 12 13 12 Q10.5 12 9.5 13.5" /></svg>,
+  lainnya: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="10" r="7.5" /><path d="M8 8 Q8 6 10 6 Q12 6 12 8 Q12 9.4 10 10 L10 11.6" /><circle cx="10" cy="14" r="0.6" fill="currentColor" /></svg>,
+};
 const KAT = [
-  { key: "akademik", label: "Akademik", hint: "Ujian, kelulusan, rapor", cls: "c-akademik" },
-  { key: "keuangan", label: "Keuangan", hint: "SPP, biaya kegiatan", cls: "c-keuangan" },
-  { key: "kegiatan", label: "Kegiatan", hint: "Lomba, acara, OSIS", cls: "c-kegiatan" },
-  { key: "umum", label: "Umum", hint: "Libur, peminjaman buku", cls: "c-umum" },
-  { key: "penting", label: "Penting", hint: "Mendesak & prioritas", cls: "c-penting" },
+  { key: "akademik", label: "Akademik", hint: "Ujian, kelulusan, rapor", cls: "c-akademik", ico: I.akademik },
+  { key: "keuangan", label: "Keuangan", hint: "SPP, biaya kegiatan", cls: "c-keuangan", ico: I.keuangan },
+  { key: "kegiatan", label: "Kegiatan", hint: "Lomba, acara, OSIS", cls: "c-kegiatan", ico: I.kegiatan },
+  { key: "umum", label: "Umum", hint: "Libur, peminjaman buku", cls: "c-umum", ico: I.umum },
+  { key: "staf", label: "Staf", hint: "Rapat guru, internal", cls: "c-penting", ico: I.staf },
+  { key: "lainnya", label: "Lainnya", hint: "Buat kategori baru", cls: "c-akademik", ico: I.lainnya },
 ];
+const TGT_I = {
+  semua: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="6.5" r="3" /><path d="M3.5 16.5 Q3.5 11 10 11 Q16.5 11 16.5 16.5" /></svg>,
+  ortu: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="14" height="13" rx="2" /><path d="M3 8 H17 M7 2.5 V5 M13 2.5 V5" /></svg>,
+  siswa: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="10" cy="6.5" r="3" /><path d="M3.5 16.5 Q3.5 11 10 11 Q16.5 11 16.5 16.5" /></svg>,
+  staf: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="6.5" cy="7" r="2.3" /><circle cx="13" cy="7" r="2.3" /><path d="M2.5 16 Q2.5 12 6.5 12 Q9 12 10 13" /><path d="M17.5 16 Q17.5 12 13 12 Q10.5 12 9.5 13.5" /></svg>,
+};
 const STEPS = [
   { t: "Pilih jenis", s: "Kategori & prioritas" },
   { t: "Tulis isi", s: "Judul & isi pesan" },
   { t: "Pilih penerima", s: "Siapa yang dikirim" },
   { t: "Kirim sekarang", s: "Tinjau & jadwalkan" },
 ];
+const KELAS = ["Kelas 10", "Kelas 11", "Kelas 12", "MIPA", "IPS", "Bahasa"];
 
 export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose: () => void; data: PengData }) {
   const [step, setStep] = useState(0);
@@ -26,7 +47,9 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
   const [prioritas, setPrioritas] = useState(false);
   const [butuhBalasan, setButuhBalasan] = useState(false);
   const [judul, setJudul] = useState("");
+  const [body, setBody] = useState("");
   const [target, setTarget] = useState("semua");
+  const [kelas, setKelas] = useState<Set<string>>(new Set());
   const [mode, setMode] = useState<"now" | "schedule">("now");
   const [scheduledAt, setScheduledAt] = useState("");
   const [channels, setChannels] = useState<Set<string>>(new Set(["wa"]));
@@ -39,9 +62,11 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
     { key: "siswa", label: "Siswa", n: data.audience.siswa, unit: "siswa" },
     { key: "staf", label: "Staf", n: data.audience.guru, unit: "PTK" },
   ];
-  const toggleCh = (c: string) => setChannels((s) => { const n = new Set(s); if (n.has(c)) n.delete(c); else n.add(c); return n; });
+  const toggle = (set: React.Dispatch<React.SetStateAction<Set<string>>>, c: string) => set((s) => { const n = new Set(s); if (n.has(c)) n.delete(c); else n.add(c); return n; });
   const last = step === 3;
-  const targetN = targets.find((t) => t.key === target)?.n ?? 0;
+  const tgt = targets.find((t) => t.key === target)!;
+  const katLabel = KAT.find((k) => k.key === kategori)?.label ?? "Umum";
+  const bodyText = strip(body);
 
   return (
     <div className={`pg-modal-ov${open ? " show" : ""}`} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -58,7 +83,6 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
         </div>
 
         <form action={formAction} className="pg-wz-main">
-          {/* hidden state → server action */}
           <input type="hidden" name="kategori" value={kategori} />
           <input type="hidden" name="target" value={target} />
           {pinned && <input type="hidden" name="pinned" value="on" />}
@@ -79,12 +103,12 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
             {/* STEP 1 */}
             <div style={{ display: step === 0 ? "block" : "none" }}>
               <h4>Pengumuman tentang apa?</h4>
-              <p className="desc">Pilih kategori agar penerima tahu pentingnya — dan otomatis terkelompok di papan.</p>
+              <p className="desc">Pilih kategori agar penerima tahu pentingnya — dan agar otomatis terkelompok di papan pengumuman.</p>
               <div className="pg-wz-grid3">
                 {KAT.map((k) => (
                   <button type="button" key={k.key} className={`pg-wz-card${kategori === k.key ? " sel" : ""}`} onClick={() => setKategori(k.key)}>
                     <span className="chk">✓</span>
-                    <span className={`ico ${k.cls}`} />
+                    <span className={`ico ${k.cls}`}>{k.ico}</span>
                     <div className="nm">{k.label}</div>
                     <div className="hint">{k.hint}</div>
                   </button>
@@ -100,15 +124,23 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
 
             {/* STEP 2 */}
             <div style={{ display: step === 1 ? "block" : "none" }}>
-              <h4>Tulis isi</h4>
-              <p className="desc">Pakai bahasa hangat dan jelas. Hindari singkatan yang membingungkan.</p>
+              <h4>Tulis pesan Anda</h4>
+              <p className="desc">Pakai bahasa hangat dan jelas. Hindari singkatan yang membingungkan orang tua.</p>
               <div className="pg-field">
                 <label>Judul pengumuman — singkat, sampai 60 huruf</label>
                 <input type="text" name="judul" value={judul} maxLength={80} onChange={(e) => setJudul(e.target.value)} placeholder="mis. Pembayaran SPP Bulan Juni 2026" />
               </div>
               <div className="pg-field">
                 <label>Isi pesan</label>
-                <TiptapEditor name="isi" placeholder="Tulis isi pengumuman. Gunakan toolbar untuk memformat…" minHeight="200px" />
+                <TiptapEditor name="isi" placeholder="Tulis isi pengumuman. Gunakan toolbar untuk memformat…" minHeight="170px" onChange={setBody} />
+              </div>
+              <div className="pg-field">
+                <label>Lampiran — gambar atau dokumen</label>
+                <div style={{ border: "1.5px dashed var(--ak-rule)", borderRadius: 14, padding: "26px 16px", textAlign: "center", color: "var(--ak-muted)", background: "var(--ak-surface-2)" }}>
+                  <div style={{ fontSize: 22 }}>📎</div>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: "var(--ak-ink-2)", marginTop: 4 }}>Tarik file ke sini atau klik untuk pilih</div>
+                  <div style={{ fontSize: 11, marginTop: 2 }}>PNG · JPG · PDF · maks 5MB</div>
+                </div>
               </div>
             </div>
 
@@ -120,55 +152,70 @@ export function ComposeWizard({ open, onClose, data }: { open: boolean; onClose:
                 {targets.map((t) => (
                   <button type="button" key={t.key} className={`pg-wz-card${target === t.key ? " sel" : ""}`} onClick={() => setTarget(t.key)}>
                     <span className="chk">✓</span>
-                    <span className="ico c-akademik" />
+                    <span className={`ico ${target === t.key ? "c-akademik" : ""}`} style={target === t.key ? { background: "var(--ak-primary)", color: "#fff" } : { background: "var(--ak-surface-2)", color: "var(--ak-muted)" }}>{TGT_I[t.key as keyof typeof TGT_I]}</span>
                     <div className="nm">{t.label}</div>
                     <div className="hint">{t.n.toLocaleString("id-ID")} {t.unit}</div>
                   </button>
                 ))}
+              </div>
+              <div className="pg-field" style={{ marginTop: 16 }}>
+                <label>Persempit ke kelas tertentu — opsional</label>
+                <div className="pg-wz-flags" style={{ marginTop: 0 }}>
+                  {KELAS.map((c) => (
+                    <button type="button" key={c} className={`pg-chip${kelas.has(c) ? " on" : ""}`} onClick={() => toggle(setKelas, c)}>{kelas.has(c) ? "✓ " : "+ "}{c}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="pg-field">
+                <label>Atau sapa langsung beberapa orang — ketik nama / NISN</label>
+                <input type="text" placeholder="@Bayu Pratama, @Ananda Putri…" />
               </div>
             </div>
 
             {/* STEP 4 */}
             <div style={{ display: step === 3 ? "block" : "none" }}>
               <h4>Tinjau & kirim</h4>
-              <p className="desc">Cek preview pesan. Bisa langsung kirim atau jadwalkan.</p>
+              <p className="desc">Cek preview bagaimana penerima akan menerima pesan ini. Bisa langsung kirim atau jadwalkan.</p>
               <div className="pg-wz-grid3" style={{ gridTemplateColumns: "1fr 1fr", marginBottom: 14 }}>
                 <button type="button" className={`pg-wz-card${mode === "now" ? " sel" : ""}`} style={{ textAlign: "left" }} onClick={() => setMode("now")}>
-                  <div className="nm">Kirim sekarang</div><div className="hint">Langsung ke semua penerima</div>
+                  <div className="nm">Kirim sekarang</div><div className="hint">Akan langsung dikirim ke semua penerima</div>
                 </button>
                 <button type="button" className={`pg-wz-card${mode === "schedule" ? " sel" : ""}`} style={{ textAlign: "left" }} onClick={() => setMode("schedule")}>
-                  <div className="nm">Jadwalkan</div><div className="hint">Pilih tanggal & jam terbit</div>
+                  <div className="nm">Jadwalkan</div><div className="hint">Pilih tanggal dan jam terbit</div>
                 </button>
               </div>
               {mode === "schedule" && (
                 <div className="pg-field"><label>Tanggal & jam terbit</label><input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} /></div>
               )}
-              <div className="pg-field">
-                <label>Kirim juga via</label>
-                <div className="pg-wz-flags" style={{ marginTop: 0 }}>
-                  {[["wa", "WhatsApp"], ["email", "Email"], ["sms", "SMS"]].map(([c, l]) => (
-                    <button type="button" key={c} className={`pg-chip${channels.has(c) ? " on" : ""}`} onClick={() => toggleCh(c)}>{channels.has(c) ? "✓ " : "+ "}{l}</button>
-                  ))}
+              <div className="pg-wz-grid3" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                <div className="pg-field" style={{ marginBottom: 8 }}>
+                  <label>Kirim juga via</label>
+                  <div className="pg-wz-flags" style={{ marginTop: 0 }}>
+                    {[["wa", "WhatsApp"], ["email", "Email"], ["sms", "SMS"]].map(([c, l]) => (
+                      <button type="button" key={c} className={`pg-chip${channels.has(c) ? " on" : ""}`} onClick={() => toggle(setChannels, c)}>{channels.has(c) ? "✓ " : "+ "}{l}</button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="pg-field">
-                <label>Pengingat ulang</label>
-                <select value={reminderHours} onChange={(e) => setReminderHours(Number(e.target.value))}>
-                  <option value={0}>Tidak perlu</option>
-                  <option value={24}>Ulang 1× setelah 24 jam (yang belum baca)</option>
-                  <option value={48}>Ulang 1× setelah 48 jam (yang belum baca)</option>
-                </select>
+                <div className="pg-field" style={{ marginBottom: 8 }}>
+                  <label>Pengingat ulang</label>
+                  <select value={reminderHours} onChange={(e) => setReminderHours(Number(e.target.value))}>
+                    <option value={0}>Tidak perlu</option>
+                    <option value={24}>Ulang 1× setelah 24 jam (yang belum baca)</option>
+                    <option value={48}>Ulang 1× setelah 48 jam (yang belum baca)</option>
+                  </select>
+                </div>
               </div>
               <div className="pg-wa">
                 <div className="pg-wa-lbl">Preview di WhatsApp</div>
                 <div className="pg-wa-bubble">
-                  <b>{judul || "(judul pengumuman)"}</b>{"\n"}
-                  {KAT.find((k) => k.key === kategori)?.label} · {data.schoolName}
+                  <b>{judul || "(judul pengumuman)"}</b>{"\n\n"}
+                  {bodyText || "(isi pesan akan tampil di sini)"}{"\n\n"}
+                  _{katLabel} · {data.schoolName}_
                   <span className="tm">sekarang ✓✓</span>
                 </div>
               </div>
               <div className="pg-summary">
-                Akan terkirim ke <b>{targetN.toLocaleString("id-ID")} {targets.find((t) => t.key === target)?.unit}</b> via kategori <b>{KAT.find((k) => k.key === kategori)?.label}</b>{mode === "schedule" && scheduledAt ? ` — terjadwal ${new Date(scheduledAt).toLocaleString("id-ID")}` : " — langsung"}.
+                Pengumuman ini akan terkirim ke <b>{tgt.n.toLocaleString("id-ID")} {tgt.unit}</b> dengan kategori <b>{katLabel}</b>{mode === "schedule" && scheduledAt ? ` — terjadwal ${new Date(scheduledAt).toLocaleString("id-ID")}` : " — langsung"}.
               </div>
             </div>
           </div>

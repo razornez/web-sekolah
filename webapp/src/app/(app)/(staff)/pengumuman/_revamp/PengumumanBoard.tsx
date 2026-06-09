@@ -8,7 +8,7 @@ import { MiniGameTebakKategori } from "./MiniGameTebakKategori";
 import { ComposeWizard } from "./ComposeWizard";
 import { logKirim } from "../actions";
 
-const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting"] as const;
+const KATEGORIS = ["umum", "akademik", "keuangan", "kegiatan", "penting", "staf", "lainnya"] as const;
 
 const KAT_META: Record<string, { label: string; cls: string }> = {
   umum: { label: "Umum", cls: "c-umum" },
@@ -16,6 +16,8 @@ const KAT_META: Record<string, { label: string; cls: string }> = {
   keuangan: { label: "Keuangan", cls: "c-keuangan" },
   kegiatan: { label: "Kegiatan", cls: "c-kegiatan" },
   penting: { label: "Penting", cls: "c-penting" },
+  staf: { label: "Staf", cls: "c-penting" },
+  lainnya: { label: "Lainnya", cls: "c-akademik" },
 };
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 
@@ -178,6 +180,7 @@ export function PengumumanBoard({ data }: { data: PengData }) {
       <div className={`pg-overlay${sel ? " show" : ""}`} onClick={() => setSelId(null)} />
       <aside className={`pg-drawer${sel ? " show" : ""}`} role="dialog" aria-modal="true" aria-hidden={!sel}>
         {sel && (() => {
+          const tot = sel.recipientTotal;
           const belum = Math.max(0, sel.recipientTotal - sel.readCount);
           const pct = sel.recipientTotal > 0 ? Math.round((sel.readCount / sel.recipientTotal) * 100) : 0;
           return (
@@ -196,12 +199,17 @@ export function PengumumanBoard({ data }: { data: PengData }) {
                 <div dangerouslySetInnerHTML={{ __html: sel.isi }} />
                 <div className="pg-reach">
                   <div className="rtop"><span className="rl">Tingkat dibaca</span><span className="rv">{pct}<small>%</small></span></div>
-                  <div className="rbar"><div className="seg" style={{ width: `${pct}%`, background: "var(--ak-mint-deep)" }} /><div className="seg" style={{ width: `${100 - pct}%`, background: "var(--ak-soft)" }} /></div>
+                  <div className="rbar">
+                    <div className="seg" style={{ width: `${tot ? (sel.readByTipe.siswa / tot) * 100 : 0}%`, background: "var(--ak-sky-deep)" }} />
+                    <div className="seg" style={{ width: `${tot ? (sel.readByTipe.ortu / tot) * 100 : 0}%`, background: "var(--ak-pink-deep)" }} />
+                    <div className="seg" style={{ width: `${tot ? (sel.readByTipe.guru / tot) * 100 : 0}%`, background: "var(--ak-lav-deep)" }} />
+                    <div className="seg" style={{ width: `${tot ? (belum / tot) * 100 : 100}%`, background: "var(--ak-soft)" }} />
+                  </div>
                   <div className="rleg">
-                    <div className="row"><span className="dot" style={{ background: "var(--ak-mint-deep)" }} />Sudah dibaca<b>{sel.readCount.toLocaleString("id-ID")}</b></div>
-                    <div className="row"><span className="dot" style={{ background: "var(--ak-soft)" }} />Belum<b>{belum.toLocaleString("id-ID")}</b></div>
-                    <div className="row"><span className="dot" style={{ background: "var(--ak-lav-deep)" }} />Penerima<b>{sel.recipientTotal.toLocaleString("id-ID")}</b></div>
-                    <div className="row"><span className="dot" style={{ background: "var(--ak-sky-deep)" }} />Dilihat (raw)<b>{sel.viewCount.toLocaleString("id-ID")}</b></div>
+                    <div className="row"><span className="dot" style={{ background: "var(--ak-sky-deep)" }} />Dibaca siswa<b>{sel.readByTipe.siswa.toLocaleString("id-ID")}</b></div>
+                    <div className="row"><span className="dot" style={{ background: "var(--ak-pink-deep)" }} />Dibaca ortu<b>{sel.readByTipe.ortu.toLocaleString("id-ID")}</b></div>
+                    <div className="row"><span className="dot" style={{ background: "var(--ak-lav-deep)" }} />Dibaca guru<b>{sel.readByTipe.guru.toLocaleString("id-ID")}</b></div>
+                    <div className="row"><span className="dot" style={{ background: "var(--ak-soft)" }} />Belum dibaca<b>{belum.toLocaleString("id-ID")}</b></div>
                   </div>
                 </div>
               </div>
