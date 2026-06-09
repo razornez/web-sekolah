@@ -148,7 +148,7 @@ export async function getPengumumanData(sekolahId: number): Promise<PengData> {
   return {
     schoolName: sekolah?.nama ?? "Sekolah",
     items,
-    pinned: items.filter((i) => i.pinned).slice(0, 3),
+    pinned: items.filter((i) => i.pinned || i.prioritas || i.kategori === "penting").slice(0, 3),
     categoryCounts,
     total,
     pentingCount,
