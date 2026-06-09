@@ -1,348 +1,312 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { prisma } from "@/lib/prisma";
 import { requireModule } from "@/lib/permissions";
+import { prisma } from "@/lib/prisma";
+import { getSiswaDetail } from "../_revamp/detailData";
+import { RaporTabs } from "../_revamp/RaporTabs";
+import { KartuButton } from "../_revamp/KartuButton";
+import "../_revamp/detail.css";
 
-const fmt = (d: Date | null | undefined) =>
-  d ? d.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" }) : "—";
-const rupiah = (n: number) => "Rp " + n.toLocaleString("id-ID");
-const BULAN = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+const BULAN3 = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+const waHref = (no: string | null, text: string) => {
+  const n = (no ?? "").replace(/\D/g, "").replace(/^0/, "62");
+  return `https://wa.me/${n}?text=${encodeURIComponent(text)}`;
+};
 
-function InfoRow({ label, value }: { label: string; value?: string | number | null }) {
+function LineChart({ data }: { data: { label: string; avg: number }[] }) {
+  if (data.length < 2) return <p style={{ color: "var(--ak-muted)", fontSize: 12 }}>Butuh ≥2 semester untuk grafik tren.</p>;
+  const W = 600, H = 200, P = 30;
+  const vals = data.map((d) => d.avg);
+  const min = Math.max(0, Math.min(...vals) - 5), max = Math.min(100, Math.max(...vals) + 5) || 100;
+  const x = (i: number) => P + (i / (data.length - 1)) * (W - 2 * P);
+  const y = (v: number) => H - P - ((v - min) / (max - min || 1)) * (H - 2 * P);
+  const pts = data.map((d, i) => `${x(i)},${y(d.avg)}`).join(" ");
   return (
-    <div className="flex gap-2 py-1.5 border-b border-gray-50 last:border-0">
-      <dt className="w-40 shrink-0 text-xs text-gray-500">{label}</dt>
-      <dd className="flex-1 text-sm text-gray-800">{value ?? <span className="text-gray-300">—</span>}</dd>
-    </div>
+    <svg className="line-chart" viewBox={`0 0 ${W} ${H + 24}`} preserveAspectRatio="none" style={{ height: 200 }}>
+      {[0, 0.5, 1].map((t) => <line key={t} x1={P} x2={W - P} y1={P + t * (H - 2 * P)} y2={P + t * (H - 2 * P)} stroke="var(--ak-rule-2)" strokeWidth="1" />)}
+      <polyline points={pts} fill="none" stroke="var(--ak-primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      {data.map((d, i) => (
+        <g key={i}>
+          <circle cx={x(i)} cy={y(d.avg)} r={i === data.length - 1 ? 6 : 4} fill={i === data.length - 1 ? "var(--ak-primary)" : "#fff"} stroke="var(--ak-primary)" strokeWidth="2.5" />
+          <text x={x(i)} y={y(d.avg) - 12} textAnchor="middle" fontSize="13" fontWeight="800" fill="var(--ak-ink)">{d.avg}</text>
+          <text x={x(i)} y={H + 14} textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--ak-muted)">{d.label}</text>
+        </g>
+      ))}
+    </svg>
   );
 }
 
-function Section({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) {
+function RadarChart({ data }: { data: { axis: string; value: number }[] }) {
+  const cx = 130, cy = 120, R = 88, n = data.length;
+  const pt = (v: number, i: number): [number, number] => {
+    const ang = -Math.PI / 2 + (i / n) * Math.PI * 2;
+    const r = (v / 100) * R;
+    return [cx + r * Math.cos(ang), cy + r * Math.sin(ang)];
+  };
+  const poly = data.map((d, i) => pt(d.value, i).join(",")).join(" ");
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3">
-        <span>{icon}</span>
-        <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
-      </div>
-      <div className="p-4">{children}</div>
-    </div>
+    <svg className="radar-chart" viewBox="0 0 260 240" style={{ height: 220 }}>
+      {[0.33, 0.66, 1].map((t) => <polygon key={t} points={data.map((_, i) => pt(100 * t, i).join(",")).join(" ")} fill="none" stroke="var(--ak-rule-2)" strokeWidth="1" />)}
+      {data.map((d, i) => { const [ex, ey] = pt(100, i); return <line key={i} x1={cx} y1={cy} x2={ex} y2={ey} stroke="var(--ak-rule-2)" strokeWidth="1" />; })}
+      <polygon points={poly} fill="rgba(91,79,233,0.22)" stroke="var(--ak-primary)" strokeWidth="2.5" />
+      {data.map((d, i) => { const [lx, ly] = pt(118, i); return <text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="10" fontWeight="700" fill="var(--ak-ink-3)">{d.axis}</text>; })}
+    </svg>
   );
+}
+
+function Heatmap({ cells }: { cells: { date: string; status: string }[] }) {
+  const map = new Map(cells.map((c) => [c.date, c.status]));
+  const today = new Date();
+  const start = new Date(today); start.setDate(today.getDate() - 364);
+  start.setDate(start.getDate() - start.getDay());
+  const out: string[] = [];
+  for (let w = 0; w < 53; w++) for (let d = 0; d < 7; d++) {
+    const dt = new Date(start); dt.setDate(start.getDate() + w * 7 + d);
+    const dow = dt.getDay();
+    if (dt > today || dow === 0 || dow === 6) { out.push(""); continue; }
+    const st = map.get(dt.toISOString().slice(0, 10));
+    out.push(st === "hadir" || st === "terlambat" ? "hadir" : st === "izin" ? "izin" : st === "sakit" ? "sakit" : st === "alpa" ? "alpa" : "");
+  }
+  return <div className="hm">{out.map((c, i) => <i key={i} className={c} />)}</div>;
 }
 
 export default async function SiswaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const sekolahId = await requireModule("siswa");
-  const t = await getTranslations("siswa");
   const { id } = await params;
+  const [s, sekolah] = await Promise.all([
+    getSiswaDetail(Number(id), sekolahId),
+    prisma.sekolah.findUnique({ where: { id: sekolahId }, select: { nama: true } }),
+  ]);
+  if (!s) notFound();
 
-  const siswa = await prisma.siswa.findFirst({
-    where: { id: Number(id), sekolahId, deletedAt: null },
-    include: {
-      orangTuaWali: { orderBy: { tipe: "asc" } },
-      anggotaRombel: {
-        orderBy: { id: "desc" },
-        include: { rombel: { include: { tahunAjaran: { select: { tahun: true } }, tingkat: { select: { nama: true } } } } },
-      },
-      nilaiRapor: {
-        orderBy: [{ periodeId: "desc" }, { mapel: { noUrut: "asc" } }],
-        include: { mapel: { select: { namaMapel: true, kelompok: true } }, periode: { select: { nama: true, tahunAjaran: { select: { tahun: true } } } } },
-        take: 60,
-      },
-      penerimaPrestasiList: { include: { prestasi: { select: { nama: true, tingkat: true, kategori: true, tahun: true } } }, orderBy: { id: "desc" } },
-      penerimaBeasiswaList: { include: { beasiswa: { select: { nama: true, kategori: true } } }, orderBy: { id: "desc" } },
-      tagihanSpp: { orderBy: [{ tahun: "desc" }, { bulan: "desc" }], take: 24, include: { jenis: { select: { nama: true } } } },
-      kehadiran: { orderBy: { tanggal: "desc" }, take: 30, select: { tanggal: true, status: true } },
-      kasus: { orderBy: { tanggal: "desc" }, include: { kategori: { select: { nama: true } } } },
-      user: { select: { username: true, isActive: true } },
-    },
-  });
-  if (!siswa) notFound();
-
-  const kelasAktif = siswa.anggotaRombel[0]?.rombel;
-
-  // Group nilai by periode
-  const nilaiByPeriode: Record<string, typeof siswa.nilaiRapor> = {};
-  for (const n of siswa.nilaiRapor) {
-    const key = `${n.periode.tahunAjaran.tahun} · ${n.periode.nama}`;
-    (nilaiByPeriode[key] ??= []).push(n);
-  }
-
-  // Kehadiran summary
-  const hdSummary = siswa.kehadiran.reduce<Record<string, number>>((acc, k) => {
-    acc[k.status] = (acc[k.status] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  // SPP grouped by tahun
-  const sppByTahun: Record<string, typeof siswa.tagihanSpp> = {};
-  for (const t of siswa.tagihanSpp) {
-    (sppByTahun[String(t.tahun)] ??= []).push(t);
-  }
+  const m = s.metrics;
+  const sppLunas = s.spp.filter((x) => x.status === "lunas").length;
+  const firstParentHp = s.parents.find((p) => p.noHp)?.noHp ?? null;
+  const poin = Math.max(0, 100 - m.pelanggaran * 5);
+  const ortuTone = (tipe: string) => (/ayah|ayh/i.test(tipe) ? "ayah" : /ibu/i.test(tipe) ? "ibu" : "wali");
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start gap-4">
-          {siswa.foto ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={siswa.foto} alt="Foto" className="h-24 w-24 rounded-xl border border-gray-200 object-cover shadow-sm" />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-gradient-to-br from-gray-200 to-gray-100 text-3xl font-bold text-gray-400">
-              {siswa.namaLengkap.charAt(0)}
+    <div id="ak-sd">
+      <div className="crumb"><Link href="/siswa">Siswa</Link><span>/</span><b>{s.nama}</b></div>
+
+      {/* HERO */}
+      <section className="hero-prof">
+        <div className="hero-prof-row">
+          <div className="hero-photo">{s.foto ? <img src={s.foto} alt={s.nama} /> : s.inisial}</div>
+          <div className="hero-info">
+            <span className="hero-eyebrow">Profil Siswa</span>
+            <h1 className="hero-name">{s.nama}</h1>
+            <div className="hero-chips">
+              {s.status === "aktif" && <span className="hc aktif">✓ Aktif</span>}
+              {s.jk && <span className="hc">{s.jk === "P" ? "♀ Perempuan" : "♂ Laki-laki"}</span>}
+              <span className="hc">📚 <b>{s.kelas}</b></span>
+              {s.fase && <span className="hc">🎓 Fase {s.fase}</span>}
+              {s.prestasiCount > 0 && <span className="hc">🏆 <b>{s.prestasiCount}</b> prestasi</span>}
+              {s.beasiswa && <span className="hc">💰 {s.beasiswa}</span>}
             </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{siswa.namaLengkap}</h1>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                  {siswa.nisn && <span>NISN: {siswa.nisn}</span>}
-                  {siswa.nis && <><span>·</span><span>NIS: {siswa.nis}</span></>}
-                  {kelasAktif && <><span>·</span><span className="font-medium text-gray-700">{kelasAktif.nama}</span><span>({kelasAktif.tahunAjaran.tahun})</span></>}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Link href="/siswa" className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50">{t("detailBackList")}</Link>
-                <Link href={`/siswa/${siswa.id}/edit`} className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-800">{t("detailEdit")}</Link>
-                <a href={`/cetak/rapor/${siswa.id}`} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50">{t("detailRapor")}</a>
-              </div>
-            </div>
-            {/* Quick stats */}
-            <div className="mt-3 flex flex-wrap gap-3">
-              {[
-                { label: t("detailStatStatus"), value: siswa.status, color: siswa.status === "aktif" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600" },
-                { label: t("detailStatJk"), value: siswa.jenisKelamin === "L" ? t("detailMale") : siswa.jenisKelamin === "P" ? t("detailFemale") : "—", color: "bg-gray-100 text-gray-600" },
-                { label: t("detailStatAgama"), value: siswa.agama, color: "bg-blue-50 text-blue-700" },
-                { label: t("detailStatTahunMasuk"), value: siswa.tahunMasuk, color: "bg-amber-50 text-amber-700" },
-              ].filter(s => s.value).map(s => (
-                <span key={s.label} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${s.color}`}>{s.value}</span>
-              ))}
-              {siswa.user && (
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${siswa.user.isActive ? "bg-indigo-50 text-indigo-700" : "bg-gray-100 text-gray-500"}`}>
-                  {t("detailAccount", { username: siswa.user.username })}
-                </span>
-              )}
+            <div className="hero-meta">
+              <span className="m">NISN <b>{s.nisn}</b></span>
+              <span className="m">NIS <b>{s.nis}</b></span>
+              {s.waliKelas && <span className="m">Wali kelas <b>{s.waliKelas}</b></span>}
+              {s.absen != null && <span className="m">No absen <b>{String(s.absen).padStart(2, "0")}</b></span>}
             </div>
           </div>
+          <div className="hero-actions">
+            <KartuButton nama={s.nama} nisn={s.nisn} kelas={s.kelas} inisial={s.inisial} sekolah={sekolah?.nama ?? "Sekolah"} ttl={s.ttl} />
+            <a className="btn btn-wa" href={waHref(firstParentHp, `Assalamualaikum, kami dari ${sekolah?.nama ?? "sekolah"} ingin menyampaikan informasi terkait ananda ${s.nama}.`)} target="_blank" rel="noopener noreferrer">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 1 A6 6 0 0 0 2 10 L1 13 L4 12 A6 6 0 1 0 7 1 Z" /></svg>Kirim WA ke Ortu
+            </a>
+            <Link className="btn btn-ghost" href={`/siswa/${s.id}/edit`}>✏ Edit Data</Link>
+            <Link className="btn btn-ghost" href={`/siswa/${s.id}/rapor`}>📄 Lihat Rapor</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* STRIP */}
+      <div className="strip">
+        <div className="sm"><div className="l">📊 Rata-rata Nilai</div><div className="v mint">{m.rata ?? "—"}</div><div className="d">{s.rapor.length} semester dinilai</div></div>
+        <div className="sm"><div className="l">✅ Kehadiran</div><div className="v mint">{m.hadirPct != null ? m.hadirPct : "—"}<small>%</small></div><div className="d">{s.hadirStats.hadir} hadir · {s.hadirStats.izin} izin · {s.hadirStats.sakit} sakit · {s.hadirStats.alpa} alpa</div></div>
+        <div className="sm"><div className="l">🏆 Peringkat Kelas</div><div className="v">{m.rank ? `#${m.rank}` : "—"}</div><div className="d">{m.rankTotal ? `dari ${m.rankTotal} dinilai` : "belum ada data"}</div></div>
+        <div className="sm"><div className="l">💰 SPP</div><div className="v mint">{sppLunas}<small>/{s.spp.length || 12}</small></div><div className="d">{m.sppStatus === "Lunas" ? "Lunas semua" : m.sppStatus}</div></div>
+        <div className="sm"><div className="l">📏 BMI</div><div className="v">{m.bmi?.value ?? "—"}</div><div className="d up">{m.bmi?.kategori ?? "Data belum lengkap"}</div></div>
+        <div className="sm"><div className="l">🎯 Poin Pelanggaran</div><div className="v">{m.pelanggaran}</div><div className="d">Bersih sejak masuk</div></div>
+      </div>
+
+      {/* PERSONA */}
+      <div className="section">
+        <div className="section-h"><h2><span className="ico lav">✨</span>Tentang {s.nama.split(" ")[0]}</h2><span className="meta">Analisis dari tanggal lahir &amp; biometri</span></div>
+        <div className="persona-grid">
+          {s.zodiak ? (
+            <div className="persona-card zodiac">
+              <div className="persona-h"><div><div className="ttl">Zodiak</div><h3>{s.zodiak.name} — <em>{s.zodiak.tags[2] ?? "unik"}</em></h3></div><span className="persona-emoji">{s.zodiak.sym}</span></div>
+              <div className="persona-body">{s.zodiak.desc}</div>
+              <div className="persona-tags"><span>🌊 Element {s.zodiak.el}</span>{s.zodiak.tags.slice(0, 2).map((t) => <span key={t}>{t}</span>)}</div>
+            </div>
+          ) : <div className="persona-card zodiac"><div className="persona-body">Tanggal lahir belum diisi.</div></div>}
+
+          {m.bmi ? (
+            <div className="persona-card bmi">
+              <div className="persona-h"><div><div className="ttl">Status Gizi · BMI</div><h3>Tinggi {s.tinggi} cm · Berat {s.berat} kg</h3></div><span className="persona-emoji">💪</span></div>
+              <div className="bmi-row"><div className="bmi-num">{m.bmi.value}<small>BMI</small></div><span className="bmi-status">{m.bmi.kategori.toUpperCase()}</span></div>
+              <div className="bmi-meter"><div className="bmi-arrow" style={{ left: `${m.bmi.pct}%` }} /></div>
+              <div className="bmi-scale"><span>&lt;18.5</span><span>18.5-25</span><span>25-30</span><span>&gt;30</span></div>
+            </div>
+          ) : <div className="persona-card bmi"><div className="persona-h"><div><div className="ttl">Status Gizi · BMI</div><h3>Belum lengkap</h3></div><span className="persona-emoji">💪</span></div><div className="persona-body" style={{ fontSize: 12 }}>Isi tinggi &amp; berat badan di Edit Data.</div></div>}
+
+          {s.numero ? (
+            <div className="persona-card numerologi">
+              <div className="persona-h"><div><div className="ttl">Numerologi · Angka Hidup</div><h3>Angka <span style={{ color: "var(--ak-lav-deep)" }}>{s.numero.angka}</span></h3></div><span className="persona-emoji">🔮</span></div>
+              <div className="persona-body">Angka {s.numero.angka} — {s.numero.sifat}</div>
+              <div className="persona-tags">{s.numero.tags.map((t) => <span key={t}>{t}</span>)}</div>
+            </div>
+          ) : <div className="persona-card numerologi"><div className="persona-body">Tanggal lahir belum diisi.</div></div>}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Data Pribadi */}
-        <Section title={t("sectionDataPribadi")} icon="🪪">
-          <dl>
-            <InfoRow label={t("rowTempatLahir")} value={siswa.tempatLahir} />
-            <InfoRow label={t("rowTanggalLahir")} value={siswa.tanggalLahir ? fmt(siswa.tanggalLahir) : null} />
-            <InfoRow label={t("rowNik")} value={siswa.nik} />
-            <InfoRow label={t("rowNoInduk")} value={siswa.noInduk} />
-            <InfoRow label={t("rowGolDarah")} value={siswa.golonganDarah} />
-            <InfoRow label={t("rowTinggiBerat")} value={siswa.tinggiBadan ? `${siswa.tinggiBadan} cm / ${siswa.beratBadan ?? "?"} kg` : null} />
-            <InfoRow label={t("rowKebutuhanKhusus")} value={siswa.kebutuhanKhusus} />
-            <InfoRow label={t("rowAsalSekolah")} value={siswa.asalSekolah} />
-          </dl>
-        </Section>
-
-        {/* Alamat & Kontak */}
-        <Section title={t("sectionAlamatKontak")} icon="📍">
-          <dl>
-            <InfoRow label={t("rowAlamat")} value={siswa.alamat} />
-            <InfoRow label={t("rowDesaKel")} value={[siswa.desaKel, siswa.kecamatan, siswa.kabupaten].filter(Boolean).join(", ")} />
-            <InfoRow label={t("rowKodePos")} value={siswa.kodePos} />
-            <InfoRow label={t("rowNoHp")} value={siswa.noHp} />
-            <InfoRow label={t("rowTinggalBersama")} value={siswa.tinggalDengan} />
-            <InfoRow label={t("rowTransportasi")} value={siswa.transportasi} />
-          </dl>
-        </Section>
+      {/* AKADEMIK */}
+      <div className="section">
+        <div className="section-h"><h2><span className="ico mint">📊</span>Perkembangan Akademik</h2><span className="meta">{s.rapor.length} semester · {s.radar.filter((r) => r.value > 0).length} bidang</span></div>
+        <div className="akademik-grid">
+          <div className="chart-card"><h3>Tren rata-rata per semester</h3><div className="sub">Nilai pengetahuan tiap periode</div><LineChart data={s.line} /></div>
+          <div className="chart-card"><h3>Pemetaan bakat</h3><div className="sub">Rata-rata nilai per bidang</div><RadarChart data={s.radar} /></div>
+        </div>
       </div>
 
-      {/* Orang Tua / Wali */}
-      {siswa.orangTuaWali.length > 0 && (
-        <Section title={t("sectionOrangTua")} icon="👨‍👩‍👦">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {siswa.orangTuaWali.map((ot) => (
-              <div key={ot.id} className="rounded-lg border border-gray-100 bg-gray-50 p-3">
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{ot.tipe}</div>
-                <div className="font-medium text-gray-900">{ot.nama}</div>
-                <dl className="mt-1 space-y-0.5 text-xs text-gray-500">
-                  {ot.pekerjaan && <div>{ot.pekerjaan}</div>}
-                  {ot.pendidikan && <div>{t("otPend", { value: ot.pendidikan })}</div>}
-                  {ot.noHp && <div>📱 {ot.noHp}</div>}
-                  {ot.penghasilan && <div>{t("otPenghasilan", { value: Number(ot.penghasilan).toLocaleString("id-ID") })}</div>}
-                </dl>
-              </div>
+      {/* JOURNEY */}
+      {s.journey.length > 0 && (
+        <div className="section">
+          <div className="section-h"><h2><span className="ico lav">🧭</span>Perjalanan Akademik</h2><span className="meta">{s.journey.length} periode kelas</span></div>
+          <div className="journey">
+            {s.journey.map((j, i) => (
+              <div key={i} className={`jnode${j.current ? " cur" : ""}`}><span className="jdot" /><div className="jt">{j.tahun}</div><div className="jk">{j.rombel}</div><div className="js">{j.absen != null ? `No absen ${j.absen}` : "—"}</div></div>
             ))}
           </div>
-        </Section>
+        </div>
       )}
 
-      {/* Riwayat Kelas */}
-      <Section title={t("sectionRiwayatKelas")} icon="🏫">
-        {siswa.anggotaRombel.length === 0 ? (
-          <p className="text-sm text-gray-400">{t("emptyRiwayatKelas")}</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">{t("colKelasRombel")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("colTingkat")}</th>
-                <th className="px-3 py-2 text-left font-medium">{t("colTahunAjaran")}</th>
-                <th className="px-3 py-2 text-right font-medium">{t("colNoAbsen")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {siswa.anggotaRombel.map((ar, i) => (
-                <tr key={ar.id} className={i === 0 ? "bg-green-50" : "hover:bg-gray-50"}>
-                  <td className="px-3 py-2 font-medium text-gray-900">
-                    {ar.rombel.nama}
-                    {i === 0 && <span className="ml-1.5 rounded bg-green-200 px-1 py-0.5 text-xs text-green-800">{t("badgeSaatIni")}</span>}
-                  </td>
-                  <td className="px-3 py-2 text-gray-600">{ar.rombel.tingkat.nama}</td>
-                  <td className="px-3 py-2 text-gray-600">{ar.rombel.tahunAjaran.tahun}</td>
-                  <td className="px-3 py-2 text-right text-gray-600">{ar.nomorAbsen ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Section>
-
-      {/* Nilai Akademik */}
-      <Section title={t("sectionNilaiAkademik")} icon="📊">
-        {Object.keys(nilaiByPeriode).length === 0 ? (
-          <p className="text-sm text-gray-400">{t("emptyNilai")}</p>
-        ) : (
-          <div className="space-y-4">
-            {Object.entries(nilaiByPeriode).map(([periode, nilais]) => (
-              <details key={periode} className="group" open={Object.keys(nilaiByPeriode).indexOf(periode) === 0}>
-                <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
-                  <span>{periode}</span>
-                  <span className="text-xs font-normal text-gray-500">{t("nilaiMapelCount", { n: nilais.length })}</span>
-                </summary>
-                <table className="mt-2 w-full text-sm">
-                  <thead className="text-xs text-gray-500">
-                    <tr><th className="px-3 py-1 text-left font-medium">{t("colMapel")}</th><th className="px-3 py-1 font-medium">{t("colNilai")}</th><th className="px-3 py-1 font-medium text-left">{t("colCapaian")}</th></tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {nilais.map((n) => {
-                      const nilai = n.nilaiAkhir ?? n.nilaiPengetahuan;
-                      const color = !nilai ? "text-gray-400" : nilai >= n.kkm ? "text-green-700" : "text-red-600";
-                      return (
-                        <tr key={n.id} className="hover:bg-gray-50">
-                          <td className="px-3 py-1.5 text-gray-800">{n.mapel.namaMapel}</td>
-                          <td className={`px-3 py-1.5 text-center font-semibold ${color}`}>{nilai ?? "—"}</td>
-                          <td className="px-3 py-1.5 max-w-xs truncate text-xs text-gray-500">{n.deskripsiCapaian ?? "—"}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </details>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        {/* Prestasi */}
-        <Section title={t("sectionPrestasi")} icon="🏆">
-          {siswa.penerimaPrestasiList.length === 0 ? (
-            <p className="text-sm text-gray-400">{t("emptyPrestasi")}</p>
-          ) : (
-            <ul className="space-y-2">
-              {siswa.penerimaPrestasiList.map((p) => (
-                <li key={p.id} className="flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2">
-                  <span className="text-base">🥇</span>
-                  <div>
-                    <div className="text-sm font-medium text-gray-800">{p.prestasi.nama}</div>
-                    <div className="text-xs text-gray-500">{p.prestasi.tingkat} · {p.prestasi.kategori} · {p.tahun ?? p.prestasi.tahun ?? "—"}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Section>
-
-        {/* Beasiswa */}
-        <Section title={t("sectionBeasiswa")} icon="🎓">
-          {siswa.penerimaBeasiswaList.length === 0 ? (
-            <p className="text-sm text-gray-400">{t("emptyBeasiswa")}</p>
-          ) : (
-            <ul className="space-y-2">
-              {siswa.penerimaBeasiswaList.map((b) => (
-                <li key={b.id} className="flex items-start gap-2 rounded-lg border border-indigo-100 bg-indigo-50 px-3 py-2">
-                  <span className="text-base">💰</span>
-                  <div>
-                    <div className="text-sm font-medium text-gray-800">{b.beasiswa.nama}</div>
-                    <div className="text-xs text-gray-500">{b.beasiswa.kategori} · {b.tahun ?? "—"}{b.nominal ? ` · ${rupiah(b.nominal)}` : ""}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Section>
+      {/* RAPOR */}
+      <div className="section">
+        <div className="section-h"><h2><span className="ico sun">📑</span>Rapor Akademik</h2><span className="meta">Nilai per mata pelajaran</span></div>
+        <RaporTabs rapor={s.rapor} />
       </div>
 
-      {/* SPP / Keuangan */}
-      <Section title={t("sectionSpp")} icon="💳">
-        {Object.keys(sppByTahun).length === 0 ? (
-          <p className="text-sm text-gray-400">{t("emptySpp")}</p>
-        ) : (
-          <div className="space-y-4">
-            {Object.entries(sppByTahun).map(([tahun, tagihanList]) => (
-              <div key={tahun}>
-                <div className="mb-2 text-xs font-semibold text-gray-500">{t("sppTahun", { tahun })}</div>
-                <div className="flex flex-wrap gap-2">
-                  {tagihanList.map((t) => (
-                    <div key={t.id} className={`rounded-md border px-2.5 py-1.5 text-center text-xs ${t.status === "lunas" ? "border-green-200 bg-green-50 text-green-700" : t.status === "cicil" ? "border-blue-200 bg-blue-50 text-blue-700" : "border-red-200 bg-red-50 text-red-700"}`}>
-                      <div className="font-medium">{BULAN[t.bulan]}</div>
-                      <div>{t.status}</div>
-                    </div>
-                  ))}
+      {/* HEATMAP */}
+      <div className="section">
+        <div className="section-h"><h2><span className="ico mint">🗓</span>Heatmap Kehadiran</h2><span className="meta">Setahun terakhir</span></div>
+        <div className="hm-wrap"><Heatmap cells={s.heatmap} /></div>
+        <div className="hm-foot">
+          <div className="hm-stat"><span className="n">{s.hadirStats.hadir}</span><span className="k">Hadir</span></div>
+          <div className="hm-stat"><span className="n">{s.hadirStats.izin}</span><span className="k">Izin</span></div>
+          <div className="hm-stat"><span className="n">{s.hadirStats.sakit}</span><span className="k">Sakit</span></div>
+          <div className="hm-stat"><span className="n">{s.hadirStats.alpa}</span><span className="k">Alpa</span></div>
+          <div className="hm-legend"><span><i style={{ background: "var(--ak-mint-deep)" }} />Hadir</span><span><i style={{ background: "var(--ak-sky-deep)" }} />Izin</span><span><i style={{ background: "var(--ak-sun-deep)" }} />Sakit</span><span><i style={{ background: "var(--ak-peach-deep)" }} />Alpa</span></div>
+        </div>
+      </div>
+
+      {/* MAP */}
+      <div className="section">
+        <div className="section-h"><h2><span className="ico sky">📍</span>Rumah &amp; Transportasi</h2></div>
+        <div className="map-grid">
+          <div className="map-canvas">
+            <svg className="map-route" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M20 70 L40 70 L40 40 L80 40 L80 30" fill="none" stroke="var(--ak-primary)" strokeWidth="1.5" strokeDasharray="4 2" /></svg>
+            <span className="map-pin" style={{ left: "20%", top: "70%" }}>🏠<span className="ring" /></span>
+            <span className="map-pin" style={{ left: "80%", top: "30%", fontSize: 24 }}>🏫<span className="ring" /></span>
+          </div>
+          <div className="map-info">
+            <div className="mi-addr">📍 {s.alamat ?? "Alamat belum diisi"}</div>
+            <div className="map-stats">
+              <div className="mst"><div className="k">Tinggal dengan</div><div className="v" style={{ fontSize: 13 }}>{s.tinggalDengan ?? "—"}</div></div>
+              <div className="mst"><div className="k">Transportasi</div><div className="v" style={{ fontSize: 13 }}>{s.transportasi ?? "—"}</div></div>
+            </div>
+            <div className="map-transport">🚍 Rute &amp; jarak tampil saat koordinat lokasi tersedia.</div>
+          </div>
+        </div>
+      </div>
+
+      {/* BK + GAUGE */}
+      <div className="section">
+        <div className="section-h"><h2><span className="ico mint">🌿</span>Catatan BK &amp; Disiplin</h2></div>
+        <div className="bk-grid">
+          <div className="bk-empty">
+            <div className="e">🌿</div><h4>Belum ada catatan pelanggaran</h4><p>Bersikap baik sejak masuk sekolah.</p>
+            <div className="bk-stats"><div><div className="v">0</div><div className="k">Pelanggaran</div></div><div><div className="v">{s.prestasiCount}</div><div className="k">Penghargaan</div></div></div>
+          </div>
+          <div className="gauge-card">
+            <svg viewBox="0 0 200 110" width="200" height="110">
+              <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="var(--ak-bg-2)" strokeWidth="14" strokeLinecap="round" />
+              <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="var(--ak-mint-deep)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${(poin / 100) * 267} 400`} />
+            </svg>
+            <div className="gnum">{poin}</div><div className="gk">Poin disiplin</div>
+            <div className="gpill">{poin >= 80 ? "Sangat baik" : poin >= 50 ? "Cukup" : "Perlu perhatian"}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* SPP */}
+      <div className="section">
+        <div className="section-h"><h2><span className="ico sun">💰</span>Pembayaran SPP</h2><span className="meta">{s.spp.length} bulan</span></div>
+        {s.spp.length === 0 ? <p style={{ color: "var(--ak-muted)", fontSize: 13 }}>Belum ada tagihan SPP.</p> : (
+          <>
+            <div className="spp-grid">
+              {Array.from({ length: 12 }, (_, i) => {
+                const t = s.spp.find((x) => x.bulan === i + 1);
+                const st = t?.status ?? "";
+                return <div key={i} className={`spp-cell ${st}`}><div className="b">{BULAN3[i + 1]}</div><div className="i">{st === "lunas" ? "✓" : st === "cicil" ? "½" : st === "belum" ? "·" : ""}</div></div>;
+              })}
+            </div>
+            <div className="spp-sum">
+              <div className="ss"><div className="k">Lunas</div><div className="v">{sppLunas} bln</div></div>
+              <div className="ss"><div className="k">Cicil</div><div className="v">{s.spp.filter((x) => x.status === "cicil").length} bln</div></div>
+              <div className="ss"><div className="k">Belum</div><div className="v">{s.spp.filter((x) => x.status === "belum").length} bln</div></div>
+              <div className="ss"><div className="k">Total terbayar</div><div className="v">Rp {s.spp.filter((x) => x.status === "lunas").reduce((a, b) => a + b.nominal, 0).toLocaleString("id-ID")}</div></div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* PRESTASI */}
+      {s.prestasi.length > 0 && (
+        <div className="section">
+          <div className="section-h"><h2><span className="ico sun">🏆</span>Prestasi &amp; Penghargaan</h2><span className="meta">{s.prestasi.length} pencapaian</span></div>
+          <div className="shelf">
+            <div className="shelf-row">
+              {s.prestasi.slice(0, 6).map((p, i) => {
+                const tone = ["g", "s", "b", "p"][i % 4];
+                const ico = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏅";
+                return <div className={`medal ${tone}`} key={i}><div className="disc">{ico}</div><div className="mt">{p.nama}</div><div className="ms">{[p.tingkat, p.tahun].filter(Boolean).join(" · ") || "Penghargaan"}</div></div>;
+              })}
+            </div>
+            <div className="shelf-board" />
+          </div>
+        </div>
+      )}
+
+      {/* ORTU */}
+      {s.parents.length > 0 && (
+        <div className="section">
+          <div className="section-h"><h2><span className="ico pink">👨‍👩‍👧</span>Orang Tua &amp; Wali</h2><span className="meta">Kontak komunikasi</span></div>
+          <div className="ortu-grid">
+            {s.parents.slice(0, 3).map((p, i) => (
+              <div className={`ortu-card ${ortuTone(p.tipe)}`} key={i}>
+                <span className="ortu-tag">{p.tipe}</span>
+                <h4>{p.nama}</h4>
+                <div className="ortu-rows">
+                  {p.pekerjaan && <div className="or"><span className="k">Pekerjaan</span><span className="vv">{p.pekerjaan}</span></div>}
+                  {p.pendidikan && <div className="or"><span className="k">Pendidikan</span><span className="vv">{p.pendidikan}</span></div>}
+                  {p.penghasilan && <div className="or"><span className="k">Penghasilan</span><span className="vv">{p.penghasilan}</span></div>}
+                  {p.noHp && <div className="or"><span className="k">No HP</span><span className="vv">{p.noHp}</span></div>}
                 </div>
+                {p.noHp && (
+                  <div className="ortu-actions">
+                    <a className="wa" href={waHref(p.noHp, `Assalamualaikum ${p.nama}, kami dari sekolah ingin menyampaikan informasi tentang ananda ${s.nama}.`)} target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
+                    <a className="tel" href={`tel:${p.noHp}`}>📞 Telepon</a>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        )}
-        <div className="mt-3">
-          <Link href={`/spp?siswaId=${siswa.id}`} className="text-xs text-gray-500 hover:text-gray-900 hover:underline">{t("kelolaSpp")}</Link>
         </div>
-      </Section>
-
-      {/* Kehadiran */}
-      <Section title={t("sectionKehadiran")} icon="📅">
-        <div className="flex flex-wrap gap-3">
-          {[["hadir","✅","text-green-700","bg-green-50",t("hadHadir")],["izin","📋","text-blue-700","bg-blue-50",t("hadIzin")],["sakit","🤒","text-amber-700","bg-amber-50",t("hadSakit")],["alpa","❌","text-red-700","bg-red-50",t("hadAlpa")],["terlambat","⏰","text-orange-700","bg-orange-50",t("hadTerlambat")]].map(([s, icon, tc, bg, label]) => (
-            <div key={s} className={`rounded-xl border px-4 py-3 text-center ${bg}`}>
-              <div className="text-xl">{icon}</div>
-              <div className={`text-lg font-bold ${tc}`}>{hdSummary[s] ?? 0}</div>
-              <div className="text-xs text-gray-500">{label}</div>
-            </div>
-          ))}
-        </div>
-        <p className="mt-2 text-xs text-gray-400">{t("kehadiranNote", { n: siswa.kehadiran.length })}</p>
-      </Section>
-
-      {/* Catatan BK */}
-      {siswa.kasus.length > 0 && (
-        <Section title={t("sectionKasus")} icon="📝">
-          <table className="w-full text-sm">
-            <thead className="text-xs text-gray-500">
-              <tr><th className="px-3 py-1 text-left font-medium">{t("colTanggal")}</th><th className="px-3 py-1 text-left font-medium">{t("colPelanggaran")}</th><th className="px-3 py-1 font-medium">{t("colPoin")}</th><th className="px-3 py-1 text-left font-medium">{t("colKeterangan")}</th></tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {siswa.kasus.map((k) => (
-                <tr key={k.id} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 text-gray-500 whitespace-nowrap">{fmt(k.tanggal)}</td>
-                  <td className="px-3 py-2 text-gray-800">{k.namaKasus}</td>
-                  <td className="px-3 py-2 text-center font-semibold text-red-600">{k.poin}</td>
-                  <td className="px-3 py-2 text-gray-500 text-xs">{k.keterangan ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="mt-1 text-xs font-semibold text-red-600">{t("totalPoin", { total: siswa.kasus.reduce((s, k) => s + k.poin, 0) })}</p>
-        </Section>
       )}
     </div>
   );

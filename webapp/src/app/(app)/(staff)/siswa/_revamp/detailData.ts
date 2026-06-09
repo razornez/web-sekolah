@@ -1,0 +1,136 @@
+import { prisma } from "@/lib/prisma";
+import { zodiakFromDate, numerologi, bmi, type Zodiak, type Bmi } from "../_lib/persona";
+
+export const inisial = (n: string) =>
+  n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "··";
+
+const RADAR_AXES = [
+  { key: "Sains", kw: ["fisika", "kimia", "biologi", "ipa", "alam"] },
+  { key: "Matematika", kw: ["matematika", "mtk"] },
+  { key: "Bahasa", kw: ["bahasa", "inggris", "indonesia", "sastra", "arab"] },
+  { key: "Sosial", kw: ["sosial", "ips", "ekonomi", "geografi", "sejarah", "sosiologi", "pkn", "pancasila"] },
+  { key: "Seni", kw: ["seni", "musik", "budaya", "prakarya"] },
+  { key: "Olahraga", kw: ["jasmani", "olahraga", "penjas", "pjok", "kesehatan"] },
+];
+function axisOf(nama: string): string | null {
+  const n = nama.toLowerCase();
+  for (const a of RADAR_AXES) if (a.kw.some((k) => n.includes(k))) return a.key;
+  return null;
+}
+
+export type DetailRapor = { periode: string; tahun: string; urutan: number; avg: number; items: { mapel: string; nilai: number; kkm: number; deskripsi: string | null }[] };
+export type SiswaDetail = {
+  id: number; nama: string; inisial: string; nisn: string; nis: string; noInduk: string;
+  jk: "L" | "P" | null; status: string; foto: string | null;
+  kelas: string; tingkat: string; fase: string | null; waliKelas: string | null; absen: number | null;
+  ttl: string; alamat: string | null; transportasi: string | null; tinggalDengan: string | null;
+  tinggi: number; berat: number;
+  prestasiCount: number; beasiswa: string | null;
+  metrics: { rata: number | null; hadirPct: number | null; rank: number | null; rankTotal: number | null; sppStatus: string; bmi: Bmi | null; pelanggaran: number };
+  zodiak: Zodiak | null; numero: { angka: number; sifat: string; tags: string[] } | null;
+  line: { label: string; avg: number }[];
+  radar: { axis: string; value: number }[];
+  journey: { rombel: string; tahun: string; absen: number | null; current: boolean }[];
+  rapor: DetailRapor[];
+  heatmap: { date: string; status: string }[];
+  hadirStats: { hadir: number; izin: number; sakit: number; alpa: number };
+  spp: { bulan: number; status: string; nominal: number }[];
+  prestasi: { nama: string; tingkat: string | null; tahun: string | null }[];
+  parents: { tipe: string; nama: string; pekerjaan: string | null; pendidikan: string | null; penghasilan: string | null; noHp: string | null }[];
+};
+
+const BULAN = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+const fmtTgl = (d: Date) => `${d.getDate()} ${BULAN[d.getMonth() + 1]} ${d.getFullYear()}`;
+
+export async function getSiswaDetail(id: number, sekolahId: number): Promise<SiswaDetail | null> {
+  const s = await prisma.siswa.findFirst({
+    where: { id, sekolahId, deletedAt: null },
+    include: {
+      anggotaRombel: { orderBy: { id: "desc" }, include: { rombel: { include: { tingkat: true, tahunAjaran: true, waliGuru: { select: { namaGuru: true } } } } } },
+      orangTuaWali: { orderBy: { id: "asc" } },
+      prestasi: { orderBy: [{ tanggal: "desc" }, { id: "desc" }] },
+      beasiswa: { orderBy: { id: "desc" } },
+      tagihanSpp: { include: { jenis: { select: { nama: true } } }, orderBy: [{ tahun: "desc" }, { bulan: "asc" }] },
+      nilaiRapor: { where: { nilaiAkhir: { not: null } }, include: { mapel: { select: { namaMapel: true, kkm: true } }, periode: { select: { nama: true, urutan: true, tahunAjaranId: true, tahunAjaran: { select: { tahun: true } } } } } },
+    },
+  });
+  if (!s) return null;
+
+  const cur = s.anggotaRombel[0];
+  const curRombelId = cur?.rombelId ?? null;
+  const tinggi = Number(s.tinggiBadan) || 0;
+  const berat = Number(s.beratBadan) || 0;
+
+  // ── kehadiran (heatmap + stats) ──
+  const since = new Date(); since.setDate(since.getDate() - 364);
+  const [kehadiran, hadirGroups, rankRows] = await Promise.all([
+    prisma.kehadiranSiswa.findMany({ where: { siswaId: id, tanggal: { gte: since } }, select: { tanggal: true, status: true }, orderBy: { tanggal: "asc" } }),
+    prisma.kehadiranSiswa.groupBy({ by: ["status"], where: { siswaId: id }, _count: { _all: true } }),
+    curRombelId
+      ? prisma.nilaiRapor.groupBy({ by: ["siswaId"], where: { nilaiAkhir: { not: null }, siswa: { anggotaRombel: { some: { rombelId: curRombelId } } } }, _avg: { nilaiAkhir: true } })
+      : Promise.resolve([] as { siswaId: number; _avg: { nilaiAkhir: number | null } }[]),
+  ]);
+
+  const hg = (st: string) => hadirGroups.find((g) => g.status === st)?._count._all ?? 0;
+  const hadirStats = { hadir: hg("hadir") + hg("terlambat"), izin: hg("izin"), sakit: hg("sakit"), alpa: hg("alpa") };
+  const totalHadir = hadirStats.hadir + hadirStats.izin + hadirStats.sakit + hadirStats.alpa;
+  const hadirPct = totalHadir > 0 ? Math.round((hadirStats.hadir / totalHadir) * 100) : null;
+  const heatmap = kehadiran.map((k) => ({ date: k.tanggal.toISOString().slice(0, 10), status: k.status }));
+
+  // ── nilai: rata², rapor per periode, line, radar ──
+  const allNilai = s.nilaiRapor;
+  const rata = allNilai.length ? Math.round(allNilai.reduce((a, b) => a + (b.nilaiAkhir ?? 0), 0) / allNilai.length) : null;
+
+  const perPeriode = new Map<number, DetailRapor>();
+  const axisAgg = new Map<string, { sum: number; n: number }>();
+  for (const n of allNilai) {
+    const key = n.periodeId;
+    const e = perPeriode.get(key) ?? { periode: n.periode.nama, tahun: n.periode.tahunAjaran?.tahun ?? "", urutan: (n.periode.tahunAjaranId * 100) + n.periode.urutan, avg: 0, items: [] };
+    e.items.push({ mapel: n.mapel.namaMapel, nilai: n.nilaiAkhir ?? 0, kkm: n.mapel.kkm, deskripsi: n.deskripsiCapaian });
+    perPeriode.set(key, e);
+    const ax = axisOf(n.mapel.namaMapel);
+    if (ax) { const a = axisAgg.get(ax) ?? { sum: 0, n: 0 }; a.sum += n.nilaiAkhir ?? 0; a.n++; axisAgg.set(ax, a); }
+  }
+  const rapor = [...perPeriode.values()].map((r) => ({ ...r, avg: r.items.length ? Math.round(r.items.reduce((a, b) => a + b.nilai, 0) / r.items.length) : 0 })).sort((a, b) => b.urutan - a.urutan);
+  const line = [...rapor].sort((a, b) => a.urutan - b.urutan).slice(-4).map((r) => ({ label: `${r.periode.split(" ")[0]} ${r.tahun.split("/")[0] ?? ""}`.trim(), avg: r.avg }));
+  const radar = RADAR_AXES.map((a) => { const v = axisAgg.get(a.key); return { axis: a.key, value: v && v.n ? Math.round(v.sum / v.n) : 0 }; });
+
+  // ── peringkat ──
+  let rank: number | null = null, rankTotal: number | null = null;
+  if (rankRows.length) {
+    const sorted = rankRows.filter((r) => r._avg.nilaiAkhir != null).sort((a, b) => (b._avg.nilaiAkhir ?? 0) - (a._avg.nilaiAkhir ?? 0));
+    rankTotal = sorted.length;
+    const i = sorted.findIndex((r) => r.siswaId === id);
+    rank = i >= 0 ? i + 1 : null;
+  }
+
+  // ── SPP (tahun terbaru yang ada) ──
+  const sppYear = s.tagihanSpp.length ? Math.max(...s.tagihanSpp.map((t) => t.tahun)) : new Date().getFullYear();
+  const sppRows = s.tagihanSpp.filter((t) => t.tahun === sppYear);
+  const spp = sppRows.map((t) => ({ bulan: t.bulan, status: t.status, nominal: t.nominal }));
+  const sppNunggak = sppRows.filter((t) => t.status === "belum").length;
+  const sppStatus = sppRows.length === 0 ? "—" : sppNunggak === 0 ? "Lunas" : `${sppNunggak} bln`;
+
+  // ── journey ──
+  const journey = s.anggotaRombel.map((ar, idx) => ({ rombel: ar.rombel.nama, tahun: ar.rombel.tahunAjaran?.tahun ?? "", absen: ar.nomorAbsen, current: idx === 0 })).reverse();
+
+  // ── parents ──
+  const parents = s.orangTuaWali.map((o) => ({ tipe: o.tipe, nama: o.nama, pekerjaan: o.pekerjaan, pendidikan: o.pendidikan, penghasilan: o.penghasilan, noHp: o.noHp ?? null }));
+
+  const tl = s.tanggalLahir ? new Date(s.tanggalLahir) : null;
+
+  return {
+    id: s.id, nama: s.namaLengkap, inisial: inisial(s.namaLengkap), nisn: s.nisn ?? "—", nis: s.nis ?? "—", noInduk: s.noInduk ?? "—",
+    jk: s.jenisKelamin, status: s.status, foto: s.foto,
+    kelas: cur?.rombel?.nama ?? "—", tingkat: cur?.rombel?.tingkat?.nama ?? "—", fase: cur?.rombel?.tingkat?.fase ?? null,
+    waliKelas: cur?.rombel?.waliGuru?.namaGuru ?? null, absen: cur?.nomorAbsen ?? null,
+    ttl: `${s.tempatLahir ?? "—"}${tl ? `, ${fmtTgl(tl)}` : ""}`, alamat: s.alamat, transportasi: s.transportasi, tinggalDengan: s.tinggalDengan,
+    tinggi, berat,
+    prestasiCount: s.prestasi.length, beasiswa: s.beasiswa[0]?.nama ?? null,
+    metrics: { rata, hadirPct, rank, rankTotal, sppStatus, bmi: bmi(tinggi, berat), pelanggaran: 0 },
+    zodiak: tl ? zodiakFromDate(tl) : null, numero: tl ? numerologi(tl) : null,
+    line, radar, journey, rapor,
+    heatmap, hadirStats,
+    spp, prestasi: s.prestasi.map((p) => ({ nama: p.namaPrestasi, tingkat: p.tingkat, tahun: p.tahun })), parents,
+  };
+}
